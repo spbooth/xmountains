@@ -1,44 +1,16 @@
-If you manage to do anything interesting with this code I would
-appreciate it if you could let me have a copy.
+Xmountains is a X11 based fractal landscape generator. It generates
+random fractal surfaces and displays them in a window. While the
+program is running the fractal is continuously extended on the right
+and the image is scrolled from left to right to expose the newly
+generated area.
 
-I am afraid this is not the neatest program I ever wrote so here is 
-a quick guide to the code.
 
-1) fractal generation
-  calcalt.h crinkle.h
-  these are the routines that generate the fractal, these routines are 
-  stand alone. 
-  The only procedures needed outside this file are
-    make_fold, called once to initialise the data structs.
-    next_strip, each call returns a new strip off the side of the surface
-                 you can keep calling this as often as you want.
-    free_strip, get rid of the strip when finished with it.
-    free_fold,  get rid of the data structs when finished with this surface.
-  see the comments in the code for details about parameters etc.
-2) Image rendering.
-   artist.c paint.h global.c global.h
-  This code is bit more of a mess. There are lots of global variables
-defined in the file global.c. Most of these variables are initialised
-in the routine init_artist_variables.
-3) Main program.
-   scroll.c -- command line handling and main program loop.
-4) sun_graphics.c
-  This contains the routines to open and manipulate the frame buffer
-  Operations supported are
-  1) query the screen size
-  2) set a colour lookup table
-  3) set pixels
-  4) horizontal scroll
 
-There are a very large number of options to this program now (and
-getting larger all the time) fro a complete list run the program with a
--h flag.
-
-scroll: illegal option -- h
-./scroll: illegal argument
-usage, ./scroll -[xslrftISTRad]
+./xmountains: version 1.1
+usage, ./xmountains -[bxmslrftISTRapgd]
+ -b       [false] use root window 
  -x       [false] flat start 
- -m       [false] print map
+ -m       [false] print map 
  -s       [true] toggle smoothing 
  -l int   [9] # levels of recursion 
  -t int   [1] # non fractal iterations 
@@ -49,20 +21,31 @@ usage, ./scroll -[xslrftISTRad]
  -S float [0.600000] vertical stretch 
  -T float [0.500000] vertical shift 
  -a float [2.500000] altitude of viewpoint 
- -d float [4.000000] distance of viewpoint 
+ -p float [4.000000] distance of viewpoint 
+ -g string     window geometry
+ -d string     display
 
-The depth of the fractal is 2^level + 1,  
-the -t flag controls the average number of mountains from foreground to
-background, at t=0 there should only be 1 or 2, at t=1 4 or 5 etc.
 
-On a sun with 1152x896 pixels I usually run the program as
-scroll -l 10 -t 2
-On a smaller screen the number of levels should be decreased, otherwise
-most of the detail will be off screen.
+The program breaks down into three sections
+1) Fractal generation (calcalt.c random.c crinkle.h) This code should be
+   fairly solid, It also contains some algorithmic tricks I had to
+   invent (though it is not inconcevable that somebody else has also
+   thought of them)
+2) Image rendering & main program (artist.c global.c scroll.c global.h
+   paint.h) This code is a bit more sloppy but seems to work OK.
+3) The X interface (X_graphics.c) The X interface was retro-fitted to an
+   earlier version of the program that was designed to use memory mapped
+   video hardware. As a result this code is a little crude. I expect
+   that a more experienced X hacker could do better but ...
 
-One fun thing to try is:
-scroll -a 3.0 -d -0.5
-this gives a view from directly above.
+PROBLEMS
+ There is now way to control the speed of the program, it runs as fast
+as the CPU and the X server let it.
+ The choice of colours looks strange on some hardware.
 
-Most of the time seems to be taken in drawing the 3D image rather than
-generating the fractal. 
+
+Copyright 1994 Stephen Booth, see copyright.h
+
+
+
+
