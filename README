@@ -27,6 +27,10 @@ usage: ./xmountains -[bxmslrftISTRapcegd]
  -g string     window geometry
  -d string     display
 
+This program works best on a colour display. It will work on monochrome
+displays but the default parameter values are not optimal for this.
+Try using [-e 0.1] it may help.
+
 
 The program breaks down into three sections
 1) Fractal generation (calcalt.c random.c crinkle.h) This code should be
