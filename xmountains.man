@@ -2,7 +2,7 @@
 .ds Rv \\$3
 .ds Dt \\$4
 ..
-.Id $Id: xmountains.man,v 1.9 1994/04/04 08:54:40 spb Exp $
+.Id $Id: xmountains.man,v 1.10 1994/04/06 11:45:19 spb Exp $
 .ds r \s-1RCS\s0
 .if n .ds - \%--
 .if t .ds - \(em
@@ -46,6 +46,11 @@ Start the fractal from a flat start.
 Display a map of the surface rather than a perspective view.
 .RE
 .br
+.B \-M
+.RS
+Produce reflections in the water. This may be a little slower.
+.RE
+.br
 .B \-s 
 .RS
 Toggle the smoothing algorithm. Without smoothing the program runs twice as fast but the surface is covered in creases.
@@ -74,6 +79,7 @@ Set the number of non\-fractal iterations. Increasing this value by one doubles 
 .B \-r [20] 
 .RS
 To reduce the load on the X server the program generates several columns of pixels before scrolling the image. This flag sets the number of columns.
+A negative value reverses the direction of scrolling.
 .RE
 .br
 .B \-B [80] 
@@ -98,7 +104,12 @@ Set the fractal dimension of the surface. This should be in the range 0.5\-1.0.
 .br
 .B \-I [45.0] 
 .RS
-Set the angle of illumination.
+Set the vertical angle of illumination.
+.RE
+.br
+.B \-I [0.0] 
+.RS
+Set the horizontal angle of illumination.
 .RE
 .br
 .B \-S [0.6] 

@@ -5,12 +5,13 @@ and the image is scrolled from right to left to expose the newly
 generated area.
 
 
-./xmountains: version 1.3
-usage: ./xmountains -[bqxmsElrftISTCBZRapcevgd]
+./xmountains: version 1.4
+usage: ./xmountains -[bqxmsElrftIASTCBZRapcevgd]
  -b       [false] use root window 
  -q       [false] reset root window on exit
  -x       [false] flat start 
  -m       [false] print map 
+ -M       [false] implement reflections 
  -s       [true] toggle smoothing 
  -E       [true] toggle explicit expose events 
  -l int   [10] # levels of recursion 
@@ -20,7 +21,8 @@ usage: ./xmountains -[bqxmsElrftISTCBZRapcevgd]
  -R int   [0] rng seed, read clock if 0 
  -Z int   [10] time to sleep before scrolling
  -f float [0.650000] fractal dimension 
- -I float [40.000000] angle of light 
+ -I float [40.000000] vertical angle of light 
+ -A float [0.000000] horizontal angle of light 
  -S float [0.600000] vertical stretch 
  -T float [0.500000] vertical shift 
  -C float [0.300000] contour parameter 
@@ -51,6 +53,12 @@ The program breaks down into three sections
 PROBLEMS
  All parameters are set on the command line.
  The choice of colours looks strange on some hardware.
+
+CHANGES from V1.3
+1) There is now a flag to control the horizontal light angle.
+2) negative values of the scroll parameter make the image scroll in the
+   opposite direction.
+3) water reflections have been implemented.
 
 CHANGES from V1.2
 1) program now sleeps after a scroll rather than once per column.
