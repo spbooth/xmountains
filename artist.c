@@ -7,7 +7,7 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.14 1994/01/11 12:04:01 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.15 1994/01/19 13:25:37 spb Exp $";
 #define SIDE 1.0
 #ifndef PI
 #define PI 3.14159265
@@ -30,9 +30,16 @@ void set_clut(Gun *red, Gun *green, Gun *blue)
 *  float gb[N_BANDS] = { 0.667,0.667,0.500,0.500,0.600,1.000 };
 *  float bb[N_BANDS] = { 0.500,0.450,0.333,0.200,0.000,1.000 };
 */
-  float rb[N_BANDS] = { 0.450,0.600,1.000 };
-  float gb[N_BANDS] = { 0.500,0.600,1.000 };
-  float bb[N_BANDS] = { 0.333,0.000,1.000 };
+
+  float rb[N_BANDS];
+  float gb[N_BANDS];
+  float bb[N_BANDS];
+
+  /* band base colours as RGB fractions */
+  rb[0] = 0.450; rb[1] = 0.600; rb[2] = 1.000;
+  gb[0] = 0.500; gb[1] = 0.600; gb[2] = 1.000;
+  bb[0] = 0.333; bb[1] = 0.000; bb[2] = 1.000;
+
   /*{{{  black */
   red[BLACK]       = 0;
   green[BLACK]     = 0;
