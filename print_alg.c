@@ -29,7 +29,7 @@ P("  rg3:  recalculate corner points (A,B,C,D) from the edge points (F,G,H,I)");
 P("        after the stage2 update");
 P("The regeneration stages are turned on by the smoothing parameter (-s flag)");
 P("");
-P("  flag    rg1   rg2   rg3");
+P("  flag    rg3   rg2   rg1");
 P("  0       off   off   off");
 P("  1       on    off   off");
 P("  2       off   on    off");
