@@ -9,7 +9,7 @@
 #define VERSION 2
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.32 1995/06/12 18:58:04 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.33 1995/10/03 15:43:18 spb Exp $";
 
 extern char *display;
 extern char *geom;
@@ -330,10 +330,6 @@ char **argv;
          }else{
            i=1;
          }
-         if( repeat < 1 )
-         {
-           repeat = 1;
-         }
          /* we want repeat to be a multiple of 2 as we are using
           * a textured field for the sky.
           */
@@ -565,7 +561,7 @@ char **argv;
   }else{
     mapwid=s_height;
   }
-  if( repeat > 0 )
+  if( repeat >= 0 )
   {
     for(p=0 ; p < s_width ; p++)
     {
@@ -579,6 +575,13 @@ char **argv;
   }
   while( TRUE )
   {
+    if( repeat == 0)
+    {
+      for(p=0 ; p < s_width-1 ; p++)
+      {
+        plot_column(p,map,reflec,0);
+      }
+    }else{
       /* do the scroll */
       scroll_screen(repeat);
       if(repeat > 0)
@@ -593,7 +596,8 @@ char **argv;
           plot_column(p,map,reflec,0);
         }
       }
-      plot_column(p,map,reflec,snooze_time);
+    }
+    plot_column(p,map,reflec,snooze_time);
   }
 }
 
