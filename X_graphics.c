@@ -4,7 +4,7 @@
 #include<X11/Xatom.h>
 #include "paint.h"
 
-char X_graphics_Id[]="$Id: X_graphics.c,v 1.11 1994/01/20 14:57:47 spb Exp $";
+char X_graphics_Id[]="$Id: X_graphics.c,v 1.12 1994/01/21 11:04:10 spb Exp $";
 
 char *display=NULL;       /* name of display to open, NULL for default */
 char *geom=NULL;          /* geometry of window, NULL for default */
@@ -16,6 +16,8 @@ Atom wm_delete_window;
 #define TRUE 1
 #define FALSE 0
 #endif
+
+  int quit_xmount=FALSE;
   Display *dpy;
   int screen;
   unsigned int graph_width;
@@ -26,6 +28,7 @@ Atom wm_delete_window;
 #include <X11/bitmaps/gray>
 
   Pixmap stip;
+  unsigned int depth=0;
   GC gc;
   Pixmap pix;
   Colormap map, defaultmap;
@@ -39,7 +42,6 @@ void zap_events()
   XEvent event;
   XExposeEvent *expose = (XExposeEvent *)&event;
   int exw, exh;
-  int quit=FALSE;
   
   while( XPending(dpy) ){
     XNextEvent(dpy, &event);
@@ -47,13 +49,13 @@ void zap_events()
       case ClientMessage:
         if (event.xclient.message_type == wm_protocols &&
           event.xclient.data.l[0] == wm_delete_window)  {
-            quit=TRUE;
+            quit_xmount=TRUE;
           }
             break;
         case ButtonPress:
             break;
         case ButtonRelease:
-              quit=TRUE;
+              quit_xmount=TRUE;
             break;
         case Expose:
           if( (expose->x < graph_width) && (expose->y < graph_height))
@@ -82,7 +84,7 @@ void zap_events()
             break;
     }
   }
-  if( quit )
+  if( quit_xmount )
   {
     finish_graphics();
     finish_artist();
@@ -97,7 +99,7 @@ void finish_graphics()
   unsigned long attmask;
   XSetWindowAttributes attributes;
   int x,y;
-  unsigned int border,depth;
+  unsigned int border;
   int count;
   
   XFreePixmap(dpy,pix);
@@ -126,10 +128,16 @@ void finish_graphics()
 /*}}}*/
 
 /*{{{void init_graphics( ... )*/
-void init_graphics( int want_use_root, int *s_graph_width, int *s_graph_height,int ncol, Gun *red, Gun *green, Gun *blue )
+void init_graphics( want_use_root, s_graph_width,s_graph_height,ncol,red,green,blue )
+int want_use_root;
+int *s_graph_width;
+int *s_graph_height;
+int ncol;
+Gun *red;
+Gun *green;
+Gun *blue;
 {
 /*{{{defs*/
-  unsigned int depth=0;
   Visual *vis;
   int mask;
   int count;
@@ -138,7 +146,7 @@ void init_graphics( int want_use_root, int *s_graph_width, int *s_graph_height,i
   int gbits=0;
   unsigned long attmask;
   XSetWindowAttributes attributes;
-  char * winname="Mountains";
+  char * winname="Xmountains";
   XTextProperty textprop;
 
   unsigned int border;
@@ -276,7 +284,8 @@ void init_graphics( int want_use_root, int *s_graph_width, int *s_graph_height,i
 /*}}}*/
 
 /*{{{void scroll_screen( int dist )*/
-void scroll_screen( int dist )
+void scroll_screen( dist )
+int dist;
 {
   /* scroll the pixmap */
   if( dist > graph_width )
@@ -286,12 +295,17 @@ void scroll_screen( int dist )
   /* copy the data */
   XCopyArea(dpy,pix,pix,gc,dist,0,graph_width-dist,graph_height,0,0);
   /* blank new region */
-  XSetBackground(dpy,gc,WhitePixel(dpy,screen));
-  XSetForeground(dpy,gc,table[SKY].pixel);
-  XSetFillStyle(dpy,gc,FillOpaqueStippled);
-  XFillRectangle(dpy,pix,gc,graph_width-dist,0,dist,graph_height);
-  XSetFillStyle(dpy,gc,FillSolid);
-  XSetBackground(dpy,gc,BlackPixel(dpy,screen));
+  if( depth == 1 )
+  {
+    /* use a textured gray sky on monochrome displays */
+    XSetForeground(dpy,gc,WhitePixel(dpy,screen));
+    XSetFillStyle(dpy,gc,FillOpaqueStippled);
+    XFillRectangle(dpy,pix,gc,graph_width-dist,0,dist,graph_height);
+    XSetFillStyle(dpy,gc,FillSolid);
+  }else{
+    XSetForeground(dpy,gc,table[SKY].pixel);
+    XFillRectangle(dpy,pix,gc,graph_width-dist,0,dist,graph_height);
+  }
   /* update the window to match */
   XCopyArea(dpy,pix,win,gc,0,0,graph_width,graph_height,0,0);
 
@@ -299,7 +313,10 @@ void scroll_screen( int dist )
 /*}}}*/
 
 /*{{{void plot_pixel( int x, int y, Gun value )*/
-void plot_pixel( int x, int y, Gun value )
+void plot_pixel( x, y, value )
+int x;
+int y;
+Gun value;
 {
   XSetForeground(dpy,gc,table[value].pixel);
   XDrawPoint(dpy,pix,gc,x,y);
@@ -307,7 +324,11 @@ void plot_pixel( int x, int y, Gun value )
 /*}}}*/
 
 /*{{{void flush_region(int x, int y, int w, int h)*/
-void flush_region(int x, int y, int w, int h)
+void flush_region( x, y, w, h)
+int x;
+int y;
+int w;
+int h;
 {
   XCopyArea(dpy,pix,win,gc,x,y,w,h,x,y);
 }
