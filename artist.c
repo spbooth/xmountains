@@ -6,7 +6,7 @@
 #include "paint.h"
 #include "crinkle.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.38 1997/10/24 14:52:10 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.39 1997/10/24 16:07:27 spb Exp $";
 #define SIDE 1.0
 #ifndef PI
 #define PI 3.14159265
@@ -262,6 +262,11 @@ void init_artist_variables()
   /* initialise the light strengths */
   vstrength = g.vfract * g.contrast /( 1.0 + g.vfract );
   lstrength = g.contrast /( 1.0 + g.vfract );
+  if( g.repeat >= 0 ){
+    g.pos=0;
+  }else{
+    g.pos=g.graph_width-1;
+  }	
 }
 /*}}}*/
 /*{{{  Col get_col(Height p, Height p_minus_x, Height p_minus_y, Height shadow) */
@@ -820,16 +825,17 @@ Graph *g;
   Col *l;
   int j;
   int mapwid;
-  int scrolled=FALSE;
 
   /* blank if we are doing the full window */
   if( g->repeat >= 0){
     if(g->pos == 0){
       blank_region(0,0,g->graph_width,g->graph_height);
+      flush_region(0,0,g->graph_width,g->graph_height);
     }
   }else{
     if( g->pos == g->graph_width-1){
       blank_region(0,0,g->graph_width,g->graph_height);
+      flush_region(0,0,g->graph_width,g->graph_height);
     }
   }
   if( g->scroll ){
@@ -871,9 +877,9 @@ Graph *g;
   /* now update pos ready for next time */
   if( g->repeat >=0 ){
     g->pos++;
-    if(g->pos > g->graph_width)
+    if(g->pos >= g->graph_width)
     {
-      g->pos = g->graph_width - g->repeat;
+      g->pos -=  g->repeat;
       if( g->pos < 0 || g->pos > g->graph_width-1 )
       {
         g->pos=0; 
@@ -884,7 +890,7 @@ Graph *g;
   }else{
     g->pos--;
     if( g->pos < 0 ){
-      g->pos =  - g->repeat;
+      g->pos -=   g->repeat;
       if( g->pos < 0 || g->pos > (g->graph_width-1) ){
 	g->pos=g->graph_width-1;
       }else{
