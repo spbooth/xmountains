@@ -23,7 +23,7 @@
 #include <math.h>
 #include "crinkle.h"
 
-char calcalt_Id[] = "$Id: calcalt.c,v 1.8 1994/01/21 11:53:47 spb Rel $";
+char calcalt_Id[] = "$Id: calcalt.c,v 1.9 1994/02/02 18:48:41 spb Exp $";
 
 /*{{{  Strip *make_strip(int level) */
 Strip *make_strip (level)
@@ -303,6 +303,7 @@ float fdim;
   Fold *p;
   Length scale, midscale;
   double root2;
+  Strip *tmp;
 
   if( (levels < stop) || (stop<0) )
   {
@@ -334,7 +335,9 @@ float fdim;
     p->next = make_fold((levels-1),stop,fractal_start,slope,smooth,(2.0*length),start,mean,fdim);
     if ( fractal_start )
     {
-      p->regen = double_strip(next_strip( p->next ));
+      tmp = next_strip( p->next );
+      p->regen = double_strip(tmp);
+      free_strip(tmp);
       p->old = NULL;
       /*
        * do an update step to flush out the undefined p->old
