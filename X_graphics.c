@@ -3,7 +3,7 @@
 #include<X11/Xutil.h>
 #include<X11/Xatom.h>
 #include "paint.h"
-char X_graphics_Id[]="$Id: X_graphics.c,v 1.16 1994/02/18 14:19:01 spb Exp $";
+char X_graphics_Id[]="$Id: X_graphics.c,v 1.17 1994/02/22 12:58:44 spb Exp $";
 
 char *display=NULL;       /* name of display to open, NULL for default */
 char *geom=NULL;          /* geometry of window, NULL for default */
@@ -23,6 +23,7 @@ Atom wm_delete_window;
   unsigned int graph_height;
   Window parent, win, root;
   int use_root=FALSE;
+  int pixmap_installed=FALSE;
   
 #include <X11/bitmaps/gray>
 
@@ -199,6 +200,7 @@ Gun *blue;
 /*}}}*/
 
   use_root = want_use_root;
+  pixmap_installed = use_background;
   graph_width = *s_graph_width;
   graph_height = *s_graph_height;
 /*{{{open display*/
@@ -327,7 +329,7 @@ Gun *blue;
   {
     XMapWindow(dpy, win );
   }
-
+  XClearWindow(dpy,win);
   zap_events(0);
   
   *s_graph_width = graph_width;
@@ -349,7 +351,12 @@ int dist;
   /* blank new region */
   blank_region(graph_width-dist,0,dist,graph_height);
   /* update the window to match */
-  XCopyArea(dpy,pix,win,gc,0,0,graph_width,graph_height,0,0);
+  if( pixmap_installed )
+  {
+    XClearWindow(dpy,win);
+  }else{
+    XCopyArea(dpy,pix,win,gc,0,0,graph_width,graph_height,0,0);
+  }
 
 }
 /*}}}*/
