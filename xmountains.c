@@ -9,7 +9,7 @@
 #define SIDE 1.0
 #define VERSION 1
 
-char scroll_Id[]="$Id: xmountains.c,v 1.15 1994/02/04 20:17:32 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.16 1994/02/07 11:34:25 spb Exp $";
 
 extern char *display;
 extern char *geom;
@@ -186,7 +186,7 @@ char **argv;
   /*{{{handle command line flags*/
   mesg[0]="false";
   mesg[1]="true";
-  while((c = getopt(argc,argv,"bxmsl:r:f:t:I:S:T:a:p:R:g:d:c:e:v:"))!= -1)
+  while((c = getopt(argc,argv,"bxmsl:r:f:t:I:S:T:C:a:p:R:g:d:c:e:v:"))!= -1)
   {
     switch(c){
       case 'b':
@@ -257,6 +257,9 @@ char **argv;
       case 'T':                     /* set shift */
          shift = atof( optarg );
          break;
+      case 'C':
+         contour = atof( optarg );
+         break;
       case 'a':                     /* set altitude */
          altitude = atof( optarg );
          break;
@@ -314,6 +317,7 @@ char **argv;
     fprintf(stderr," -I float [%f] angle of light \n",(phi*180.0)/PI);
     fprintf(stderr," -S float [%f] vertical stretch \n",stretch);
     fprintf(stderr," -T float [%f] vertical shift \n",shift);
+    fprintf(stderr," -C float [%f] contour parameter \n",contour);
     fprintf(stderr," -a float [%f] altitude of viewpoint \n",altitude);
     fprintf(stderr," -p float [%f] distance of viewpoint \n",distance);
     fprintf(stderr," -c float [%f] contrast\n",contrast);
