@@ -7,7 +7,7 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.32 1995/06/09 10:52:41 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.33 1995/06/12 18:30:31 spb Exp $";
 #define SIDE 1.0
 #ifndef PI
 #define PI 3.14159265
@@ -228,12 +228,14 @@ void init_artist_variables()
   tan_vangle = tan_vangle - ( (double) (height/2) / focal );
 #endif
 
+  fold_param.mean=mean;
   fold_param.rg1=smooth & 4;
   fold_param.rg2=smooth & 2;
   fold_param.rg3=smooth & 1;
   fold_param.cross=cross;
   fold_param.force_front=slope;
   fold_param.force_back=0;
+  fold_param.forceval=forceheight;
   fold_param.forceval=-1.0;
   fold_param.mix=mix;
   fold_param.midmix=midmix;
