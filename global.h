@@ -17,6 +17,12 @@ extern double tan_phi;
 extern Height sealevel;
 extern int width;
 extern unsigned char red[256] ,green[256], blue[256];
+extern int height;
+extern double vangle;
+extern float vscale;
+extern float viewpos;
+extern float viewheight;
+extern float focal;
 extern Height *shadow;
 extern Height *a_strip, *b_strip;
 
