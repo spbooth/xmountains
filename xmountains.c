@@ -9,7 +9,7 @@
 #define VERSION 2
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.33 1995/10/03 15:43:18 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.34 1996/04/12 08:28:00 spb Exp $";
 
 extern char *display;
 extern char *geom;
@@ -326,7 +326,7 @@ char **argv;
          if( repeat < 0 )
          {
            repeat = -repeat;
-           i=-1;
+           i= -1;
          }else{
            i=1;
          }

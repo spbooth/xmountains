@@ -7,7 +7,7 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.36 1995/10/05 17:54:06 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.37 1996/04/12 08:28:00 spb Exp $";
 #define SIDE 1.0
 #ifndef PI
 #define PI 3.14159265
@@ -501,7 +501,7 @@ Height *shadow;
       last_col=map[i];
       /* invalidate strip so last stip does not exist */
       last_bottom=height;
-      last_top=-1;
+      last_top= -1;
       /* fill in water values */
       coord=1+project(i,sealevel);
       for(j=0;j<coord;j++)
