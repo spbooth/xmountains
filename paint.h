@@ -1,4 +1,4 @@
-/* $Id: paint.h,v 1.8 1994/01/24 20:29:58 spb Rel $ */
+/* $Id: paint.h,v 1.9 1994/02/08 10:06:32 spb Exp $ */
 #ifndef PAINT
 #define PAINT
 
@@ -7,6 +7,7 @@
 /* colour code definitions */
 typedef int Col;
 typedef unsigned short Gun;
+
 
 #define BLACK       0
 #define WHITE       1
@@ -26,15 +27,15 @@ void set_clut(Gun *, Gun *, Gun *);
 Height *extract(Strip *s);
 void init_artist_variables();
 Col get_col(Height p, Height p_plus_x, Height p_plus_y, Height shadow);
-Col *artist(Height *a, Height *b, Height *shadow);
-Col *camera( Height *a, Col *c );
+Col *makemap(Height *a, Height *b, Height *shadow);
+Col *camera(Height *a, Height *b, Height *shadow);
 int project( int x , Height y );
 #else
 void set_clut();
 Height *extract();
 void init_artist_variables();
 Col get_col();
-Col *artist();
+Col *makemap();
 Col *camera();
 int project();
 #endif
