@@ -20,7 +20,7 @@
 #include <math.h>
 #include "crinkle.h"
 
-char calcalt_Id[] = "$Id: calcalt.c,v 2.10 1995/11/27 20:25:48 spb Exp $";
+char calcalt_Id[] = "$Id: calcalt.c,v 2.11 1995/11/27 20:51:05 spb Exp $";
 
 #ifdef DEBUG
 #define DB(A,B) dump_pipeline(A,B)
@@ -582,7 +582,7 @@ Strip *c;
     /*}}}*/
   }else if(mix >= 1.0){
     /*{{{random offset to old values*/
-    for(i=0; i<count-1; i+=2)
+    for(i=0; i<count; i+=2)
     {
       mp[0] = mp[0]
             + (scale * gaussian());
@@ -662,7 +662,7 @@ Strip *c;
     /*}}}*/
   }else if(mix >= 1.0){
     /*{{{random offset to old values*/
-    for(i=0; i<count-1; i+=2)
+    for(i=0; i<count; i+=2)
     {
       mp[0] = mp[0]
             + (scale * gaussian());
