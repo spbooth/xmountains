@@ -3,7 +3,7 @@
 #include<X11/Xutil.h>
 #include<X11/Xatom.h>
 
-char X_graphics_Id[]="$Id: X_graphics.c,v 1.3 1994/01/10 17:37:18 spb Exp $";
+char X_graphics_Id[]="$Id: X_graphics.c,v 1.4 1994/01/10 18:32:07 spb Exp $";
 
 Atom wm_protocols;
 Atom wm_delete_window;
@@ -31,9 +31,11 @@ void finish_graphics()
   XSetWindowAttributes attributes;
   int x,y,border,depth;
   
+  /* reset things in case this was the root window. */
   XGetGeometry(dpy,win,&root,&x,&y,&graph_width,&graph_height,&border,&depth);
   XClearArea(dpy,win,0,0,graph_width,graph_height,FALSE);
   attmask = 0;
+  attmask |= CWColormap;
   attributes.colormap = defaultmap;
   XChangeWindowAttributes(dpy,win,attmask,&attributes);
   XCloseDisplay(dpy);
@@ -128,7 +130,6 @@ void init_graphics( int want_use_root, int *s_graph_width, int *s_graph_height,i
   }
   screen = DefaultScreen(dpy);
   parent = RootWindow(dpy, screen);
-
 /*}}}*/
 /*{{{find appropriate vis*/
   map=defaultmap=DefaultColormap(dpy,screen);
@@ -203,7 +204,10 @@ void init_graphics( int want_use_root, int *s_graph_width, int *s_graph_height,i
 /*}}}*/
   XSetForeground(dpy,gc,BlackPixel(dpy,screen));
   XFillRectangle(dpy,pix,gc,0,0,graph_width,graph_height); 
-  XMapWindow(dpy, win );
+  if( ! use_root )
+  {
+    XMapWindow(dpy, win );
+  }
 
   zap_events();
   
