@@ -25,7 +25,6 @@ double tan_phi;
 Height sealevel = 0.0;
 int width;        /* width of the landscape, (function of levels) */
 int seed=0;       /* zero means read the clock */
-unsigned char red[256] ,green[256], blue[256];
 
 /*
  * viewport parameters
