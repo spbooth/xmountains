@@ -6,7 +6,7 @@
 #include"vroot.h"
 #endif
 #include "paint.h"
-char X_graphics_Id[]="$Id: X_graphics.c,v 1.22 1995/06/19 10:35:12 spb Exp $";
+char X_graphics_Id[]="$Id: X_graphics.c,v 1.23 1997/03/24 11:37:33 spb Exp $";
 
 char *display=NULL;       /* name of display to open, NULL for default */
 char *geom=NULL;          /* geometry of window, NULL for default */
@@ -185,6 +185,14 @@ int lx,ly,ux,uy;
     XSetForeground(dpy,gc,table[SKY].pixel);
     XFillRectangle(dpy,pix,gc,lx,ly,ux,uy);
   }
+}
+/*}}}*/
+
+/*{{{void blank_col( pos )*/
+void blank_col( pos )
+int pos;
+{
+  blank_region(pos,0,pos,graph_height);
 }
 /*}}}*/
 

@@ -9,7 +9,7 @@
 #define VERSION 2
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.35 1996/09/11 13:38:21 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.36 1997/03/24 11:37:33 spb Exp $";
 
 extern char *display;
 extern char *geom;
@@ -201,12 +201,14 @@ int reflec;
 double atof();
 #ifdef ANSI
 void init_graphics (int, int, int *, int *, int, Gun *, Gun *, Gun *);
+void clear_col( int );
 void finish_graphics();
 void plot_pixel (int, int, unsigned char);
 void scroll_screen ( int );
 void zap_events( int );
 #else
 void init_graphics ();
+void clear_col();
 void finish_graphics();
 void plot_pixel ();
 void scroll_screen ();
@@ -579,6 +581,8 @@ char **argv;
     {
       for(p=0 ; p < s_width-1 ; p++)
       {
+        /* plot routines assume we are starting with sky */
+        blank_col(p);
         plot_column(p,map,reflec,0);
       }
     }else{
