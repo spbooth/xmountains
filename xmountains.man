@@ -2,7 +2,7 @@
 .ds Rv \\$3
 .ds Dt \\$4
 ..
-.Id $Id: xmountains.man,v 1.11 1994/10/27 14:03:04 spb Exp $
+.Id $Id: xmountains.man,v 1.12 1995/06/09 10:58:02 spb Exp $
 .ds r \s-1RCS\s0
 .if n .ds - \%--
 .if t .ds - \(em
@@ -12,7 +12,7 @@ xmountains \- A fractal landscape generator.
 .SH SYNOPSIS
 .B xmountains
 [
-.B bqgdEmMrBZIASTCapcevfRltxsXYH
+.B bqgPdEmMrBnZIASTWFGCapcevfRltxsXYH
 ]
 
 .SH DESCRIPTION
@@ -39,6 +39,11 @@ unless the program is using the root window.
 .B \-g [string] 
 .RS
 Set the geometry of the window.
+.RE
+.br
+.B \-P [filename] 
+.RS
+Write the PID to the specified file.
 .RE
 .br
 .B \-d [string] 
@@ -77,6 +82,12 @@ A negative value reverses the direction of scrolling.
 Set the number of shades of each colour that the program allocates.
 .RE
 .br
+.B \-n [245] 
+.RS
+Set a maximum number of colours to use. This is just a different way of
+setting the number of shades of each colour.
+.RE
+.br
 .B \-Z [10] 
 .RS
 Set the number of seconds that the program sleeps after scrolling the screen.
@@ -100,6 +111,23 @@ Set the vertical stretch of the surface.
 .B \-T [0.5] 
 .RS
 Set the vertical shift of the surface.
+.RE
+.br
+.B \-W [0.5] 
+.RS
+Set the height where the water occurs.
+.RE
+.br
+.B \-F [1] 
+.RS
+Reduce the variation in the forground height to ensure a good view of
+the surface. This flag sets the number of iterations for which the
+forground height is constrained to a constant value.
+.RE
+.br
+.B \-G [-1.0] 
+.RS
+Mean altitude for the for forground.
 .RE
 .br
 .B \-C [0.3] 
