@@ -1,4 +1,4 @@
-/* $Id: crinkle.h,v 1.2 1993/03/16 12:56:04 spb Exp $ */
+/* $Id: crinkle.h,v 1.3 1993/03/18 19:53:09 spb Exp $ */
 #ifndef CRINKLE
 #define CRINKLE
 /*{{{  typedefs */
@@ -16,6 +16,7 @@ typedef float Length;
 
 #define START 0
 #define STORE 1
+
 /*}}}*/
 /*{{{  structs */
 /* strip of altitudes */
@@ -28,8 +29,9 @@ typedef struct strip{
 typedef struct fold{
   int level;                /* levels of recursion below us */
   int stop;                 /* level to stop recursion */
-  int state;                
+  int state;                /* internal stat of algorithm */
   int smooth;               /* is smoothing on or off */
+  int slope;                /* constrain the front of the surface */
   Height mean;              /* mean altitude */
   Length scale;             /* scale factor for perturbations */
   Length midscale;          /* as above but for diagonal offsets */
@@ -49,7 +51,7 @@ void side_update(Strip *, Length );
 void mid_update(Strip *, Strip *, Strip *,Length , Length );
 void recalc(Strip *, Strip *, Strip *,Length );
 Strip *next_strip(Fold *);
-Fold *make_fold(int ,int ,int , Length , Height , Height , float );
+Fold *make_fold(int ,int ,int , int, int, Length , Height , Height , float );
 void free_fold(Fold *);
 Length gaussian();
 /*}}}*/

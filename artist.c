@@ -7,7 +7,7 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.9 1993/03/18 13:05:52 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.10 1993/03/18 19:53:09 spb Exp $";
 #define SIDE 1.0
 #define PI 3.14159265
 
@@ -140,17 +140,10 @@ void init_artist_variables()
    * average height returned by calcalt. If we have stop != 0 then
    * make the largest update length = SIDE
    */
-  /* height of the shadows */
-  shadow = (Height *) malloc(width * sizeof(Height));
-  if ( shadow == NULL )
-  {
-    fprintf(stderr,"malloc failed for shadow array\n");
-    exit(1);
-  }
   cos_phi = cos( phi );
   sin_phi = sin( phi );
   tan_phi = tan( phi );
-  vscale = 0.8 * pwidth;  /* have approx same height as fractal width */
+  vscale = 0.6 * pwidth;  /* have approx same height as fractal width */
   /* guess the average height of the fractal */
   varience = pow( SIDE ,(2.0 * fdim));
   varience = vscale * varience ;
@@ -158,22 +151,24 @@ void init_artist_variables()
   varience = varience + shift;
 
   start = (sealevel - shift) / vscale ; /* always start at sealevel */ 
-  for(i=0 ; i<width ; i++)
-  {
-    shadow[i] = start;
-  }
   /* set the position of the view point */
-  viewheight = 1.5 * width;
-  viewpos = -2.0 * width;
-  /* choose a point to look towards */
+  viewheight = 2.5 * width;
+  viewpos = -4.0 * width;
+  /* set viewing angle and focal length (vertical-magnification)
+   * try mapping the bottom of the fractal to the bottom of the
+   * screen. Try to get points in the middle of the fractal
+   * to be 1 pixel high
+   */
   dh = viewheight;
-  dd = (3.0 * width / 4.0) - viewpos;
-  /* set viewing angle and focal length (vertical-magnification) */
+  dd = (width / 2.0) - viewpos;
   focal = sqrt( (dd*dd) + (dh*dh) );
-  tan_vangle = (double) (dh/dd);
+  tan_vangle = (double) ((double)(viewheight-sealevel)/(double) - viewpos);
   vangle = atan ( tan_vangle );
+  vangle -= atan( (double) (height/2) / focal ); 
 
-  top=make_fold(levels,stop,smooth,(SIDE / pwidth),start,mean,fdim);
+  top=make_fold(levels,stop,frac_start,slope,smooth,(SIDE / pwidth),start,mean,fdim);
+  /* use first set of heights to set shadow value */
+  shadow = extract(next_strip(top));
   a_strip = extract( next_strip(top) ); 
   b_strip = extract( next_strip(top) );
 }

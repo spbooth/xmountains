@@ -5,6 +5,8 @@ extern Fold *top;
 extern int levels;
 extern int stop;
 extern int smooth;
+extern int frac_start;
+extern int slope;
 extern float fdim;
 extern float start;
 extern float mean;

@@ -3,9 +3,11 @@
 #define PI 3.14159265
 
 Fold *top;
-int levels = 10;
-int stop = 0;
+int levels = 9;
+int stop = 1;
 int smooth = TRUE;
+int frac_start = TRUE;
+int slope = TRUE;
 float fdim = 0.65;
 float start;      /* starting value for the surface */
 float mean=0.0;   /* mean value of surface */

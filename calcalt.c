@@ -22,7 +22,7 @@
 #include <math.h>
 #include "crinkle.h"
 
-char calcalt_Id[] = "$Id: calcalt.c,v 1.3 1993/03/16 12:56:04 spb Exp $";
+char calcalt_Id[] = "$Id: calcalt.c,v 1.4 1993/03/18 19:53:09 spb Exp $";
 
 /*{{{  Strip *make_strip(int level) */
 Strip *make_strip(int level)
@@ -192,7 +192,13 @@ Strip *next_strip(Fold *fold)
   {
     /*{{{  generate values from scratch */
     result=make_strip(fold->stop);
-    for( i=0 ; i < ((1 << fold->stop) +1) ; i++)
+    i=0;
+    if( fold->slope )
+    {
+      result->d[i] = fold->mean;
+      i++;
+    }
+    for( ; i < ((1 << fold->stop) +1) ; i++)
     {
       result->d[i] = fold->mean + (fold->scale * gaussian());
     }
@@ -240,7 +246,7 @@ Strip *next_strip(Fold *fold)
   return(NULL);
 }
 /*}}}*/
-/*{{{  Fold *make_fold(int levels, int stop, int smooth, Length len, Height start, Height mean, float fdim) */
+/*{{{  Fold *make_fold(int levels, int stop, int fractal_start, int slope,int smooth, Length len, Height start, Height mean, float fdim) */
 /*
  * Initialise the fold structures.
  * As everything else reads the parameters from their fold
@@ -249,14 +255,18 @@ Strip *next_strip(Fold *fold)
  *    Number of points = 2^levels+1
  * stop is the number of levels that are generated as random offsets from a
  *    constant rather than from an average.
+ * fractal_start, if true we start in the middle of a mountain range
+ *    if false we build up mountains from the start.
+ * slope, force the front of the fractal to remain close to the mean value
  * smooth turns the smoothing algorithm on or off
  * len is the length of the side of the square at this level.
  *   N.B this means the update square NOT the width of the fractal.
  *   len gets smaller as the level increases.
+ * start, see uder fractal_start.
  * mean is the mean height.
  * fdim is the fractal dimension
  */
-Fold *make_fold(int levels, int stop, int smooth, Length length, Height start, Height mean, float fdim)
+Fold *make_fold(int levels, int stop, int fractal_start, int slope, int smooth, Length length, Height start, Height mean, float fdim)
 {
   Fold *p;
   Length scale, midscale;
@@ -279,8 +289,9 @@ Fold *make_fold(int levels, int stop, int smooth, Length length, Height start, H
   midscale = pow((((double) length)*root2), (double) (2.0 * fdim));
   p->level = levels;
   p->stop = stop;
-  p->state = 0;
+  p->state = START;
   p->smooth = smooth;
+  p->slope = slope;
   p->mean = mean;
   p->scale = scale;
   p->midscale = midscale;
@@ -288,9 +299,28 @@ Fold *make_fold(int levels, int stop, int smooth, Length length, Height start, H
   p->working = NULL;
   if( levels > stop )
   {
-    p->regen = set_strip(levels,start);
-    p->old = set_strip(levels,start);
-    p->next = make_fold((levels-1),stop,smooth,(2.0*length),start,mean,fdim);
+    p->next = make_fold((levels-1),stop,fractal_start,slope,smooth,(2.0*length),start,mean,fdim);
+    if ( fractal_start )
+    {
+      p->regen = double_strip(next_strip( p->next ));
+      p->old = NULL;
+      /*
+       * do an update step to flush out the undefined p->old
+       * pointer, as p->old is used in the regeneration step we
+       * have to force smoothing to be off. This should return a NULL
+       * pointer
+       */
+      p->smooth = FALSE;
+      if( NULL != next_strip( p ) )
+      {
+        printf("make_fold: internal logic error\n");
+        exit(2);
+      }
+      p->smooth = smooth;
+    }else{
+      p->regen = set_strip(levels,start);
+      p->old = set_strip(levels,start);
+    }
   }else{
     p->regen = NULL;
     p->old = NULL;
