@@ -2,7 +2,7 @@
 .ds Rv \\$3
 .ds Dt \\$4
 ..
-.Id $Id: xmountains.man,v 1.13 1997/03/24 10:20:41 spb Exp $
+.Id $Id: xmountains.man,v 1.14 1999/03/30 08:07:08 spb Exp $
 .ds r \s-1RCS\s0
 .if n .ds - \%--
 .if t .ds - \(em
@@ -75,7 +75,7 @@ Produce reflections in the water. This may be a little slower.
 .RS
 To reduce the load on the X server the program generates several columns of pixels before scrolling the image. This flag sets the number of columns.
 A negative value reverses the direction of scrolling. A value of zero
-makes the program scan accross the window without scrolling at all.
+makes the program scan across the window without scrolling at all.
 .RE
 .br
 .B \-B [80] 
@@ -121,19 +121,19 @@ Set the height where the water occurs.
 .br
 .B \-F [1] 
 .RS
-Reduce the variation in the forground height to ensure a good view of
+Reduce the variation in the foreground height to ensure a good view of
 the surface. This flag sets the number of iterations for which the
-forground height is constrained to a constant value.
+foreground height is constrained to a constant value.
 .RE
 .br
 .B \-G [-1.0] 
 .RS
-Mean altitude for the for forground.
+Mean altitude for the for foreground.
 .RE
 .br
 .B \-C [0.3] 
 .RS
-Set the contour parameter. The base coulour of a point depends on its
+Set the contour parameter. The base colour of a point depends on its
 height and how flat the surface is. This parameter controls the relative
 importance of these factors.
 .RE
@@ -194,7 +194,7 @@ Use cross updates (see under \-H)
 .B \-s [1]
 .RS
 Control the regeneration steps used to reduce creasing. There are three
-possible regeneration steps contolled by the first 3 bits of this flag value.
+possible regeneration steps controlled by the first 3 bits of this flag value.
 (see under \-H)
 .RE
 .br
