@@ -6,7 +6,7 @@
 
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.5 1994/01/10 17:37:18 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.6 1994/01/11 10:12:07 spb Exp $";
 
 /*{{{  Col *next_col(int paint) */
 Col *next_col(int paint)
@@ -46,7 +46,7 @@ Col *next_col(int paint)
 }
 /*}}}*/
 double atof();
-void init_graphics(int, int *, int *, int, unsigned char *, unsigned char *, unsigned char *);
+void init_graphics(int, int *, int *, int, Gun *, Gun *, Gun *);
 void finish_graphics();
 void plot_pixel(int, int, unsigned char);
 void scroll_screen( int );
@@ -67,6 +67,7 @@ main(int argc, char **argv)
   extern char *optarg;
   extern int optind;
   char *mesg[2];
+  Gun red[MAX_COL], green[MAX_COL], blue[MAX_COL];
 
   mesg[0]="false";
   mesg[1]="true";
@@ -159,8 +160,8 @@ main(int argc, char **argv)
     fprintf(stderr," -h int   [%d] height of screen \n",s_height);
     exit(1);
   }
-  set_clut();
-  init_graphics(root,&s_width,&s_height,MAX_COL+1,red,green,blue);
+  set_clut(red, green, blue);
+  init_graphics(root,&s_width,&s_height,MAX_COL,red,green,blue);
 
   height = s_height;
 
@@ -222,6 +223,7 @@ main(int argc, char **argv)
     
 void finish_prog()
 {
+  zap_events();
   finish_graphics();
   finish_artist();
   exit(0);

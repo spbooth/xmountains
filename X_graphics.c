@@ -2,8 +2,9 @@
 #include<X11/Xlib.h>
 #include<X11/Xutil.h>
 #include<X11/Xatom.h>
+#include "paint.h"
 
-char X_graphics_Id[]="$Id: X_graphics.c,v 1.4 1994/01/10 18:32:07 spb Exp $";
+char X_graphics_Id[]="$Id: X_graphics.c,v 1.5 1994/01/11 10:12:07 spb Exp $";
 
 Atom wm_protocols;
 Atom wm_delete_window;
@@ -18,49 +19,35 @@ Atom wm_delete_window;
   int graph_height;
   Window parent, win, root;
   int use_root=FALSE;
-
+  
   GC gc;
   Pixmap pix;
   Colormap map, defaultmap;
-  XColor table[256];
-
-/*{{{void finish_graphics()*/
-void finish_graphics()
-{
-  unsigned long attmask;
-  XSetWindowAttributes attributes;
-  int x,y,border,depth;
+  XColor table[MAX_COL];
+void zap_events();
+void finish_graphics();
   
-  /* reset things in case this was the root window. */
-  XGetGeometry(dpy,win,&root,&x,&y,&graph_width,&graph_height,&border,&depth);
-  XClearArea(dpy,win,0,0,graph_width,graph_height,FALSE);
-  attmask = 0;
-  attmask |= CWColormap;
-  attributes.colormap = defaultmap;
-  XChangeWindowAttributes(dpy,win,attmask,&attributes);
-  XCloseDisplay(dpy);
-}
-/*}}}*/
-
 /*{{{void zap_events()*/
 void zap_events()
 {
   XEvent event;
   XExposeEvent *expose = (XExposeEvent *)&event;
   int exw, exh;
+  int quit=FALSE;
+  
   while( XPending(dpy) ){
     XNextEvent(dpy, &event);
     switch(event.type) {
       case ClientMessage:
         if (event.xclient.message_type == wm_protocols &&
           event.xclient.data.l[0] == wm_delete_window)  {
-            finish_prog();
+            quit=TRUE;
           }
             break;
         case ButtonPress:
             break;
         case ButtonRelease:
-              finish_prog();
+              quit=TRUE;
             break;
         case Expose:
           if( (expose->x < graph_width) && (expose->y < graph_height))
@@ -89,11 +76,49 @@ void zap_events()
             break;
     }
   }
+  if( quit )
+  {
+    finish_graphics();
+    finish_artist();
+    exit(0);
+  }
+}
+/*}}}*/
+  
+/*{{{void finish_graphics()*/
+void finish_graphics()
+{
+  unsigned long attmask;
+  XSetWindowAttributes attributes;
+  int x,y,border,depth;
+  int count;
+  
+  XFreePixmap(dpy,pix);
+  XFreeGC(dpy,gc);
+  /* reset things if this was the root window. */
+  if( use_root )
+  {
+    XGetGeometry(dpy,win,&root,&x,&y,&graph_width,&graph_height,&border,&depth);
+    XClearArea(dpy,win,0,0,graph_width,graph_height,FALSE);
+    attmask = 0;
+    attmask |= CWColormap;
+    attributes.colormap = defaultmap;
+    XChangeWindowAttributes(dpy,win,attmask,&attributes);
+  }
+  if( map != defaultmap )
+  {
+    XFreeColormap(dpy, map );
+  }
+  if( count = XPending(dpy) )
+  {
+    fprintf(stderr,"WARNING: %d events still pending\n",count);
+  }
+  XCloseDisplay(dpy);
 }
 /*}}}*/
 
 /*{{{void init_graphics( ... )*/
-void init_graphics( int want_use_root, int *s_graph_width, int *s_graph_height,int ncol, unsigned char *red, unsigned char *green, unsigned char *blue )
+void init_graphics( int want_use_root, int *s_graph_width, int *s_graph_height,int ncol, Gun *red, Gun *green, Gun *blue )
 {
 /*{{{defs*/
   char *display=NULL;       /* name of display to open, NULL for default */
@@ -137,18 +162,24 @@ void init_graphics( int want_use_root, int *s_graph_width, int *s_graph_height,i
   depth = DefaultDepth(dpy,screen);
 /*}}}*/
 /*{{{set colormap*/
+  if( ncol > MAX_COL )
+  {
+    fprintf(stderr,"INTERNAL ERROR too many colours requested %d > %d\n",ncol,MAX_COL);
+    exit(1);
+  }
   for(i=0; i<ncol ; i++)
   {
-    table[i].red   = red[i]*257;
-    table[i].green = green[i]*257;
-    table[i].blue  = blue[i]*257;
+    table[i].red   = red[i];
+    table[i].green = green[i];
+    table[i].blue  = blue[i];
     while( ! XAllocColor(dpy,map,table+i) )
     {
       if( newmap ){
         fprintf(stderr,"failed to allocate colour %d\n",i);
-        finish_graphics();
+        XCloseDisplay(dpy);
         exit(1);
       }else{
+        printf("making new cmap for %d\n",i);
         map = XCopyColormapAndFree(dpy,map);
         newmap=TRUE;
       }
@@ -235,14 +266,13 @@ void scroll_screen( int dist )
 }
 /*}}}*/
 
-/*{{{void plot_pixel( int x, int y, unsigned char value )*/
-void plot_pixel( int x, int y, unsigned char value )
+/*{{{void plot_pixel( int x, int y, Gun value )*/
+void plot_pixel( int x, int y, Gun value )
 {
   XSetForeground(dpy,gc,table[value].pixel);
   XDrawPoint(dpy,pix,gc,x,y);
 }
 /*}}}*/
-
 
 /*{{{void flush_region(int x, int y, int w, int h)*/
 void flush_region(int x, int y, int w, int h)
