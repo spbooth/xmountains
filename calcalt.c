@@ -23,7 +23,9 @@
 #include <math.h>
 #include "crinkle.h"
 
-char calcalt_Id[] = "$Id: calcalt.c,v 2.1 1994/07/01 12:03:27 spb Exp $";
+char calcalt_Id[] = "$Id: calcalt.c,v 2.2 1994/07/03 16:30:17 spb Exp $";
+
+#define db(A,B)
 
 /*{{{  Strip *make_strip(int level) */
 Strip *make_strip (level)
@@ -77,7 +79,7 @@ Strip *s;
     *b = *a;
     a++;
     b++;
-    *b = 0;
+    *b = 0.0;
     b++;
   }
   *b = *a;
@@ -103,7 +105,7 @@ Height value;
   return(s);
 }
 /*}}}*/
-/*{{{  Fold *make_fold(int levels, int stop, Length len) */
+/*{{{  Fold *make_fold(Parm *param, int levels, int stop, Length len) */
 /*
  * Initialise the fold structures.
  * As everything else reads the parameters from their fold
@@ -190,10 +192,11 @@ Strip *next_strip (fold)
 Fold *fold;
 {
   Strip *result=NULL;
+  Strip *tmp;
   Strip **t;
   int i, count;
 
-  count = ((1 << fold->stop) +1);
+  count = ((1 << fold->level) +1);
   if( fold->level == fold->stop)
   {
     /*{{{  generate values from scratch */
@@ -228,20 +231,34 @@ Fold *fold;
     {
       case START:
         /*{{{  perform an update. return first result*/
+        db("S1",fold);
         t=fold->s;
         /* read in a new A strip at the start of the pipeline */
-        t[0] = double_strip(next_strip(fold->next));
-        if(t[2]){
-          /* make the new B strip */
-          t[1]=make_strip(fold->level);
+        tmp =next_strip(fold->next);
+        t[0] = double_strip(tmp);
+        free_strip(tmp);
+        /* make the new B strip */
+        t[1]=set_strip(fold->level,0.0);
+        if( ! t[2] )
+        {
+          t[2]=t[0];
+          tmp =next_strip(fold->next);
+          t[0] = double_strip(tmp);
+          free_strip(tmp);
         }
+        db("E1",fold);
+        
         /*
          * create the mid point
          * t := A B A
          */
+        db("S2",fold);
         x_update(count,fold->midscale,0.0,t[0],t[1],t[2]);
+        db("E2",fold);
+        
         if(fold->p->rg1)
         {
+          db("S3",fold);
           /*
            * first possible regeneration step
            * use the midpoints to regenerate the corner values
@@ -249,23 +266,31 @@ Fold *fold;
            */
           v_update(count,fold->midscale,fold->p->midmix,t[1],t[2],t[3]);
           t+=2;
+          db("E3",fold);
+        
         }
+        
         /*
          * fill in the edge points
          * increment t by 2 to preserve the A B A pattern
          */
+        db("S4",fold);
+        
         if( fold->p->cross )
         {
           t_update(count,fold->scale,0.0,t[0],t[1],t[2]);
           p_update(count,fold->scale,0.0,t[1],t[2],t[3]);
           t+=2;
         }else{
-          vside_update(count,fold->scale,0.0,t[1]);
-          hside_update(count,fold->scale,0.0,t[1],t[2],t[3]);
+          hside_update(count,fold->scale,0.0,t[0],t[1],t[2]);
+          vside_update(count,fold->scale,0.0,t[2]);
           t+=2;
         }
+        db("E4",fold);
+        
         if(fold->p->rg2)
         {
+          db("S5",fold);
           /*
            * second regeneration step update midpoint
            * from the new edge values
@@ -276,6 +301,8 @@ Fold *fold;
           }else{
             vside_update(count,fold->scale,fold->p->mix,t[1]);
           }
+          db("E5",fold);
+        
         }
         /* increment t by 1
          * this gives a B A B pattern to regen-3
@@ -285,6 +312,8 @@ Fold *fold;
         t++;
         if(fold->p->rg3)
         {
+          db("S6",fold);
+        
           /* final regenration step
            * regenerate the corner points from the new edge values
            * this needs a B A B pattern
@@ -297,11 +326,14 @@ Fold *fold;
             hside_update(count,fold->scale,fold->p->mix,t[0],t[1],t[2]);
           }
           t++;
+          db("E6",fold);
+        
         }
         result=t[1];
         fold->save=t[0];
         t[0]=t[1]=NULL;
         fold->state = STORE;
+        break;
         /*}}}*/
       case STORE:
         /*{{{  return second value from previous update. */
@@ -313,9 +345,11 @@ Fold *fold;
         }
         fold->s[0] = fold->s[1]=NULL;
         fold->state = START;
+        break;
         /*}}}*/
       default:
-        fprintf(stderr,"next_strip: invalid state\n");
+        fprintf(stderr,"next_strip: invalid state level %d state %d\n",
+             fold->level,fold->state);
         exit(3);
     }
     /*}}}*/
@@ -337,18 +371,52 @@ Strip *c;
   float w;
   Height *mp, *lp, *rp;
 
+  /* don't run unless we have all the parameters */
+  if( !a || !c ) return;
+  if( !b )
+  {
+    fprintf(stderr,"x_update: attempt to update NULL strip\n");
+    exit(1);
+  }
+  
   w = (1.0 - mix)/4.0;
-  mp=b->d+1;
+  mp=b->d;
   lp=a->d;
   rp=c->d;
 
-  for(i=0; i<count-2; i+=2)
-  {
-    mp[0] = (mix * mp[0]) + w * ( lp[0] + rp[0] + lp[2] + rp[2])
-          + (scale * gaussian());
-    mp+=2;
-    lp+=2;
-    rp+=2;
+  if( mix <= 0.0 ){
+    /*{{{random offset to average of new points*/
+    for(i=0; i<count-2; i+=2)
+    {
+      mp[1] = 0.25 * ( lp[0] + rp[0] + lp[2] + rp[2])
+            + (scale * gaussian());
+      mp+=2;
+      lp+=2;
+      rp+=2;
+    }
+    /*}}}*/
+  }else if( mix >= 1.0 ){
+    /*{{{random offset to old value*/
+    for(i=0; i<count-2; i+=2)
+    {
+      mp[1] = mp[1]
+            + (scale * gaussian());
+      mp+=2;
+      lp+=2;
+      rp+=2;
+    }
+    /*}}}*/
+  }else{
+    /*{{{mixed update*/
+    for(i=0; i<count-2; i+=2)
+    {
+      mp[1] = (mix * mp[1]) + w * ( lp[0] + rp[0] + lp[2] + rp[2])
+            + (scale * gaussian());
+      mp+=2;
+      lp+=2;
+      rp+=2;
+    }
+    /*}}}*/
   }
 }    
 /*}}}*/
@@ -365,18 +433,57 @@ Strip *c;
   float w;
   Height *mp, *lp, *rp;
 
+  /* don't run if we have no parameters */
+  if( !a || !b ) return;
+
+  /* if c is missing we can do a vside update instead
+   * should really be a sideways t but what the heck we only
+   * need this at the start
+   */
+  if( !c )
+  {
+    vside_update(count,scale,mix,b);
+    return;
+  }
+
   w = (1.0 - mix)/4.0;
   mp=b->d;
-  lp=a->d+1;
-  rp=c->d+1;
+  lp=a->d;
+  rp=c->d;
 
-  for(i=0; i<count-2; i+=2)
-  {
-    mp[1] = (mix * mp[1]) + w * ( lp[0] + rp[0] + mp[0] + mp[2] )
-          + (scale * gaussian());
-    mp+=2;
-    lp+=2;
-    rp+=2;
+  if( mix <= 0.0 ){
+    /*{{{random offset to average of new points*/
+    for(i=0; i<count-2; i+=2)
+    {
+      mp[1] = 0.25 * ( lp[1] + rp[1] + mp[0] + mp[2] )
+            + (scale * gaussian());
+      mp+=2;
+      lp+=2;
+      rp+=2;
+    }
+    /*}}}*/
+  }else if(mix >= 1.0){
+    /*{{{random offset to old values*/
+    for(i=0; i<count-2; i+=2)
+    {
+      mp[1] = mp[1]
+            + (scale * gaussian());
+      mp+=2;
+      lp+=2;
+      rp+=2;
+    }
+    /*}}}*/
+  }else{
+    /*{{{mixed update*/
+    for(i=0; i<count-2; i+=2)
+    {
+      mp[1] = (mix * mp[1]) + w * ( lp[1] + rp[1] + mp[0] + mp[2] )
+            + (scale * gaussian());
+      mp+=2;
+      lp+=2;
+      rp+=2;
+    }
+    /*}}}*/
   }
 }    
 
@@ -394,27 +501,68 @@ Strip *c;
   float w, we;
   Height *mp, *lp, *rp;
 
+  /* don't run unless we have all the parameters */
+  if( !a || !c ) return;
+  if( !b )
+  {
+    fprintf(stderr,"t_update: attempt to update NULL strip\n");
+    exit(1);
+  }
+
   w = (1.0 - mix)/4.0;
   we = (1.0 - mix)/3.0;
   mp=b->d;
   lp=a->d;
   rp=c->d;
 
-    mp[0] = (mix * mp[0]) + we * ( lp[0] + rp[0] + mp[1] )
-          + (scale * gaussian());
+  if( mix <= 0.0){
+    /*{{{random offset to average of new points*/
+    mp[0] = (1.0/3.0) * ( lp[0] + rp[0] + mp[1] )
+            + (scale * gaussian());
     mp++;
     lp++;
     rp++;
-  for(i=1; i<count-1; i+=2)
-  {
-    mp[1] = (mix * mp[1]) + w * ( lp[1] + rp[1] + mp[0] + mp[2] )
+    for(i=1; i<count-3; i+=2)
+    {
+      mp[1] = 0.25 * ( lp[1] + rp[1] + mp[0] + mp[2] )
+            + (scale * gaussian());
+      mp+=2;
+      lp+=2;
+      rp+=2;
+    }
+    mp[1] = (1.0/3.0) * ( lp[1] + rp[1] + mp[0] )
           + (scale * gaussian());
-    mp+=2;
-    lp+=2;
-    rp+=2;
+    /*}}}*/
+  }else if(mix >= 1.0){
+    /*{{{random offset to old values*/
+    for(i=0; i<count-2; i+=2)
+    {
+      mp[0] = mp[0]
+            + (scale * gaussian());
+      mp+=2;
+      lp+=2;
+      rp+=2;
+    }
+    /*}}}*/
+  }else{
+    /*{{{mixed update*/
+    mp[0] = (mix * mp[0]) + we * ( lp[0] + rp[0] + mp[1] )
+            + (scale * gaussian());
+    mp++;
+    lp++;
+    rp++;
+    for(i=1; i<count-3; i+=2)
+    {
+      mp[1] = (mix * mp[1]) + w * ( lp[1] + rp[1] + mp[0] + mp[2] )
+            + (scale * gaussian());
+      mp+=2;
+      lp+=2;
+      rp+=2;
+    }
+    mp[1] = (mix * mp[1]) + we * ( lp[1] + rp[1] + mp[0] )
+          + (scale * gaussian());
+    /*}}}*/
   }
-  mp[1] = (mix * mp[1]) + we * ( lp[1] + rp[1] + mp[0] )
-        + (scale * gaussian());
 }    
 
 
@@ -432,27 +580,68 @@ Strip *c;
   float w, we;
   Height *mp, *lp, *rp;
 
+  /* don't run unless we have all the parameters */
+  if( !a || !c ) return;
+  if( !b )
+  {
+    fprintf(stderr,"v_update: attempt to update NULL strip\n");
+    exit(1);
+  }
+
   w = (1.0 - mix)/4.0;
   we = (1.0 - mix)/2.0;
-  mp=b->d+1;
+  mp=b->d;
   lp=a->d;
   rp=c->d;
 
-    mp[0] = (mix * mp[0]) + we * ( lp[0] + rp[0] )
-          + (scale * gaussian());
-    mp+=2;
-    lp+=2;
-    rp+=2;
-  for(i=1; i<count-1; i+=2)
-  {
-    mp[0] = (mix * mp[0]) + w * ( lp[0] + rp[0] + lp[2] + rp[2] )
-          + (scale * gaussian());
-    mp+=2;
-    lp+=2;
-    rp+=2;
+  if( mix <= 0.0){
+    /*{{{random offset of average of new points*/
+    mp[0] = 0.5 * ( lp[1] + rp[1] )
+            + (scale * gaussian());
+    mp++;
+    lp++;
+    rp++;
+    for(i=1; i<count-3; i+=2)
+    {
+      mp[1] = 0.25 * ( lp[0] + rp[0] + lp[2] + rp[2] )
+            + (scale * gaussian());
+      mp+=2;
+      lp+=2;
+      rp+=2;
+    }
+    mp[1] = 0.5 * ( lp[0] + rp[0] )
+            + (scale * gaussian());
+    /*}}}*/
+  }else if(mix >= 1.0){
+    /*{{{random offset to old values*/
+    for(i=0; i<count-2; i+=2)
+    {
+      mp[0] = mp[0]
+            + (scale * gaussian());
+      mp+=2;
+      lp+=2;
+      rp+=2;
+    }
+    /*}}}*/
+  }else{
+    /*{{{mixed update*/
+    mp[0] = (mix * mp[0]) + we * ( lp[1] + rp[1] )
+            + (scale * gaussian());
+    mp++;
+    lp++;
+    rp++;
+    for(i=1; i<count-3; i+=2)
+    {
+      mp[1] = (mix * mp[1]) + w * ( lp[0] + rp[0] + lp[2] + rp[2] )
+            + (scale * gaussian());
+      mp+=2;
+      lp+=2;
+      rp+=2;
+    }
+    mp[1] = (mix * mp[1]) + we * ( lp[0] + rp[0] )
+            + (scale * gaussian());
+    /*}}}*/
   }
-  mp[0] = (mix * mp[0]) + we * ( lp[0] + rp[0] )
-          + (scale * gaussian());
 }    
 
 /*}}}*/
@@ -467,14 +656,40 @@ Strip *a;
   float w;
   Height *mp;
 
+  /* don't run unless we have all the parameters */
+  if( !a ) return;
+
+
   w = (1.0 - mix)/2.0;
   mp=a->d;
 
-  for(i=0; i<count-2; i+=2)
-  {
-    mp[1] = (mix * mp[1]) + w * ( mp[0] + mp[2] )
-          + (scale * gaussian());
-    mp+=2;
+  if( mix <= 0.0){
+    /*{{{random offset to average of new points*/
+    for(i=0; i<count-2; i+=2)
+    {
+      mp[1] = 0.5 * ( mp[0] + mp[2] )
+            + (scale * gaussian());
+      mp+=2;
+    }
+    /*}}}*/
+  }else if(mix >= 1.0){
+    /*{{{random offset to old values*/
+    for(i=0; i<count-2; i+=2)
+    {
+      mp[1] = mp[1]
+            + (scale * gaussian());
+      mp+=2;
+    }
+    /*}}}*/
+  }else{
+    /*{{{mixed update*/
+    for(i=0; i<count-2; i+=2)
+    {
+      mp[1] = (mix * mp[1]) + w * ( mp[0] + mp[2] )
+            + (scale * gaussian());
+      mp+=2;
+    }
+    /*}}}*/
   }
 }    
 
@@ -493,18 +708,52 @@ Strip *c;
   float w, we;
   Height *mp, *lp, *rp;
 
+  /* don't run unless we have all the parameters */
+  if( !a || !c ) return;
+  if( !b )
+  {
+    fprintf(stderr,"x_update: attempt to update NULL strip\n");
+    exit(1);
+  }
+
   w = (1.0 - mix)/2.0;
   mp=b->d;
   lp=a->d;
   rp=c->d;
 
-  for(i=0; i<count; i+=2)
-  {
-    mp[0] = (mix * mp[0]) + w * ( lp[0] + rp[0] )
-          + (scale * gaussian());
-    mp+=2;
-    lp+=2;
-    rp+=2;
+  if( mix <= 0.0 ){
+    /*{{{random offset to average of new points*/
+    for(i=0; i<count; i+=2)
+    {
+      mp[0] = 0.5 * ( lp[0] + rp[0] )
+            + (scale * gaussian());
+      mp+=2;
+      lp+=2;
+      rp+=2;
+    }
+    /*}}}*/
+  }else if(mix >= 1.0){
+    /*{{{random offset to old points*/
+    for(i=0; i<count; i+=2)
+    {
+      mp[0] = mp[0]
+            + (scale * gaussian());
+      mp+=2;
+      lp+=2;
+      rp+=2;
+    }
+    /*}}}*/
+  }else{
+    /*{{{mixed update*/
+    for(i=0; i<count; i+=2)
+    {
+      mp[0] = (mix * mp[0]) + w * ( lp[0] + rp[0] )
+            + (scale * gaussian());
+      mp+=2;
+      lp+=2;
+      rp+=2;
+    }
+    /*}}}*/
   }
 }    
 
@@ -513,4 +762,12 @@ Strip *c;
 /*}}}*/
 
 
-
+#ifndef db
+db(s, f)
+char *s;
+Fold *f;
+{
+  printf("%s[%d]: %0xd %0xd %0xd %0xd %0xd %0xd %0xd %0xd\n",s,f->level,
+     f->s[0],f->s[1],f->s[2],f->s[3],f->s[4],f->s[5],f->s[6],f->s[7]);
+}  
+#endif

@@ -7,7 +7,7 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.29 1994/04/07 11:23:24 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.30 1994/07/03 16:30:17 spb Exp $";
 #define SIDE 1.0
 #ifndef PI
 #define PI 3.14159265
@@ -16,6 +16,9 @@ char artist_Id[] = "$Id: artist.c,v 1.29 1994/04/07 11:23:24 spb Exp $";
 float vstrength; /* strength of vertical light source */
 float lstrength; /* strength of vertical light source */
 int base=0;      /* parity flag for mirror routine */
+
+Parm fold_param;
+
 float uni();
 /*{{{  void set_clut(Gun *red, Gun *green, Gun *blue)*/
 /*
@@ -213,7 +216,19 @@ void init_artist_variables()
   tan_vangle = tan_vangle - ( (double) (height/2) / focal );
 #endif
 
-  top=make_fold(levels,stop,frac_start,slope,smooth,(SIDE / pwidth),start,mean,fdim);
+  fold_param.rg1=smooth & 4;
+  fold_param.rg2=smooth & 2;
+  fold_param.rg3=smooth & 1;
+  fold_param.cross=cross;
+  fold_param.force_front=slope;
+  fold_param.force_back=FALSE;
+  fold_param.mix=mix;
+  fold_param.midmix=midmix;
+  fold_param.fdim=fdim;
+
+
+
+  top=make_fold(&fold_param, levels,stop,(SIDE / pwidth));
 
   /* use first set of heights to set shadow value */
   shadow = extract(next_strip(top));

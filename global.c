@@ -4,8 +4,8 @@
 Fold *top;
 int levels = 10;
 int stop = 2;
-int smooth = TRUE;
-int frac_start = TRUE;
+int smooth = 3;
+int cross = FALSE;
 int slope = TRUE;
 int snooze_time = 10;
 int n_col=MAX_COL;
@@ -17,6 +17,8 @@ int e_events = FALSE;
 int e_events = FALSE;
 #endif
 float fdim = 0.65;
+float mix   =0.0;
+float midmix=0.0;
 Height start;      /* starting value for the surface */
 Height mean=0.0;   /* mean value of surface */
 Height varience;   /* rough estimate of the height of the range */

@@ -6,10 +6,10 @@
 #include "patchlevel.h"
 #include "copyright.h"
 
-#define VERSION 1
+#define VERSION 2
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.26 1994/04/05 20:55:34 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.27 1994/07/03 16:30:17 spb Exp $";
 
 extern char *display;
 extern char *geom;
@@ -279,23 +279,20 @@ char **argv;
   /*{{{handle command line flags*/
   mesg[0]="false";
   mesg[1]="true";
-  while((c = getopt(argc,argv,"bxmsqMEl:r:f:t:I:A:S:T:C:a:p:B:R:g:d:c:e:v:Z:"))!= -1)
+  while((c = getopt(argc,argv,"bxmqMEs:l:r:f:t:I:A:S:T:C:a:p:B:R:g:d:c:e:v:Z:X:Y:"))!= -1)
   {
     switch(c){
       case 'b':
         root = 1- root;
         break;                      /* run on root window */
-      case 's':                     /* Toggle smoothing */
-        smooth = 1 - smooth;
-        break;
+      case 'x':
+        cross = 1- cross;
+        break;                      /* use cross updates */
       case 'E':
         e_events = 1 - e_events;
         break;
       case 'q':
         request_clear = 1 - request_clear;
-        break;
-      case 'x':                     /* Toggle fractal Start */
-        frac_start = 1 - frac_start;
         break;
       case 'm':                     /* Map view only */
         map = 1 - map;
@@ -309,6 +306,9 @@ char **argv;
          {
            levels = 2;
          }
+         break;
+      case 's':                     /* Set # levels of recursion */
+         smooth = atoi( optarg );
          break;
       case 't':                     /* Set width of lowest level */
          stop = atoi( optarg );
@@ -385,6 +385,12 @@ char **argv;
            alpha = PI/3.0;
          }
          break;
+      case 'X':                     /* set mix */
+         mix = atof( optarg );
+         break;
+      case 'Y':                     /* set midmix */
+         midmix = atof( optarg );
+         break;
       case 'S':                     /* set stretch */
          stretch = atof( optarg );
          break;
@@ -438,13 +444,13 @@ char **argv;
   if( errflg )
   {
     fprintf(stderr,"%s: version %d.%d\n",argv[0],VERSION,PATCHLEVEL);
-    fprintf(stderr,"usage: %s -[bqxmsElrftIASTCBZRapcevgd]\n",argv[0]);
+    fprintf(stderr,"usage: %s -[bqmsElrftIASTCBZRXyapcevgd]\n",argv[0]);
     fprintf(stderr," -b       [%s] use root window \n",mesg[root]);
     fprintf(stderr," -q       [%s] reset root window on exit\n",mesg[request_clear]);
-    fprintf(stderr," -x       [%s] flat start \n",mesg[1-frac_start]);
+    fprintf(stderr," -x       [%s] cross update \n",mesg[cross]);
     fprintf(stderr," -m       [%s] print map \n",mesg[map]);
     fprintf(stderr," -M       [%s] implement reflections \n",mesg[reflec]);
-    fprintf(stderr," -s       [%s] toggle smoothing \n",mesg[smooth]);
+    fprintf(stderr," -s       [%x] toggle smoothing \n",smooth);
     fprintf(stderr," -E       [%s] toggle explicit expose events \n",mesg[smooth]);
     fprintf(stderr," -l int   [%d] # levels of recursion \n",levels);
     fprintf(stderr," -t int   [%d] # non fractal iterations \n",stop);
@@ -463,6 +469,8 @@ char **argv;
     fprintf(stderr," -c float [%f] contrast\n",contrast);
     fprintf(stderr," -e float [%f] ambient light level\n",ambient);
     fprintf(stderr," -v float [%f] vertical light level\n",vfract);
+    fprintf(stderr," -X float [%f] fraction of old value for rg2 & rg3\n",mix);
+    fprintf(stderr," -Y float [%f] fraction of old value for rg1\n",midmix);
     fprintf(stderr," -g string     window geometry\n");
     fprintf(stderr," -d string     display\n");
     exit(1);
