@@ -21,6 +21,7 @@ Height start;      /* starting value for the surface */
 Height mean=0.0;   /* mean value of surface */
 Height varience;   /* rough estimate of the height of the range */
 Height shift=0.5;    /* offset from calcalt to artist coordinates */
+Height delta_shadow; /* offset of shadow at each step */
 float stretch=0.6;   /* vertical stretch */
 float contour = 0.3;
 float ambient = 0.3;  /* level of ambient light */
@@ -31,10 +32,17 @@ float vfract   = 0.6; /* relative strength of vertical light relative
                         */
 float altitude = 2.5;
 float distance = 4.0;
-double phi=(40.0 * PI)/180.0; /* angle of the light */
+double phi=(40.0 * PI)/180.0; /* angle of the light (vertical plane)*/
+double alpha=0.0;             /* angle of the light (horizontal plane)
+                               * must have -pi/4 < alpha < pi/4
+                               */
+double shadow_slip;
+double shadow_register=0.0;
 double cos_phi;
 double sin_phi;
 double tan_phi;
+double x_fact;
+double y_fact;
 Height sealevel = 0.0;
 int width;        /* width of the landscape, (function of levels) */
 int seed=0;       /* zero means read the clock */

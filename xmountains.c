@@ -9,7 +9,7 @@
 #define VERSION 1
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.23 1994/02/25 09:59:35 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.24 1994/04/04 19:27:55 spb Exp $";
 
 extern char *display;
 extern char *geom;
@@ -93,20 +93,73 @@ int paint;
   b_strip = extract( next_strip(top) );
   /*}}}*/
 
-  for(i=0 ; i<width ; i++)
+  /*{{{update the shadow*/
+  shadow_register += shadow_slip;
+  if( shadow_register >= 1.0 )
   {
-    shadow[i] -= (tan_phi * SIDE);
-    if( shadow[i] < b_strip[i] )
+    shadow_register -= 1.0;
+    for(i=width-1 ; i>0 ; i--)
     {
-      shadow[i] = b_strip[i];
+      shadow[i] = shadow[i-1]-delta_shadow;
+      if( shadow[i] < b_strip[i] )
+      {
+        shadow[i] = b_strip[i];
+      }
+      /*{{{  stop shadow at sea level */
+      if( shadow[i] < sealevel )
+      {
+        shadow[i] = sealevel;
+      }
+      /*}}}*/
     }
+    shadow[0] = b_strip[0];
     /*{{{  stop shadow at sea level */
-    if( shadow[i] < sealevel )
+    if( shadow[0] < sealevel )
     {
-      shadow[i] = sealevel;
+      shadow[0] = sealevel;
     }
     /*}}}*/
+  }else if( shadow_register <= -1.0 ){
+    shadow_register += 1.0;
+    for(i=0 ; i<width-1 ; i++)
+    {
+      shadow[i] = shadow[i+1]-delta_shadow;
+      if( shadow[i] < b_strip[i] )
+      {
+        shadow[i] = b_strip[i];
+      }
+      /*{{{  stop shadow at sea level */
+      if( shadow[i] < sealevel )
+      {
+        shadow[i] = sealevel;
+      }
+      /*}}}*/
+    }
+    shadow[width-1] = b_strip[width-1];
+    /*{{{  stop shadow at sea level */
+    if( shadow[width-1] < sealevel )
+    {
+      shadow[width-1] = sealevel;
+    }
+    /*}}}*/
+  }else{
+    for(i=0 ; i<width ; i++)
+    {
+      shadow[i] -= delta_shadow;
+      if( shadow[i] < b_strip[i] )
+      {
+        shadow[i] = b_strip[i];
+      }
+      /*{{{  stop shadow at sea level */
+      if( shadow[i] < sealevel )
+      {
+        shadow[i] = sealevel;
+      }
+      /*}}}*/
+    }
   }
+  /*}}}*/
+  
   return(res);
 }
 /*}}}*/
@@ -143,13 +196,13 @@ int snooze;
   l = next_col(1-map); 
   if( map )
   {
-    for(j=0; j<mapwid ; j++)
-    {
-      plot_pixel(p,((mapwid-1)-j),l[j]);
-    }
     for( j=0 ;j<(s_height-mapwid); j++)
     {
       plot_pixel(p,((s_height-1)-j),BLACK);
+    }
+    for(j=0; j<mapwid ; j++)
+    {
+      plot_pixel(p,((mapwid-1)-j),l[j]);
     }
   }else{
     for(j=0 ; j<height ; j++)
@@ -189,7 +242,7 @@ char **argv;
   /*{{{handle command line flags*/
   mesg[0]="false";
   mesg[1]="true";
-  while((c = getopt(argc,argv,"bxmsqEl:r:f:t:I:S:T:C:a:p:B:R:g:d:c:e:v:Z:"))!= -1)
+  while((c = getopt(argc,argv,"bxmsqEl:r:f:t:I:A:S:T:C:a:p:B:R:g:d:c:e:v:Z:"))!= -1)
   {
     switch(c){
       case 'b':
@@ -274,6 +327,17 @@ char **argv;
            phi = PI/2.0;
          }
          break;
+      case 'A':                     /* set Illumination angle (horizontal)*/
+         alpha = ((PI * atof( optarg ))/180.0);
+         if( alpha < -PI/4.0 )
+         {
+           alpha = -PI/4.0;
+         }
+         if( alpha > PI/4.0 )
+         {
+           alpha = PI/4.0;
+         }
+         break;
       case 'S':                     /* set stretch */
          stretch = atof( optarg );
          break;
@@ -327,7 +391,7 @@ char **argv;
   if( errflg )
   {
     fprintf(stderr,"%s: version %d.%d\n",argv[0],VERSION,PATCHLEVEL);
-    fprintf(stderr,"usage: %s -[bqxmsElrftISTCBZRapcevgd]\n",argv[0]);
+    fprintf(stderr,"usage: %s -[bqxmsElrftIASTCBZRapcevgd]\n",argv[0]);
     fprintf(stderr," -b       [%s] use root window \n",mesg[root]);
     fprintf(stderr," -q       [%s] reset root window on exit\n",mesg[request_clear]);
     fprintf(stderr," -x       [%s] flat start \n",mesg[1-frac_start]);
@@ -341,7 +405,8 @@ char **argv;
     fprintf(stderr," -R int   [%d] rng seed, read clock if 0 \n",seed);
     fprintf(stderr," -Z int   [%d] time to sleep before scrolling\n",snooze_time);
     fprintf(stderr," -f float [%f] fractal dimension \n",fdim);
-    fprintf(stderr," -I float [%f] angle of light \n",(phi*180.0)/PI);
+    fprintf(stderr," -I float [%f] vertical angle of light \n",(phi*180.0)/PI);
+    fprintf(stderr," -A float [%f] horizontal angle of light \n",(alpha*180.0)/PI);
     fprintf(stderr," -S float [%f] vertical stretch \n",stretch);
     fprintf(stderr," -T float [%f] vertical shift \n",shift);
     fprintf(stderr," -C float [%f] contour parameter \n",contour);

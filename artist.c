@@ -7,7 +7,7 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.25 1994/02/18 14:19:01 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.26 1994/04/04 19:27:55 spb Exp $";
 #define SIDE 1.0
 #ifndef PI
 #define PI 3.14159265
@@ -66,7 +66,7 @@ Gun *blue;
   green[SEA_LIT]   = 0.500*COL_RANGE;
   blue[SEA_LIT]    = 0.700*COL_RANGE;
   /*}}}*/
-  /*{{{  sea (unlit) */
+  /*{{{  sea (unlit)*/
   red[SEA_UNLIT]   = 0;
   green[SEA_UNLIT] = ((ambient+(vfract/(1.0+vfract)))*0.500)*COL_RANGE;
   blue[SEA_UNLIT]  = ((ambient+(vfract/(1.0+vfract)))*0.700)*COL_RANGE;
@@ -173,11 +173,15 @@ void init_artist_variables()
   sin_phi = sin( phi );
   tan_phi = tan( phi );
 
+  x_fact = cos_phi* cos(alpha);
+  y_fact = cos_phi* sin(alpha);
   vscale = stretch * pwidth;  /* have approx same height as fractal width
-                               * this makes each pixel 1.0 wide.
+                               * this makes each pixel SIDE=1.0 wide.
                                * c.f. get_col
                                */
 
+  delta_shadow = tan_phi /cos(alpha);
+  shadow_slip = tan(alpha);
   /* guess the average height of the fractal */
   varience = pow( SIDE ,(2.0 * fdim));
   varience = vscale * varience ;
@@ -220,14 +224,14 @@ void init_artist_variables()
   lstrength = contrast /( 1.0 + vfract );
 }
 /*}}}*/
-/*{{{  Col get_col(Height p, Height p_minus_x, Height p_plus_y, Height shadow) */
+/*{{{  Col get_col(Height p, Height p_minus_x, Height p_minus_y, Height shadow) */
 /*
  * calculate the colour of a point.
  */
-Col get_col (p,p_minus_x,p_plus_y,shadow)
+Col get_col (p,p_minus_x,p_minus_y,shadow)
 Height p;
 Height p_minus_x;
-Height p_plus_y;
+Height p_minus_y;
 Height shadow;
 {
   Height delta_x, delta_y;
@@ -264,12 +268,17 @@ Height shadow;
    *
    * For light parallel to ( cos_phi, 0, -sin_phi) the cosine is
    *        (cos_phi*delta_x + sin_phi)/sqrt( 1 + delta_x^2 + delta_y^2)
+   *
+   * For light parallel to ( cos_phi*cos_alpha, cos_phi*sin_alpha, -sin_phi)
+   * the cosine is
+   * (cos_phi*cos_alpha*delta_x + cos_phi*sin_alpha*delta_y+ sin_phi)/sqrt( 1 + delta_x^2 + delta_y^2)
+   *
    * For vertical light the cosine is
    *        1 / sqrt( 1 + delta_x^2 + delta_y^2)
    */
    
   delta_x = p - p_minus_x;
-  delta_y = p_plus_y - p;
+  delta_y = p - p_minus_y;
   delta_x_sqr = delta_x * delta_x;
   delta_y_sqr = delta_y * delta_y;
   hypot_sqr = delta_x_sqr + delta_y_sqr;
@@ -305,7 +314,9 @@ Height shadow;
     /*
      * add in contribution from the main light source
      */
-    dshade += ((double) lstrength * ((delta_x * cos_phi) + sin_phi));
+    /* dshade += ((double) lstrength * ((delta_x * cos_phi) + sin_phi));*/
+    dshade += ((double) lstrength *
+               ((delta_x * x_fact) + (delta_y * y_fact) + sin_phi));
   }
   /* divide by the normalisation factor (the same for both light sources) */
   dshade /= norm;
