@@ -1,4 +1,4 @@
-/* $Id: paint.h,v 1.2 1993/02/18 15:38:40 spb Exp $ */
+/* $Id: paint.h,v 1.3 1993/02/19 12:13:35 spb Exp $ */
 #ifndef PAINT
 #define PAINT
 
@@ -22,7 +22,8 @@ Height *extract(Strip *s);
 void init_artist_variables();
 Col get_col(Height p, Height p_plus_x, Height p_plus_y, Height shadow);
 Col *artist(Height *a, Height *b, Height *shadow);
-
+Col *camera( Height *a, Col *c );
+int project( int x , Height y );
 
 
 
