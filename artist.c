@@ -6,19 +6,20 @@
 #include "paint.h"
 #include "crinkle.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.39 1997/10/24 16:07:27 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.40 1997/12/03 17:21:10 spb Exp $";
 #define SIDE 1.0
 #ifndef PI
 #define PI 3.14159265
 #endif
 
 
+
 int base=0;      /* parity flag for mirror routine */
 
-Parm fold_param;
-Fold *top;
-Graph g;
+extern Parm fold_param;
+extern Graph g;
 
+Fold *top;
 
 
 Height varience;
@@ -47,7 +48,7 @@ Height *a_strip, *b_strip;    /* the two most recent strips */
 
 
 float uni();
-/*{{{  void set_clut(int max_col, Gun *red, Gun *green, Gun *blue)*/
+/* {{{   void set_clut(int max_col, Gun *red, Gun *green, Gun *blue)*/
 /*
  * setup the colour lookup table
  */
@@ -76,31 +77,31 @@ Gun *blue;
   gb[0] = 0.500; gb[1] = 0.600; gb[2] = 1.000;
   bb[0] = 0.333; bb[1] = 0.000; bb[2] = 1.000;
 
-  /*{{{  black */
+  /* {{{   black */
   red[BLACK]       = 0;
   green[BLACK]     = 0;
   blue[BLACK]      = 0;
-  /*}}}*/
-  /*{{{  white */
+  /* }}} */
+  /* {{{   white */
   red[WHITE]       = COL_RANGE;
   green[WHITE]     = COL_RANGE;
   blue[WHITE]      = COL_RANGE;
-  /*}}}*/
-  /*{{{  sky*/
+  /* }}} */
+  /* {{{   sky*/
   red[SKY]         = 0.404*COL_RANGE;
   green[SKY]       = 0.588*COL_RANGE;
   blue[SKY]        = COL_RANGE;
-  /*}}}*/
-  /*{{{  sea (lit) */
+  /* }}} */
+  /* {{{   sea (lit) */
   red[SEA_LIT]     = 0;
   green[SEA_LIT]   = 0.500*COL_RANGE;
   blue[SEA_LIT]    = 0.700*COL_RANGE;
-  /*}}}*/
-  /*{{{  sea (unlit)*/
+  /* }}} */
+  /* {{{   sea (unlit)*/
   red[SEA_UNLIT]   = 0;
   green[SEA_UNLIT] = ((g.ambient+(g.vfract/(1.0+g.vfract)))*0.500)*COL_RANGE;
   blue[SEA_UNLIT]  = ((g.ambient+(g.vfract/(1.0+g.vfract)))*0.700)*COL_RANGE;
-  /*}}}*/
+  /* }}} */
 
   if( MIN_COL > max_col )
   {
@@ -122,7 +123,7 @@ Gun *blue;
         fprintf(stderr,"INTERNAL ERROR, overflowed clut\n");
         exit(1);
       }
-      /*{{{  set red */
+      /* {{{   set red */
       top = rb[band];
       bot = g.ambient * top;
       intensity = bot + ((shade * (top - bot))/(g.band_size-1));
@@ -137,8 +138,8 @@ Gun *blue;
         tmp = COL_RANGE;
       }
       red[BAND_BASE + (band*g.band_size) + shade] = tmp;
-      /*}}}*/
-      /*{{{  set green */
+      /* }}} */
+      /* {{{   set green */
       top = gb[band];
       bot = g.ambient * top;
       intensity = bot + ((shade * (top - bot))/(g.band_size-1));
@@ -153,8 +154,8 @@ Gun *blue;
         tmp = COL_RANGE;
       }
       green[BAND_BASE + (band*g.band_size) + shade] = tmp;
-      /*}}}*/
-      /*{{{  set blue */
+      /* }}} */
+      /* {{{   set blue */
       top = bb[band];
       bot = g.ambient * top;
       intensity = bot + ((shade * (top - bot))/(g.band_size-1));
@@ -169,12 +170,12 @@ Gun *blue;
         tmp = COL_RANGE;
       }
       blue[BAND_BASE + (band*g.band_size) + shade] = tmp;
-      /*}}}*/
+      /* }}} */
     }
   }
 }
-/*}}}*/
-/*{{{  Height *extract(Strip *s) */
+/* }}} */
+/* {{{   Height *extract(Strip *s) */
 /*
  * extract the table of heights from the Strip struct
  * and discard the rest of the struct.
@@ -193,8 +194,8 @@ Strip *s;
   }
   return(p);
 }
-/*}}}*/
-/*{{{  void init_artist_variables() */
+/* }}} */
+/* {{{   void init_artist_variables() */
 /*
  * initialise the variables for the artist routines.
  */
@@ -268,8 +269,8 @@ void init_artist_variables()
     g.pos=g.graph_width-1;
   }	
 }
-/*}}}*/
-/*{{{  Col get_col(Height p, Height p_minus_x, Height p_minus_y, Height shadow) */
+/* }}} */
+/* {{{   Col get_col(Height p, Height p_minus_x, Height p_minus_y, Height shadow) */
 /*
  * calculate the colour of a point.
  */
@@ -287,7 +288,7 @@ Height shadow;
   Height effective;
   Col result;
   int band, shade;
-  /*{{{  if underwater*/
+  /* {{{   if underwater*/
   if ( p < g.sealevel )
   {
     if( shadow > g.sealevel )
@@ -297,7 +298,7 @@ Height shadow;
       return( SEA_LIT );
     }
   }
-  /*}}}*/
+  /* }}} */
   /*
    * We have three light sources, one slanting in from the left
    * one directly from above and an ambient light.
@@ -329,11 +330,11 @@ Height shadow;
   hypot_sqr = delta_x_sqr + delta_y_sqr;
   norm = sqrt( 1.0 + hypot_sqr );
 
-  /*{{{  calculate effective height */
+  /* {{{   calculate effective height */
   effective = (p + (varience * g.contour *
           (1.0/ ( 1.0 + hypot_sqr))));
-  /*}}}*/
-  /*{{{  calculate colour band. */
+  /* }}} */
+  /* {{{   calculate colour band. */
   band = ( effective / varience) * N_BANDS;
   if ( band < 0 )
   {
@@ -344,9 +345,9 @@ Height shadow;
     band = (N_BANDS -1);
   }
   result = (BAND_BASE + (band * g.band_size));
-  /*}}}*/
+  /* }}} */
 
-  /*{{{calculate the illumination stength*/
+  /* {{{ calculate the illumination stength*/
   /*
    * add in a contribution for the vertical light. The normalisation factor
    * is applied later
@@ -365,8 +366,8 @@ Height shadow;
   }
   /* divide by the normalisation factor (the same for both light sources) */
   dshade /= norm;
-  /*}}}*/
-  /*{{{  calculate shading */
+  /* }}} */
+  /* {{{   calculate shading */
   /* dshade should be in the range 0.0 -> 1.0
    * if the light intensities add to 1.0
    * now convert to an integer
@@ -376,13 +377,13 @@ Height shadow;
   {
     shade = (g.band_size-1);
   }
-  /*{{{  if shade is negative then point is really in deep shadow */
+  /* {{{   if shade is negative then point is really in deep shadow */
   if( shade < 0 )
   {
       shade = 0;
   }
-  /*}}}*/
-  /*}}}*/
+  /* }}} */
+  /* }}} */
   result += shade;
   if( (result >= g.n_col) || (result < 0) )
   {
@@ -391,8 +392,8 @@ Height shadow;
   }
   return(result);
 }
-/*}}}*/
-/*{{{  Col *makemap(Height *a, Height *b, Height *shadow) */
+/* }}} */
+/* {{{   Col *makemap(Height *a, Height *b, Height *shadow) */
 Col *makemap (a,b,shadow)
 Height *a;
 Height *b;
@@ -416,8 +417,8 @@ int i;
   return(res);
 }
   
-/*}}}*/
-/*{{{  Col *camera(Height *a, Height *b, Height *shadow) */
+/* }}} */
+/* {{{   Col *camera(Height *a, Height *b, Height *shadow) */
 Col *camera(a,b,shadow)
 Height *a;
 Height *b;
@@ -471,8 +472,8 @@ Height *shadow;
   }
   return(res);
 }
-/*}}}*/
-/*{{{  Col *mirror(Height *a, Height *b, Height *shadow)*/
+/* }}} */
+/* {{{   Col *mirror(Height *a, Height *b, Height *shadow)*/
 Col *mirror(a,b,shadow)
 Height *a;
 Height *b;
@@ -510,7 +511,7 @@ Height *shadow;
   {
     if(map[i] < BAND_BASE)
     {
-      /*{{{stipple water values*/
+      /* {{{ stipple water values*/
       for(j=last_bottom;j<=last_top;j++)
       {
         res[j]=last_col;
@@ -537,9 +538,9 @@ Height *shadow;
         i--;
       }
       i++;  /* the end of the for loop will decrement as well */
-      /*}}}*/
+      /* }}} */
     }else{
-      /*{{{draw land values*/
+      /* {{{ draw land values*/
       top = project(i,a[i]);
       bottom=project(i,pivot-a[i]);
       if(last_col == map[i])
@@ -571,10 +572,10 @@ Height *shadow;
         last_bottom=bottom;
         last_col=map[i];
       }
-      /*}}}*/
+      /* }}} */
     }
   }
-  /*{{{draw in front face*/
+  /* {{{ draw in front face*/
   for(j=last_bottom;j<=last_top;j++)
   {
     res[j]=last_col;
@@ -589,13 +590,13 @@ Height *shadow;
   {
     res[j] = map[0];
   }
-  /*}}}*/
+  /* }}} */
   base=1-base;
   free(map);
   return(res);
 }
-/*}}}*/
-/*{{{  int project( int x , Height y ) */
+/* }}} */
+/* {{{   int project( int x , Height y ) */
 /*
  *  project a point onto the screen position
  */
@@ -627,8 +628,8 @@ Height y;
   }
   return( pos );
 }
-/*}}}*/
-/*{{{  void finish_artist() */
+/* }}} */
+/* {{{   void finish_artist() */
 /*
  * Tidy up and free everything.
  */
@@ -639,9 +640,8 @@ void finish_artist()
   free(shadow);
   free_fold(top);
 }
-/*}}}*/
-
-/* {{{ void init_parameters() */
+/* }}} */
+/* {{{  void init_parameters() */
 
 void init_parameters()
 {
@@ -683,8 +683,7 @@ void init_parameters()
 }
 
 /* }}} */
-
-/* {{{  Col *next_col(int paint, int reflec) */
+/* {{{   Col *next_col(int paint, int reflec) */
 
 Col *next_col (paint, reflec)
 int paint;
@@ -693,7 +692,7 @@ int reflec;
   Col *res;
   int i,offset=0;
   
-  /* {{{   update strips */
+  /* {{{    update strips */
   if(paint)
   {
     if(reflec)
@@ -710,7 +709,7 @@ int reflec;
   b_strip = extract( next_strip(top) );
   /* }}} */
 
-  /* {{{ update the shadows*/
+  /* {{{  update the shadows*/
 
   /* shadow_slip is the Y component of the light vector.
    * The shadows can only step an integer number of points in the Y
@@ -724,7 +723,7 @@ int reflec;
   shadow_register += shadow_slip;
   if( shadow_register >= 1.0 )
   {
-    /* {{{ negative offset*/
+    /* {{{  negative offset*/
 
     while( shadow_register >= 1.0 )
     {
@@ -738,19 +737,21 @@ int reflec;
       {
         shadow[i] = b_strip[i];
       }
-      /* {{{   stop shadow at sea level */
+      /* {{{    stop shadow at sea level */
 
       if( shadow[i] < g.sealevel )
       {
         shadow[i] = g.sealevel;
       }
 
+
+
       /* }}} */
     }
     for(i=0;i<offset;i++)
     {
       shadow[i] = b_strip[i];
-      /* {{{   stop shadow at sea level*/
+      /* {{{    stop shadow at sea level*/
       if( shadow[i] < g.sealevel )
       {
         shadow[i] = g.sealevel;
@@ -760,7 +761,7 @@ int reflec;
 
     /* }}} */
   }else if( shadow_register <= -1.0 ){
-    /* {{{ positive offset*/
+    /* {{{  positive offset*/
     while( shadow_register <= -1.0 )
     {
       shadow_register += 1.0;
@@ -773,7 +774,7 @@ int reflec;
       {
         shadow[i] = b_strip[i];
       }
-      /* {{{   stop shadow at sea level */
+      /* {{{    stop shadow at sea level */
       if( shadow[i] < g.sealevel )
       {
         shadow[i] = g.sealevel;
@@ -783,7 +784,7 @@ int reflec;
     for(;i<g.width;i++)
     {
       shadow[i] = b_strip[i];
-      /* {{{   stop shadow at sea level*/
+      /* {{{    stop shadow at sea level*/
       if( shadow[i] < g.sealevel )
       {
         shadow[i] = g.sealevel;
@@ -792,7 +793,7 @@ int reflec;
     }
     /* }}} */
   }else{
-    /* {{{ no offset*/
+    /* {{{  no offset*/
     for(i=0 ; i<g.width ; i++)
     {
       shadow[i] -= delta_shadow;
@@ -800,7 +801,7 @@ int reflec;
       {
         shadow[i] = b_strip[i];
       }
-      /* {{{   stop shadow at sea level */
+      /* {{{    stop shadow at sea level */
       if( shadow[i] < g.sealevel )
       {
         shadow[i] = g.sealevel;
@@ -816,9 +817,7 @@ int reflec;
 }
 
 /* }}} */
-
-
-/* {{{ void plot_column(g)*/
+/* {{{  void plot_column(g)*/
 void plot_column(g)
 Graph *g;
 {
