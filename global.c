@@ -16,28 +16,21 @@ int e_events = TRUE;
 #else
 int e_events = FALSE;
 #endif
-float fdim = 0.65;
-float mix   =0.0;
-float midmix=0.0;
 Height start=0.0;      /* starting value for the surface */
 Height mean=0.0;   /* mean value of surface */
 Height varience;   /* rough estimate of the height of the range */
-Height shift=0.5;    /* offset from calcalt to artist coordinates */
+Height shift=0.5;    
 Height delta_shadow; /* offset of shadow at each step */
-float stretch=0.6;   /* vertical stretch */
+float stretch=0.6;   
 float contour = 0.3;
-float ambient = 0.3;  /* level of ambient light */
-float contrast = 1.0; /* contrast,
-                       * increases or decreases effect of cosine rule */
-float vfract   = 0.6; /* relative strength of vertical light relative
-                        * to the main light source
-                        */
+float ambient = 0.3; 
+float contrast = 1.0; 
+float vfract   = 0.6; 
 float altitude = 2.5;
 float distance = 4.0;
-double phi=(40.0 * PI)/180.0; /* angle of the light (vertical plane)*/
-double alpha=0.0;             /* angle of the light (horizontal plane)
-                               * must have -pi/4 < alpha < pi/4
-                               */
+double phi=(40.0 * PI)/180.0; 
+double alpha=0.0;             
+                              
 double shadow_slip;
 double shadow_register=0.0;
 double cos_phi;
@@ -58,8 +51,8 @@ double vangle;                    /* view angle 0 == horizontal
                                    *increase to look down
                                    */
 double tan_vangle;                                     
-float vscale;           /* rescale physical height by this amount. */
-float viewpos;        /* position of viewpoint */
+float vscale;           
+float viewpos;        
 float viewheight;      /* height of viewpoint */
 float focal;                  /* focal length, calc to preserve aspect ratio */
 

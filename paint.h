@@ -1,4 +1,4 @@
-/* $Id: paint.h,v 1.14 1997/10/24 14:52:10 spb Exp $ */
+/* $Id: paint.h,v 1.15 2001/03/30 12:12:13 spb Exp $ */
 #ifndef PAINT
 #define PAINT
 
@@ -58,7 +58,7 @@ typedef struct graph{
 #define PI 3.14159265
 
 #ifdef ANSI
-void set_clut(Gun *, Gun *, Gun *);
+void set_clut(int, Gun *, Gun *, Gun *);
 Height *extract(Strip *s);
 void init_artist_variables();
 Col get_col(Height p, Height p_plus_x, Height p_plus_y, Height shadow);
