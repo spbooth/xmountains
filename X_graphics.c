@@ -6,7 +6,7 @@
 #include"vroot.h"
 #endif
 #include "paint.h"
-char X_graphics_Id[]="$Id: X_graphics.c,v 1.23 1997/03/24 11:37:33 spb Exp $";
+char X_graphics_Id[]="$Id: X_graphics.c,v 1.24 2001/03/30 12:13:04 spb Exp $";
 
 char *display=NULL;       /* name of display to open, NULL for default */
 char *geom=NULL;          /* geometry of window, NULL for default */
@@ -45,6 +45,34 @@ Atom wm_delete_window;
 void zap_events();
 void finish_graphics();
   
+Graph g={
+1024,
+768,
+0,
+0.3,
+1.0,
+0.3,
+0.6,
+2.5,
+4.0,
+(40.0 * PI)/180.0,
+0.0,
+0.5,
+0.0,
+0.6,
+DEF_COL,
+60,
+10,
+2,
+FALSE,
+TRUE,
+20,
+0,
+0
+};
+
+
+
 /*{{{void zap_events(int snooze)*/
 void zap_events(snooze)
 int snooze;
@@ -53,10 +81,6 @@ int snooze;
   XExposeEvent *expose = (XExposeEvent *)&event;
   int exw, exh, i;
 
-#ifndef NO_SLEEP
-  i=0;
-  do{
-#endif
   while( XPending(dpy) ){
     XNextEvent(dpy, &event);
     switch(event.type) {
@@ -105,21 +129,6 @@ int snooze;
     finish_artist();
     exit(0);
   }
-#ifndef NO_SLEEP
-    /* sleeping is very bad because it will prevent
-     * events being processed but I suppose it is better
-     * than being a CPU hog, as a compremise always check for
-     * events at least once a second, looping for longer sleep times.
-     * process the events before a sleep to make sure the screen is up to date.
-     * the events must always be processed at least once.
-     */
-    if( snooze )
-    {
-      sleep(1);
-    }
-    i++;
-  }while( i<snooze );
-#endif
 }
 /*}}}*/
   
@@ -223,6 +232,7 @@ Gun *blue;
   unsigned int border;
   unsigned long gcvmask;
   XGCValues gcv;
+  XWindowAttributes xgwa;
   
   int i;
   int newmap=FALSE;
@@ -247,7 +257,9 @@ Gun *blue;
   parent = RootWindow(dpy, screen);
 /*}}}*/
 /*{{{find appropriate vis*/
-  map=defaultmap=DefaultColormap(dpy,screen);
+  /* map=defaultmap=DefaultColormap(dpy,screen); */
+  XGetWindowAttributes (dpy, parent, &xgwa);
+  map=defaultmap=xgwa.colormap;
   vis = DefaultVisual(dpy,screen);
   depth = DefaultDepth(dpy,screen);
 /*}}}*/
