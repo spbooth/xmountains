@@ -7,7 +7,7 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.20 1994/02/04 20:17:32 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.21 1994/02/04 20:33:54 spb Exp $";
 #define SIDE 1.0
 #ifndef PI
 #define PI 3.14159265
@@ -250,9 +250,8 @@ Height shadow;
    * ( 0, 1, delta_y )
    *
    * The normal therefore is parallel to
-   * (  -delta_x, -delta_y, 1)
+   * (  -delta_x, -delta_y, 1)/sqrt( 1 + delta_x^2 + delta_y^2)
    *
-   * normalised by
    * For light parallel to ( cos_phi, 0, -sin_phi) the cosine is
    *        (cos_phi*delta_x + sin_phi)/sqrt( 1 + delta_x^2 + delta_y^2)
    * For vertical light the cosine is
