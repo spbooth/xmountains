@@ -1,0 +1,16 @@
+#
+# Generic makefile for xmountins. You will have to add the locations
+# of your X include files and libraries to the appropriate macros
+#
+CC=cc
+CFLAGS=-I/usr/iclude/X11
+LDFLAGS=-L/usr/lib/X11
+
+LOCAL_LIBRARIES = -lX11 
+  SYS_LIBRARIES = -lm
+           SRCS = calcalt.c random.c  artist.c global.c xmountains.c X_graphics.c print_alg.c
+           OBJS = calcalt.o random.o  artist.o global.o xmountains.o X_graphics.o print_alg.o
+           HDRS = crinkle.h global.h paint.h patchlevel.h copyright.h
+
+xmountains: $(OBJS)
+	$(CC) $(LDFLAGS) -o xmountains $(OBJS) -lX11 -lm
