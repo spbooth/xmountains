@@ -1,4 +1,4 @@
-/* $Id: crinkle.h,v 1.4 1994/01/21 11:53:47 spb Rel $ */
+/* $Id: crinkle.h,v 2.0 1994/07/01 09:34:20 spb Exp $ */
 #ifndef CRINKLE
 #define CRINKLE
 /*{{{  typedefs */
@@ -17,6 +17,7 @@ typedef float Length;
 #define START 0
 #define STORE 1
 
+#define NSTRIP 8
 /*}}}*/
 /*{{{  structs */
 /* strip of altitudes */
@@ -25,21 +26,29 @@ typedef struct strip{
   Height *d;    /* should have 2^level + 1 points */
 }Strip;
 
+/* parameters for the update */
+typedef struct parm{
+  Height mean;              /* mean altitude */
+  int rg1;                  /* optional regeneration steps */
+  int rg2;
+  int rg3;
+  int cross;                /* use four point average on edges rather than 2 */
+  int force_front;          /* keep front edge low */
+  int force_back;           /* keep back edge low */
+  float mix;                /* fraction of old value to include in average */
+  float fdim;
+}Parm;
+
 /* The parameter struct for the recursive procedure */
 typedef struct fold{
   int level;                /* levels of recursion below us */
-  int stop;                 /* level to stop recursion */
-  int state;                /* internal stat of algorithm */
-  int smooth;               /* is smoothing on or off */
-  int slope;                /* constrain the front of the surface */
-  Height mean;              /* mean altitude */
   Length scale;             /* scale factor for perturbations */
   Length midscale;          /* as above but for diagonal offsets */
-  struct fold *next;        /* struct for next level of recursion */
-  struct strip *new;        /* incoming results from the previous level */
-  struct strip *working;    /* strip being expanded up */
-  struct strip *regen;      /* strip being recalculated as part of smoothing */
-  struct strip *old;        /* finished results retained for averaging */
+  struct parm *p;           /* update parameters */
+  struct strip *s[NSTRIP];  /* pointers to the pipeline strips */
+  int stop;                 /* level to stop recursion */
+  int state;                /* internal stat of algorithm */
+  struct fold *next;        /* next iteration down */
 } Fold;
 /*}}}*/
 /*{{{  prototypes */
