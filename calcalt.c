@@ -22,7 +22,7 @@
 #include <math.h>
 #include "crinkle.h"
 
-char calcalt_Id[] = "$Id: calcalt.c,v 1.4 1993/03/18 19:53:09 spb Exp $";
+char calcalt_Id[] = "$Id: calcalt.c,v 1.5 1993/04/28 21:06:57 spb Exp $";
 
 /*{{{  Strip *make_strip(int level) */
 Strip *make_strip(int level)
@@ -50,7 +50,11 @@ Strip *make_strip(int level)
 /*{{{  void free_strip(Strip *p) */
 void free_strip(Strip *p)
 {
-  free(p->d);
+  if( p->d )
+  {
+    free(p->d);
+    p->d = NULL;
+  }
   free(p);
 }
 /*}}}*/
@@ -225,6 +229,7 @@ Strip *next_strip(Fold *fold)
         recalc(fold->working,fold->regen,fold->old,fold->scale);
       }
       result = fold->old;
+      fold->old = NULL;
       fold->state = STORE;
       return(result);
       /*}}}*/
@@ -335,22 +340,27 @@ void free_fold(Fold *f)
   if( f->new != NULL )
   {
     free_strip(f->new);
+    f->new = NULL;
   }
   if( f->working != NULL )
   {
     free_strip(f->working);
+    f->working = NULL;
   }
   if( f->regen != NULL )
   {
     free_strip(f->regen);
+    f->regen = NULL;
   }
   if( f->old != NULL )
   {
     free_strip(f->old);
+    f->old = NULL;
   }
   if( f->next != NULL )
   {
-     free_fold(f->next);
+    free_fold(f->next);
+    f->next = NULL;
   }
   free(f);
   return;
