@@ -6,7 +6,7 @@
 
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.7 1994/01/11 11:57:39 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.8 1994/01/11 12:53:57 spb Exp $";
 
 extern char *display;
 extern char *geom;
@@ -123,6 +123,7 @@ main(int argc, char **argv)
   int root= 0;
 
   int c, errflg=0;
+  int mapwid;
   extern char *optarg;
   extern int optind;
   char *mesg[2];
@@ -249,6 +250,12 @@ main(int argc, char **argv)
     exit(1);
   }
 
+  if( s_height > width )
+  {
+    mapwid=width;
+  }else{
+    mapwid=s_height;
+  }
   while( TRUE )
   {
       /* do the scroll */
@@ -258,11 +265,11 @@ main(int argc, char **argv)
         l = next_col(1-map); 
         if( map )
         {
-          for(j=0; (j<height)&&(j<width) ; j++)
+          for(j=0; j<mapwid ; j++)
           {
-            plot_pixel(p,((s_height-1)-j),l[j]);
+            plot_pixel(p,((mapwid-1)-j),l[j]);
           }
-          for( ;j<height; j++)
+          for( j=0 ;j<(s_height-mapwid); j++)
           {
             plot_pixel(p,((s_height-1)-j),BLACK);
           }
