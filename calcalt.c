@@ -22,7 +22,7 @@
 #include <math.h>
 #include "crinkle.h"
 
-char calcalt_Id[] = "$Id: calcalt.c,v 1.1 1991/10/22 23:18:57 spb Exp $";
+char calcalt_Id[] = "$Id: calcalt.c,v 1.2 1993/02/19 12:12:20 spb Exp $";
 
 /*{{{  Strip *make_strip(int level) */
 Strip *make_strip(int level)
@@ -246,6 +246,8 @@ Strip *next_strip(Fold *fold)
  *    Number of points = 2^levels+1
  * smooth turns the smoothing algorithm on or off
  * len is the length of the side of the square at this level.
+ *   N.B this means the update square NOT the width of the fractal.
+ *   len gets smaller as the level increases.
  * mean is the mean height.
  * fdim is the fractal dimension
  */
