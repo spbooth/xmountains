@@ -6,7 +6,7 @@
 
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.1 1993/03/20 12:09:54 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.2 1994/01/07 18:30:47 spb Exp $";
 
 /*{{{  Col *next_col(int paint) */
 Col *next_col(int paint)
@@ -46,7 +46,7 @@ Col *next_col(int paint)
 }
 /*}}}*/
 double atof();
-void init_graphics(int *, int *);
+void init_graphics(int, int *, int *);
 void finish_graphics();
 void install_clut( int, unsigned char *, unsigned char *, unsigned char *);
 void plot_pixel(int, int, unsigned char);
@@ -56,12 +56,13 @@ void finish_prog();
 
 main(int argc, char **argv)
 {
-  int s_height, s_width;
+  int s_height=768, s_width=1024;
   int i,j,p,code;
   Col *l;
 
   int repeat=20;
   int map = 0;
+  int root= 0;
 
   int c, errflg=0;
   extern char *optarg;
@@ -70,15 +71,12 @@ main(int argc, char **argv)
 
   mesg[0]="false";
   mesg[1]="true";
-  init_graphics(&s_width,&s_height);
-  set_clut();
-  install_clut(MAX_COL+1,red,green,blue);
-
-  height = s_height;
-
-  while((c = getopt(argc,argv,"xmsl:r:f:t:I:S:T:a:d:R:"))!= -1)
+  while((c = getopt(argc,argv,"bxmsl:r:f:t:I:S:T:a:d:R:"))!= -1)
   {
     switch(c){
+      case 'b':
+        root = 1- root;
+        break;                      /* run on root window */
       case 's':                     /* Toggle smoothing */
         smooth = 1 - smooth;
         break;
@@ -138,6 +136,7 @@ main(int argc, char **argv)
   {
     fprintf(stderr,"%s: illegal argument\n",argv[0]);
     fprintf(stderr,"usage, %s -[xmslrftISTRad]\n",argv[0]);
+    fprintf(stderr," -b       [%s] use root window \n",mesg[root]);
     fprintf(stderr," -x       [%s] flat start \n",mesg[1-frac_start]);
     fprintf(stderr," -m       [%s] print map \n",mesg[map]);
     fprintf(stderr," -s       [%s] toggle smoothing \n",mesg[smooth]);
@@ -151,9 +150,14 @@ main(int argc, char **argv)
     fprintf(stderr," -T float [%f] vertical shift \n",shift);
     fprintf(stderr," -a float [%f] altitude of viewpoint \n",altitude);
     fprintf(stderr," -d float [%f] distance of viewpoint \n",distance);
-    finish_graphics();
     exit(1);
   }
+  init_graphics(root,&s_width,&s_height);
+  set_clut();
+  install_clut(MAX_COL+1,red,green,blue);
+
+  height = s_height;
+
     
   seed_uni(seed);
 
@@ -163,6 +167,17 @@ main(int argc, char **argv)
     perror(argv[0]);
     exit(1);
   }
+  if( -1 == (int) signal(SIGHUP, finish_prog ))
+  {
+    perror(argv[0]);
+    exit(1);
+  }
+  if( -1 == (int) signal(SIGQUIT, finish_prog ))
+  {
+    perror(argv[0]);
+    exit(1);
+  }
+
   while( TRUE )
   {
       /* do the scroll */
@@ -187,6 +202,7 @@ main(int argc, char **argv)
           }
           free(l);
         }
+        flush_region(p,0,1,height,p,0);
       }
   }
   finish_prog();
