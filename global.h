@@ -14,6 +14,7 @@ extern float varience;
 extern float shift;
 extern float stretch;
 extern float contour;
+extern float ambient;
 extern float contrast;
 extern float altitude;
 extern float distance;

@@ -9,7 +9,7 @@
 #define SIDE 1.0
 #define VERSION 1
 
-char scroll_Id[]="$Id: xmountains.c,v 1.13 1994/01/24 14:31:26 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.14 1994/01/24 20:29:58 spb Rel $";
 
 extern char *display;
 extern char *geom;
@@ -32,6 +32,7 @@ char *pat;
   }
   if( argv[optind][1] == '-' )
   {
+    optind++;
     return -1;
   }
   if( argv[optind][1] == ':' )
@@ -147,7 +148,7 @@ char **argv;
 
   mesg[0]="false";
   mesg[1]="true";
-  while((c = getopt(argc,argv,"bxmsl:r:f:t:I:S:T:a:p:R:g:d:"))!= -1)
+  while((c = getopt(argc,argv,"bxmsl:r:f:t:I:S:T:a:p:R:g:d:c:e:"))!= -1)
   {
     switch(c){
       case 'b':
@@ -192,9 +193,25 @@ char **argv;
          break;
       case 'f':                     /* set fractal dimension */
          fdim = atof( optarg );
+         if( fdim < 0.5 )
+         {
+          fdim=0.5;
+         }
+         if( fdim > 1.0 )
+         {
+          fdim=1.0;
+         }
          break;
       case 'I':                     /* set Illumination angle */
-         phi = atof( optarg );
+         phi = ((PI * atof( optarg ))/180.0);
+         if ( phi < 0.0 )
+         {
+           phi=0.0;
+         }
+         if( phi > PI/2.0 )
+         {
+           phi = PI/2.0;
+         }
          break;
       case 'S':                     /* set stretch */
          stretch = atof( optarg );
@@ -207,6 +224,24 @@ char **argv;
          break;
       case 'p':                     /* set distance */
          distance = atof( optarg );
+         break;
+      case 'c':
+         contrast = atof( optarg );
+         if( contrast < 0.0 )
+         {
+          contrast=0.0;
+         }
+         break;
+      case 'e':
+         ambient = atof( optarg );
+         if( ambient < 0.0 )
+         {
+          ambient = 0.0;
+         }
+         if( ambient > 1.0 )
+         {
+          ambient=1.0;
+         }
          break;
       case 'g':
          geom = optarg;
@@ -221,7 +256,7 @@ char **argv;
   if( errflg )
   {
     fprintf(stderr,"%s: version %d.%d\n",argv[0],VERSION,PATCHLEVEL);
-    fprintf(stderr,"usage: %s -[bxmslrftISTRapgd]\n",argv[0]);
+    fprintf(stderr,"usage: %s -[bxmslrftISTRapcegd]\n",argv[0]);
     fprintf(stderr," -b       [%s] use root window \n",mesg[root]);
     fprintf(stderr," -x       [%s] flat start \n",mesg[1-frac_start]);
     fprintf(stderr," -m       [%s] print map \n",mesg[map]);
@@ -231,11 +266,13 @@ char **argv;
     fprintf(stderr," -r int   [%d] # columns before scrolling \n",repeat);
     fprintf(stderr," -R int   [%d] rng seed, read clock if 0 \n",seed);
     fprintf(stderr," -f float [%f] fractal dimension \n",fdim);
-    fprintf(stderr," -I float [%f] angle of light \n",phi);
+    fprintf(stderr," -I float [%f] angle of light \n",(phi*180.0)/PI);
     fprintf(stderr," -S float [%f] vertical stretch \n",stretch);
     fprintf(stderr," -T float [%f] vertical shift \n",shift);
     fprintf(stderr," -a float [%f] altitude of viewpoint \n",altitude);
     fprintf(stderr," -p float [%f] distance of viewpoint \n",distance);
+    fprintf(stderr," -c float [%f] contrast\n",contrast);
+    fprintf(stderr," -e float [%f] ambient light level\n",ambient);
     fprintf(stderr," -g string     window geometry\n");
     fprintf(stderr," -d string     display\n");
     exit(1);

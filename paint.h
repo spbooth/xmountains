@@ -1,4 +1,4 @@
-/* $Id: paint.h,v 1.7 1994/01/21 11:53:47 spb Exp $ */
+/* $Id: paint.h,v 1.8 1994/01/24 20:29:58 spb Rel $ */
 #ifndef PAINT
 #define PAINT
 
@@ -18,6 +18,8 @@ typedef unsigned short Gun;
 #define N_BANDS     3
 #define MAX_COL     (BAND_BASE + (N_BANDS * BAND_SIZE))
 #define COL_RANGE   65535
+
+#define PI 3.14159265
 
 #ifdef ANSI
 void set_clut(Gun *, Gun *, Gun *);

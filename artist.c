@@ -7,7 +7,7 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.18 1994/01/21 12:33:05 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.19 1994/01/24 20:29:58 spb Rel $";
 #define SIDE 1.0
 #ifndef PI
 #define PI 3.14159265
@@ -23,7 +23,6 @@ Gun *green;
 Gun *blue;
 {
   int band,shade;
-  float ambient = 0.5;  
   float top, bot;
   float intensity;
   int tmp;

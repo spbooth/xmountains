@@ -7,7 +7,7 @@ generated area.
 
 
 ./xmountains: version 1.1
-usage, ./xmountains -[bxmslrftISTRapgd]
+usage: ./xmountains -[bxmslrftISTRapcegd]
  -b       [false] use root window 
  -x       [false] flat start 
  -m       [false] print map 
@@ -17,11 +17,13 @@ usage, ./xmountains -[bxmslrftISTRapgd]
  -r int   [20] # columns before scrolling 
  -R int   [0] rng seed, read clock if 0 
  -f float [0.650000] fractal dimension 
- -I float [0.785398] angle of light 
+ -I float [0.4500000] angle of light 
  -S float [0.600000] vertical stretch 
  -T float [0.500000] vertical shift 
  -a float [2.500000] altitude of viewpoint 
  -p float [4.000000] distance of viewpoint 
+ -c float [1.000000] contrast
+ -e float [0.500000] ambient light level
  -g string     window geometry
  -d string     display
 
@@ -35,10 +37,11 @@ The program breaks down into three sections
    paint.h) This code is a bit more sloppy but seems to work OK.
 3) The X interface (X_graphics.c) The X interface was retro-fitted to an
    earlier version of the program that was designed to use memory mapped
-   video hardware. As a result this code is a little crude. I expect
-   that a more experienced X hacker could do better but ...
+   video hardware. As a result this code is a little crude. A more 
+   experienced X hacker could do better but ...
 
 PROBLEMS
+ All parameters are set on the command line.
  There is now way to control the speed of the program, it runs as fast
 as the CPU and the X server let it.
  The choice of colours looks strange on some hardware.

@@ -1,6 +1,5 @@
 #include "crinkle.h"
 #include "paint.h"
-#define PI 3.14159265
 
 Fold *top;
 int levels = 9;
@@ -15,7 +14,9 @@ float varience;   /* rough estimate of the height of the range */
 float shift=0.5;      /* offset from calcalt to artist coordinates */
 float stretch=0.6;   /* vertical stretch */
 float contour = 0.3;
-float contrast = 1.0;
+float ambient = 0.5;  /* level of ambient light */
+float contrast = 1.0; /* contrast,
+                       * increases or decreases effect of cosine rule */
 float altitude = 2.5;
 float distance = 4.0;
 double phi=(45.0 * PI)/180.0; /* angle of the light */
