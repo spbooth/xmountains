@@ -9,7 +9,7 @@
 #define VERSION 2
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.34 1996/04/12 08:28:00 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.35 1996/09/11 13:38:21 spb Exp $";
 
 extern char *display;
 extern char *geom;
@@ -19,7 +19,7 @@ int optind=1;
 char *optarg;
 int opterr=1;
 
-int getopt (argc, argv, pat)
+int my_getopt (argc, argv, pat)
 int argc;
 char **argv;
 char *pat;
@@ -280,7 +280,7 @@ char **argv;
   /*{{{handle command line flags*/
   mesg[0]="false";
   mesg[1]="true";
-  while((c = getopt(argc,argv,"bxmqMEHl:r:f:t:I:A:S:T:W:C:a:p:B:n:R:g:d:c:e:v:Z:s:X:Y:P:F:G:"))!= -1)
+  while((c = my_getopt(argc,argv,"bxmqMEHl:r:f:t:I:A:S:T:W:C:a:p:B:n:R:g:d:c:e:v:Z:s:X:Y:P:F:G:"))!= -1)
   {
     switch(c){
       case 'b':
