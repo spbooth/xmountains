@@ -9,7 +9,7 @@
 #define VERSION 2
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.37 2001/03/30 12:11:08 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.38 2001/03/30 12:34:34 spb Exp $";
 extern Graph g;
 Parm fold_param;
 char *display;
@@ -107,7 +107,7 @@ char **argv;
   int smooth;
   int snooze=10;
   int root= 0;
-  int seed;
+  int seed=0;
 
   int c, errflg=0;
   extern char *optarg;
