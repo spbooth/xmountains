@@ -23,9 +23,14 @@
 #include <math.h>
 #include "crinkle.h"
 
-char calcalt_Id[] = "$Id: calcalt.c,v 2.2 1994/07/03 16:30:17 spb Exp $";
+char calcalt_Id[] = "$Id: calcalt.c,v 2.3 1994/07/05 18:31:38 spb Exp $";
 
-#define db(A,B)
+#ifdef DEBUG
+#define DB(A,B) dump_pipeline(A,B)
+#else
+#define DB(A,B)
+#endif
+
 
 /*{{{  Strip *make_strip(int level) */
 Strip *make_strip (level)
@@ -231,7 +236,7 @@ Fold *fold;
     {
       case START:
         /*{{{  perform an update. return first result*/
-        db("S1",fold);
+        DB("S1",fold);
         t=fold->s;
         /* read in a new A strip at the start of the pipeline */
         tmp =next_strip(fold->next);
@@ -241,24 +246,28 @@ Fold *fold;
         t[1]=set_strip(fold->level,0.0);
         if( ! t[2] )
         {
+          /* we want to have an A B A pattern of strips at the
+           * start of the pipeline.
+           * force this when starting the pipe
+           */
           t[2]=t[0];
           tmp =next_strip(fold->next);
           t[0] = double_strip(tmp);
           free_strip(tmp);
         }
-        db("E1",fold);
+        DB("E1",fold);
         
         /*
          * create the mid point
          * t := A B A
          */
-        db("S2",fold);
+        DB("S2",fold);
         x_update(count,fold->midscale,0.0,t[0],t[1],t[2]);
-        db("E2",fold);
+        DB("E2",fold);
         
         if(fold->p->rg1)
         {
-          db("S3",fold);
+          DB("S3",fold);
           /*
            * first possible regeneration step
            * use the midpoints to regenerate the corner values
@@ -266,7 +275,7 @@ Fold *fold;
            */
           v_update(count,fold->midscale,fold->p->midmix,t[1],t[2],t[3]);
           t+=2;
-          db("E3",fold);
+          DB("E3",fold);
         
         }
         
@@ -274,7 +283,7 @@ Fold *fold;
          * fill in the edge points
          * increment t by 2 to preserve the A B A pattern
          */
-        db("S4",fold);
+        DB("S4",fold);
         
         if( fold->p->cross )
         {
@@ -286,11 +295,11 @@ Fold *fold;
           vside_update(count,fold->scale,0.0,t[2]);
           t+=2;
         }
-        db("E4",fold);
+        DB("E4",fold);
         
         if(fold->p->rg2)
         {
-          db("S5",fold);
+          DB("S5",fold);
           /*
            * second regeneration step update midpoint
            * from the new edge values
@@ -301,7 +310,7 @@ Fold *fold;
           }else{
             vside_update(count,fold->scale,fold->p->mix,t[1]);
           }
-          db("E5",fold);
+          DB("E5",fold);
         
         }
         /* increment t by 1
@@ -312,7 +321,7 @@ Fold *fold;
         t++;
         if(fold->p->rg3)
         {
-          db("S6",fold);
+          DB("S6",fold);
         
           /* final regenration step
            * regenerate the corner points from the new edge values
@@ -326,7 +335,7 @@ Fold *fold;
             hside_update(count,fold->scale,fold->p->mix,t[0],t[1],t[2]);
           }
           t++;
-          db("E6",fold);
+          DB("E6",fold);
         
         }
         result=t[1];
@@ -762,8 +771,8 @@ Strip *c;
 /*}}}*/
 
 
-#ifndef db
-db(s, f)
+#ifdef DEBUG
+dump_pipeline(s, f)
 char *s;
 Fold *f;
 {
