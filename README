@@ -9,22 +9,27 @@ been correctly installed a Makefile appropriate to your system can be
 generated from this using the command "xmkmf". Once this has been done
 the program is compiled with the command "make".
 
-./xmountains: version 2.1
-usage: ./xmountains -[bqgdEmMrBZIASTCapcevfRltxsXYH]
+./xmountains: version 2.2
+usage: ./xmountains -[bqgdPEmMrBZIASFTCapcevfRltxsXYH]
  -b       [false] use root window 
  -q       [false] reset root window on exit
  -g string     window geometry
  -d string     display
+ -P filename   write PID to file
  -E       [false] toggle explicit expose events 
  -m       [false] print map 
  -M       [false] implement reflections 
  -r int   [20] # columns before scrolling 
  -B int   [80] # shades in a colour band
+ -n int   [245] # number of colours
  -Z int   [10] time to sleep before scrolling
  -I float [40.000000] vertical angle of light 
  -A float [0.000000] horizontal angle of light 
  -S float [0.600000] vertical stretch 
  -T float [0.500000] vertical shift 
+ -W float [0.000000] sealevel 
+ -F int   [1] reduce variation in the foreground 
+ -G float [-1.000000] average foreground height 
  -C float [0.300000] contour parameter 
  -a float [2.500000] altitude of viewpoint 
  -p float [4.000000] distance of viewpoint 
@@ -62,8 +67,12 @@ PROBLEMS
  All parameters are set on the command line.
  The choice of colours looks strange on some hardware.
  The program will not work with Xscreensaver or virtual window 
-managers. This can be fixed by including vroot.h in X_graphics.c but I
-was a little wary of putting this in by default.
+managers. This can be fixed by including vroot.h in X_graphics.c (define
+VROOT to cpp to do this) but I was a little wary of putting this in by default.
+
+CHANGES from V2.1
+Added a -n flag to set the number of colours. This changes the same
+parameter as -B but you request total number of colours.
 
 CHANGES from V1.4 
 The fractal generation code has been reworked. There algorithm has been
