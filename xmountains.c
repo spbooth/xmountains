@@ -6,7 +6,7 @@
 
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.2 1994/01/07 18:30:47 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.3 1994/01/07 18:33:47 spb Exp $";
 
 /*{{{  Col *next_col(int paint) */
 Col *next_col(int paint)
@@ -163,6 +163,11 @@ main(int argc, char **argv)
 
   init_artist_variables();
   if( -1 == (int) signal(SIGINT, finish_prog ))
+  {
+    perror(argv[0]);
+    exit(1);
+  }
+  if( -1 == (int) signal(SIGTERM, finish_prog ))
   {
     perror(argv[0]);
     exit(1);
