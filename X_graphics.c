@@ -4,7 +4,7 @@
 #include<X11/Xatom.h>
 #include "paint.h"
 
-char X_graphics_Id[]="$Id: X_graphics.c,v 1.9 1994/01/19 13:33:48 spb Exp $";
+char X_graphics_Id[]="$Id: X_graphics.c,v 1.10 1994/01/19 13:36:56 spb Exp $";
 
 char *display=NULL;       /* name of display to open, NULL for default */
 char *geom=NULL;          /* geometry of window, NULL for default */
@@ -93,7 +93,7 @@ void finish_graphics()
 {
   unsigned long attmask;
   XSetWindowAttributes attributes;
-  int x,y
+  int x,y;
   unsigned int border,depth;
   int count;
   
