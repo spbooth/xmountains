@@ -7,7 +7,7 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.35 1995/06/12 18:58:04 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.36 1995/10/05 17:54:06 spb Exp $";
 #define SIDE 1.0
 #ifndef PI
 #define PI 3.14159265
@@ -240,7 +240,7 @@ void init_artist_variables()
 
 
 
-  top=make_fold(&fold_param, levels,stop,(SIDE / pwidth));
+  top=make_fold(NULL, &fold_param, levels,stop,(SIDE / pwidth));
 
   /* use first set of heights to set shadow value */
   shadow = extract(next_strip(top));

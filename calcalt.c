@@ -20,7 +20,7 @@
 #include <math.h>
 #include "crinkle.h"
 
-char calcalt_Id[] = "$Id: calcalt.c,v 2.8 1995/10/04 11:48:12 spb Exp $";
+char calcalt_Id[] = "$Id: calcalt.c,v 2.9 1995/10/05 17:54:06 spb Exp $";
 
 #ifdef DEBUG
 #define DB(A,B) dump_pipeline(A,B)
@@ -29,12 +29,11 @@ char calcalt_Id[] = "$Id: calcalt.c,v 2.8 1995/10/04 11:48:12 spb Exp $";
 #endif
 
 
-/*{{{  Strip *make_strip(int level) */
-Strip *make_strip (level)
-int level;
+/*{{{  Strip *make_strip(Fold *f) */
+Strip *make_strip (f)
+Fold *f;
 {
   Strip *p;
-  int  points;
 
   p = (Strip *) malloc( sizeof(Strip) );
   if( p == NULL )
@@ -42,9 +41,8 @@ int level;
     fprintf(stderr,"make_strip: malloc failed\n");
     exit(1);
   }
-  p->level = level;
-  points = (1 << level) +1;
-  p->d = (Height *)malloc( points * sizeof(Height) );
+  p->f = f;
+  p->d = (Height *)malloc( f->count * sizeof(Height) );
   if( p->d == NULL )
   {
     fprintf(stderr,"make_strip: malloc failed\n");
@@ -72,11 +70,13 @@ Strip *s;
   Strip *p;
   Height *a, *b;
   int i;
+  int count;
 
-  p = make_strip((s->level)+1);
+  p = make_strip(s->f->parent);
   a = s->d;
   b = p->d;
-  for(i=0; i < (1<<s->level); i++)
+  count = s->f->count;
+  for(i=0; i < count-1; i++)
   {
     *b = *a;
     a++;
@@ -88,18 +88,20 @@ Strip *s;
   return(p);
 }
 /*}}}*/
-/*{{{  Strip *set_strip(int level, Height value) */
-Strip *set_strip (level,value)
-int level;
+/*{{{  Strip *set_strip(Fold *f, Height value)*/
+Strip *set_strip (f,value)
+Fold *f;
 Height value;
 {
   int i;
   Strip *s;
   Height *h;
-
-  s = make_strip(level);
+  int count;
+  
+  s = make_strip(f);
   h = s->d;
-  for( i=0 ; i < ((1<<level)+1) ; i++)
+  count = f->count;
+  for( i=0 ; i < count ; i++)
   {
     *h = value;
     h++;
@@ -107,7 +109,24 @@ Height value;
   return(s);
 }
 /*}}}*/
-/*{{{  Fold *make_fold(Parm *param, int levels, int stop, Length len) */
+/*{{{  Strip *random_strip(Fold *f)*/
+Strip *random_strip(f)
+Fold *f;
+{
+  Strip *result;
+  int i, count;
+  
+  result=make_strip(f);
+  count = f->count;
+  for( i=0 ; i < count ; i++)
+  {
+    result->d[i] = f->p->mean + (f->scale * gaussian());
+  }
+  return(result);
+}
+/*}}}*/
+
+/*{{{  Fold *make_fold(Fold *parent,Parm *param, int levels, int stop, Length len) */
 /*
  * Initialise the fold structures.
  * As everything else reads the parameters from their fold
@@ -124,7 +143,8 @@ Height value;
  *   len gets smaller as the level increases.
  * start, the starting height for a non-fractal start.
  */
-Fold *make_fold (param,levels,stop,length)
+Fold *make_fold (parent,param,levels,stop,length)
+struct fold *parent;
 struct parm *param;
 int levels;
 int stop;
@@ -162,9 +182,10 @@ Length length;
   {
     p->s[i] = NULL;
   }
+  p->parent=parent;
   if( levels > stop )
   {
-    p->next = make_fold(param,(levels-1),stop,(2.0*length));
+    p->next = make_fold(p,param,(levels-1),stop,(2.0*length));
   }else{
     p->next = NULL;
   }
@@ -202,11 +223,7 @@ Fold *fold;
   if( fold->level == fold->stop)
   {
     /*{{{  generate values from scratch */
-    result=make_strip(fold->stop);
-    for( i=0 ; i < count ; i++)
-    {
-      result->d[i] = fold->p->mean + (fold->scale * gaussian());
-    }
+    result=random_strip(fold);
     /*}}}*/
   }else{
   /*
@@ -233,7 +250,7 @@ Fold *fold;
           t[0] = double_strip(tmp);
           free_strip(tmp);
           /* make the new B strip */
-          t[1]=set_strip(fold->level,0.0);
+          t[1]=set_strip(fold,0.0);
           if( ! t[2] )
           {
             /* we want to have an A B A pattern of strips at the

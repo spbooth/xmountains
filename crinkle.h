@@ -1,6 +1,9 @@
-/* $Id: crinkle.h,v 2.4 1995/10/04 10:02:45 spb Exp $ */
+/* $Id: crinkle.h,v 2.5 1995/10/05 17:54:06 spb Exp $ */
 #ifndef CRINKLE
 #define CRINKLE
+#ifdef MPI
+#include <mpi.h>
+#endif
 /*{{{  typedefs */
 typedef float Height;
 typedef float Length;
@@ -20,11 +23,6 @@ typedef float Length;
 #define NSTRIP 8
 /*}}}*/
 /*{{{  structs */
-/* strip of altitudes */
-typedef struct strip{
-  int level;
-  Height *d;    /* should have 2^level + 1 points */
-}Strip;
 
 /* parameters for the update */
 typedef struct parm{
@@ -53,16 +51,31 @@ typedef struct fold{
   int stop;                 /* level to stop recursion */
   int state;                /* internal stat of algorithm */
   struct fold *next;        /* next iteration down */
+  struct fold *parent;      /* next iteration up */
+#ifdef MPI
+  MPI_Comm comm;            /* MPI communicator for parallel version */
+  int nproc;                /* number of processors available */
+  int me;                   /* own identity */
+#endif
 } Fold;
+
+/* strip of altitudes */
+typedef struct strip{
+  struct fold *f;   /* parent fold structure */
+  Height *d;        /* should have 2^level + 1 (f->count) points */
+}Strip;
+
+
 /*}}}*/
 /*{{{  prototypes */
 #ifdef ANSI
-Strip *make_strip (int );
+Strip *make_strip (Fold *);
 void free_strip (Strip *);
 Strip *double_strip (Strip *);
-Strip *set_strip (int , Height );
+Strip *set_strip (Fold *, Height );
+Strip *random_strip (Fold *, Height );
 Strip *next_strip (Fold *);
-Fold *make_fold (Parm *,int, int, Length)
+Fold *make_fold (Fold *,Parm *,int, int, Length)
 void free_fold (Fold *);
 Length gaussian ();
 void x_update(Fold *, float, float, Strip *, Strip *, Strip *);
@@ -76,6 +89,7 @@ Strip *make_strip ();
 void free_strip ();
 Strip *double_strip ();
 Strip *set_strip ();
+Strip *random_strip ();
 Strip *next_strip ();
 Fold *make_fold ();
 void free_fold ();
