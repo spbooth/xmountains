@@ -6,7 +6,7 @@
 
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.3 1994/01/07 18:33:47 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.4 1994/01/07 19:38:39 spb Exp $";
 
 /*{{{  Col *next_col(int paint) */
 Col *next_col(int paint)
@@ -71,7 +71,7 @@ main(int argc, char **argv)
 
   mesg[0]="false";
   mesg[1]="true";
-  while((c = getopt(argc,argv,"bxmsl:r:f:t:I:S:T:a:d:R:"))!= -1)
+  while((c = getopt(argc,argv,"bxmsl:r:f:t:I:S:T:a:d:R:w:h:"))!= -1)
   {
     switch(c){
       case 'b':
@@ -128,6 +128,12 @@ main(int argc, char **argv)
       case 'd':                     /* set distance */
          distance = atof( optarg );
          break;
+      case 'w':
+         s_width = atoi( optarg );
+         break;
+      case 'h':
+         s_height = atoi( optarg );
+         break;
       case '?':
          errflg++;
     }
@@ -135,7 +141,7 @@ main(int argc, char **argv)
   if( errflg )
   {
     fprintf(stderr,"%s: illegal argument\n",argv[0]);
-    fprintf(stderr,"usage, %s -[xmslrftISTRad]\n",argv[0]);
+    fprintf(stderr,"usage, %s -[bxmslrftISTRadhw]\n",argv[0]);
     fprintf(stderr," -b       [%s] use root window \n",mesg[root]);
     fprintf(stderr," -x       [%s] flat start \n",mesg[1-frac_start]);
     fprintf(stderr," -m       [%s] print map \n",mesg[map]);
@@ -150,6 +156,8 @@ main(int argc, char **argv)
     fprintf(stderr," -T float [%f] vertical shift \n",shift);
     fprintf(stderr," -a float [%f] altitude of viewpoint \n",altitude);
     fprintf(stderr," -d float [%f] distance of viewpoint \n",distance);
+    fprintf(stderr," -w int   [%d] width of screen \n",s_width);
+    fprintf(stderr," -h int   [%d] height of screen \n",s_height);
     exit(1);
   }
   init_graphics(root,&s_width,&s_height);
@@ -208,6 +216,7 @@ main(int argc, char **argv)
           free(l);
         }
         flush_region(p,0,1,height,p,0);
+        zap_events();
       }
   }
   finish_prog();
