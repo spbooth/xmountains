@@ -7,7 +7,7 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.4 1993/02/19 12:11:56 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.5 1993/03/15 11:31:46 spb Exp $";
 #define SIDE 1.0
 #define PI 3.14159265
 
@@ -15,7 +15,7 @@ char artist_Id[] = "$Id: artist.c,v 1.4 1993/02/19 12:11:56 spb Exp $";
 void set_clut()
 {
   int band,shade;
-  float ambient = 0.3;  
+  float ambient = 0.5;  
   float top, bot;
   float intensity;
   int tmp;
@@ -112,7 +112,7 @@ Height *extract(Strip *s)
   free(s);
   for(i=0 ; i<width; i++ )
   {
-    p[i] = vscale * p[i];
+    p[i] = shift + (vscale * p[i]);
   }
   return(p);
 }
@@ -121,27 +121,43 @@ Height *extract(Strip *s)
 void init_artist_variables()
 {
   int i;
+  float dh, dd;
   
   width= (1 << levels)+1;
-  top=make_fold(levels,smooth,SIDE,start,mean,fdim);
+  /* make the fractal SIDE wide, this makes it easy to predict the
+   * average height returned by calcalt.
+   */
   shadow = (Height *) malloc(width * sizeof(Height));
   if ( shadow == NULL )
   {
     fprintf(stderr,"malloc failed for shadow array\n");
     exit(1);
   }
+
+  cos_phi = cos( phi );
+  sin_phi = sin( phi );
+  tan_phi = tan( phi );
+  vscale = 0.8 * width;  /* have approx same height as width */
+  varience = pow( SIDE,(2.0 * fdim));
+  varience = vscale * varience ;
+  shift = 0.5 * varience;
+  varience = varience + shift;
+  start = (sealevel - shift) / vscale ; /* always start at sealevel */ 
   for(i=0 ; i<width ; i++)
   {
     shadow[i] = start;
   }
+  viewheight = 1.5 * varience;
+  viewpos = -2.0 * width;
+  dh = viewheight - (0.5 * varience);
+  dd = (width / 2.0) - viewpos;
+  focal = sqrt( (dd*dd) + (dh*dh) );
+  tan_vangle = (double) (dh/dd);
+  vangle = atan ( tan_vangle );
+
+  top=make_fold(levels,smooth,(SIDE / width),start,mean,fdim);
   a_strip = extract( next_strip(top) ); 
   b_strip = extract( next_strip(top) );
-  cos_phi = cos( phi );
-  sin_phi = sin( phi );
-  tan_phi = tan( phi );
-  varience = pow( (width * SIDE),(2.0 * fdim));
-  varience = vscale * varience * 0.1;
-  focal = sqrt( (viewpos*viewpos) + (viewheight*viewheight) );
 }
 /*}}}*/
 /*{{{  Col get_col(Height p, Height p_minus_x, Height p_plus_y, Height shadow) */
@@ -274,9 +290,17 @@ Col *camera( Height *a, Col *c )
     coord = 1 + project( i, a[i] );
     if( last > coord )
     {
-      for( j=coord; j < last ; j++ )
+      if( c[i] == last_col )
       {
-        res[j] = last_col;
+        /* if the colours are the same just ensure that
+         * last end up as the greater of the 2
+         */
+        coord = last;
+      }else{
+        for( j=coord; j < last ; j++ )
+        {
+          res[j] = last_col;
+        }
       }
     }
     last = coord;
@@ -293,20 +317,37 @@ Col *camera( Height *a, Col *c )
 /*{{{  int project( int x , Height y ) */
 int project( int x , Height y )
 {
-  double theta;
   int pos;
-  
+#if TRUE
+  double theta;
+
   theta = atan( (double) ((viewheight - y)/( x - viewpos)) );
   theta = theta - vangle;
   pos = (height/2) - (focal * tan( theta));
+#else
+  float tan_theta;
+
+  /* nast approx to avoid trig functions */
+  tan_theta = (viewheight -y)/(x-viewpos) - tan_vangle;
+  pos = (height/2) - (focal * tan_theta);
+#endif
   if( pos > (height-1))
   {
     pos = height-1;
   }
-  if( pos < 0 )
+  else if( pos < 0 )
   {
     pos = 0;
   }
   return( pos );
+}
+/*}}}*/
+/*{{{  void finish_artist() */
+void finish_artist()
+{
+  free(a_strip);
+  free(b_strip);
+  free(shadow);
+  free_fold(top);
 }
 /*}}}*/
