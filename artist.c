@@ -7,7 +7,7 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.31 1995/01/20 15:13:06 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.32 1995/06/09 10:52:41 spb Exp $";
 #define SIDE 1.0
 #ifndef PI
 #define PI 3.14159265
@@ -20,7 +20,7 @@ int base=0;      /* parity flag for mirror routine */
 Parm fold_param;
 
 float uni();
-/*{{{  void set_clut(Gun *red, Gun *green, Gun *blue)*/
+/*{{{  void set_clut(int max_col, Gun *red, Gun *green, Gun *blue)*/
 /*
  * setup the colour lookup table
  */
@@ -75,6 +75,18 @@ Gun *blue;
   green[SEA_UNLIT] = ((ambient+(vfract/(1.0+vfract)))*0.500)*COL_RANGE;
   blue[SEA_UNLIT]  = ((ambient+(vfract/(1.0+vfract)))*0.700)*COL_RANGE;
   /*}}}*/
+
+  if( MIN_COL > max_col )
+  {
+    fprintf(stderr,"set_clut: less than the minimum number of colours available\n");
+    exit(1);
+  }
+  /* max_col can over-rule band_size */
+  while( (BAND_BASE + band_size*N_BANDS) > max_col )
+  {
+    band_size--;
+  }
+    
   for( band=0 ; band<N_BANDS; band++)
   {
     for(shade=0 ; shade < band_size ; shade++)
