@@ -9,7 +9,7 @@
 #define VERSION 2
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.31 1995/06/09 10:52:53 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.32 1995/06/12 18:58:04 spb Exp $";
 
 extern char *display;
 extern char *geom;
@@ -263,7 +263,7 @@ main (argc,argv)
 int argc;
 char **argv;
 {
-  int i,j,p,code;
+  int i,p;
 
   int repeat=20;
   int map = 0;
@@ -311,7 +311,7 @@ char **argv;
       case 'F':                     /* Set # levels to force front to mean */
          slope = atoi( optarg );
          break;
-      case 's':                     /* Set # levels of recursion */
+      case 's':                     /* Set smoothing parameter */
          smooth = atoi( optarg );
          break;
       case 't':                     /* Set width of lowest level */
@@ -353,10 +353,7 @@ char **argv;
          {
            n_col = MIN_COL;
          }
-         while( (BAND_BASE + band_size*N_BANDS) > n_col )
-         {
-           band_size--;
-         }
+         band_size = (n_col - BAND_BASE)/N_BANDS;
          n_col = (BAND_BASE + (N_BANDS * band_size));
          break;
       case 'R':                     /* set seed, read clock if 0 */

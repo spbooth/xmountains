@@ -8,7 +8,7 @@ int smooth = 1;
 int cross = TRUE;
 int slope = 1;
 int snooze_time = 10;
-int n_col=MAX_COL;
+int n_col=DEF_COL;
 int band_size=BAND_SIZE;
 int request_clear = FALSE;
 #ifdef USE_E_EVENTS

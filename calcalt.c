@@ -15,15 +15,12 @@
  * each recursive level only calls the level below once for every two times it
  * is called itself so it will take a number of iterations for any changes to
  * be notices by the bottom (long length scale) level.
- * The surface always starts as perturbations from a flat surface at the
- * mean value passed as a parameter to make_fold. It will therefore take
- * a number of iterations for long length scale deformations to build up.
  */
 #include <stdio.h>
 #include <math.h>
 #include "crinkle.h"
 
-char calcalt_Id[] = "$Id: calcalt.c,v 2.5 1994/12/06 19:40:56 spb Exp $";
+char calcalt_Id[] = "$Id: calcalt.c,v 2.6 1995/06/12 18:58:04 spb Exp $";
 
 #ifdef DEBUG
 #define DB(A,B) dump_pipeline(A,B)
@@ -37,7 +34,7 @@ Strip *make_strip (level)
 int level;
 {
   Strip *p;
-  int i , points;
+  int  points;
 
   p = (Strip *) malloc( sizeof(Strip) );
   if( p == NULL )
@@ -136,7 +133,6 @@ Length length;
   Fold *p;
   Length scale, midscale;
   double root2;
-  Strip *tmp;
   int i;
 
   if( (levels < stop) || (stop<0) )
@@ -712,7 +708,7 @@ Strip *b;
 Strip *c;
 {
   int i;
-  float w, we;
+  float w;
   Height *mp, *lp, *rp;
 
   /* don't run unless we have all the parameters */

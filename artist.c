@@ -7,7 +7,7 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.34 1995/06/12 18:40:40 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.35 1995/06/12 18:58:04 spb Exp $";
 #define SIDE 1.0
 #ifndef PI
 #define PI 3.14159265
@@ -34,7 +34,6 @@ Gun *blue;
   float top, bot;
   float intensity;
   int tmp;
-  int i;
 /*
 *  float rb[N_BANDS] = { 0.167,0.200,0.333,0.450,0.600,1.000 };
 *  float gb[N_BANDS] = { 0.667,0.667,0.500,0.500,0.600,1.000 };
@@ -174,7 +173,6 @@ Strip *s;
  */
 void init_artist_variables()
 {
-  int i;
   float dh, dd;
   int pwidth;  /* longest lengthscale for update */
   
