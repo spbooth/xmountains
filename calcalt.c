@@ -20,7 +20,7 @@
 #include <math.h>
 #include "crinkle.h"
 
-char calcalt_Id[] = "$Id: calcalt.c,v 2.11 1995/11/27 20:51:05 spb Exp $";
+char calcalt_Id[] = "$Id: calcalt.c,v 2.12 1996/09/13 10:07:46 spb Exp $";
 
 #ifdef DEBUG
 #define DB(A,B) dump_pipeline(A,B)
@@ -302,7 +302,13 @@ Fold *fold;
              * use the midpoints to regenerate the corner values
              * increment t by 2 so we still have and A B A pattern
              */
-            v_update(fold,fold->midscale,fold->p->midmix,t[1],t[2],t[3]);
+            if( t[3] == NULL )
+            {
+              /* rather than do no update add offset to old value */
+              v_update(fold,fold->midscale,1.0,t[1],t[2],t[1]);
+            }else{
+              v_update(fold,fold->midscale,fold->p->midmix,t[1],t[2],t[3]);
+            }
             t+=2;
             DB("E3",fold);
           
@@ -335,7 +341,13 @@ Fold *fold;
              */
             if( fold->p->cross )
             {
-              p_update(fold,fold->scale,fold->p->mix,t[0],t[1],t[2]);
+              if( t[2] == NULL )
+              {
+                /* add random offset to old rather than skip update */
+                p_update(fold,fold->scale,fold->p->mix,t[0],t[1],t[0]);
+              }else{
+                p_update(fold,fold->scale,fold->p->mix,t[0],t[1],t[2]);
+              }
             }else{
               vside_update(fold,fold->scale,fold->p->mix,t[1]);
             }
@@ -359,7 +371,13 @@ Fold *fold;
              *
              * this has to be a t_update
              */
-            t_update(fold,fold->scale,fold->p->mix,t[0],t[1],t[2]);
+            if( t[2] == NULL )
+            {
+              /* add random offset to old rather than skip update */
+              t_update(fold,fold->scale,1.0,t[0],t[1],t[0]);
+            }else{
+              t_update(fold,fold->scale,fold->p->mix,t[0],t[1],t[2]);
+            }
             t++;
             DB("E6",fold);
           
