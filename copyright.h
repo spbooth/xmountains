@@ -1,7 +1,7 @@
-/* $Id: copyright.h,v 1.1 1994/01/24 14:31:16 spb Rel $ */
+/* $Id: copyright.h,v 1.2 1994/03/28 15:21:32 spb Exp $ */
 /*
 
-Copyright 1994 by the Stephen Booth, the University of Edinburgh
+Copyright 1994 by Stephen Booth, the University of Edinburgh
 
 Permission to use, copy, modify, distribute, and sell this software and its
 documentation for any purpose is hereby granted without fee, provided that
