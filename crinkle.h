@@ -1,4 +1,4 @@
-/* $Id: crinkle.h,v 2.8 1997/10/23 08:28:14 spb Exp $ */
+/* $Id: crinkle.h,v 2.9 1997/10/24 14:52:10 spb Exp $ */
 #ifndef CRINKLE
 #define CRINKLE
 /* {{{   typedefs */
@@ -65,8 +65,8 @@ typedef struct strip{
 Strip *make_strip (Fold *);
 void free_strip (Strip *);
 Strip *double_strip (Strip *);
-Strip *set_strip (Fold *, Height );
-Strip *random_strip (Fold *, Height );
+Strip *set_strip(Fold *, Height );
+Strip *random_strip (Fold *);
 Strip *next_strip (Fold *);
 void reset_fold(Fold *f);
 Fold *make_fold (Fold *,Parm *,int, int, Length);

@@ -5,19 +5,46 @@
 #include <stdio.h>
 #include "paint.h"
 #include "crinkle.h"
-#include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.37 1996/04/12 08:28:00 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.38 1997/10/24 14:52:10 spb Exp $";
 #define SIDE 1.0
 #ifndef PI
 #define PI 3.14159265
 #endif
 
-float vstrength; /* strength of vertical light source */
-float lstrength; /* strength of vertical light source */
+
 int base=0;      /* parity flag for mirror routine */
 
 Parm fold_param;
+Fold *top;
+Graph g;
+
+
+
+Height varience;
+Height delta_shadow;
+Height shift;
+double shadow_slip;
+double shadow_register;
+double cos_phi;
+double sin_phi;
+double tan_phi;
+double x_fact;
+double y_fact;
+double vangle;
+double vscale;
+double tan_vangle;                                     
+float viewpos;        /* position of viewpoint */
+float viewheight;      /* height of viewpoint */
+float focal;
+float vstrength; /* strength of vertical light source */
+float lstrength; /* strength of vertical light source */
+
+
+
+Height *shadow;               /* height of the shadows */
+Height *a_strip, *b_strip;    /* the two most recent strips */
+
 
 float uni();
 /*{{{  void set_clut(int max_col, Gun *red, Gun *green, Gun *blue)*/
@@ -71,8 +98,8 @@ Gun *blue;
   /*}}}*/
   /*{{{  sea (unlit)*/
   red[SEA_UNLIT]   = 0;
-  green[SEA_UNLIT] = ((ambient+(vfract/(1.0+vfract)))*0.500)*COL_RANGE;
-  blue[SEA_UNLIT]  = ((ambient+(vfract/(1.0+vfract)))*0.700)*COL_RANGE;
+  green[SEA_UNLIT] = ((g.ambient+(g.vfract/(1.0+g.vfract)))*0.500)*COL_RANGE;
+  blue[SEA_UNLIT]  = ((g.ambient+(g.vfract/(1.0+g.vfract)))*0.700)*COL_RANGE;
   /*}}}*/
 
   if( MIN_COL > max_col )
@@ -81,24 +108,24 @@ Gun *blue;
     exit(1);
   }
   /* max_col can over-rule band_size */
-  while( (BAND_BASE + band_size*N_BANDS) > max_col )
+  while( (BAND_BASE +g.band_size*N_BANDS) > max_col )
   {
-    band_size--;
+    g.band_size--;
   }
     
   for( band=0 ; band<N_BANDS; band++)
   {
-    for(shade=0 ; shade < band_size ; shade++)
+    for(shade=0 ; shade < g.band_size ; shade++)
     {
-      if( (BAND_BASE + (band*band_size) + shade) >= max_col )
+      if( (BAND_BASE + (band*g.band_size) + shade) >= max_col )
       {
         fprintf(stderr,"INTERNAL ERROR, overflowed clut\n");
         exit(1);
       }
       /*{{{  set red */
       top = rb[band];
-      bot = ambient * top;
-      intensity = bot + ((shade * (top - bot))/(band_size-1));
+      bot = g.ambient * top;
+      intensity = bot + ((shade * (top - bot))/(g.band_size-1));
       tmp = COL_RANGE * intensity;
       if (tmp < 0)
       {
@@ -109,12 +136,12 @@ Gun *blue;
       {
         tmp = COL_RANGE;
       }
-      red[BAND_BASE + (band*band_size) + shade] = tmp;
+      red[BAND_BASE + (band*g.band_size) + shade] = tmp;
       /*}}}*/
       /*{{{  set green */
       top = gb[band];
-      bot = ambient * top;
-      intensity = bot + ((shade * (top - bot))/(band_size-1));
+      bot = g.ambient * top;
+      intensity = bot + ((shade * (top - bot))/(g.band_size-1));
       tmp = COL_RANGE * intensity;
       if (tmp < 0)
       {
@@ -125,12 +152,12 @@ Gun *blue;
       {
         tmp = COL_RANGE;
       }
-      green[BAND_BASE + (band*band_size) + shade] = tmp;
+      green[BAND_BASE + (band*g.band_size) + shade] = tmp;
       /*}}}*/
       /*{{{  set blue */
       top = bb[band];
-      bot = ambient * top;
-      intensity = bot + ((shade * (top - bot))/(band_size-1));
+      bot = g.ambient * top;
+      intensity = bot + ((shade * (top - bot))/(g.band_size-1));
       tmp = COL_RANGE * intensity;
       if (tmp < 0)
       {
@@ -141,7 +168,7 @@ Gun *blue;
       {
         tmp = COL_RANGE;
       }
-      blue[BAND_BASE + (band*band_size) + shade] = tmp;
+      blue[BAND_BASE + (band*g.band_size) + shade] = tmp;
       /*}}}*/
     }
   }
@@ -160,7 +187,7 @@ Strip *s;
   Height *p;
   p = s->d;
   free(s);
-  for(i=0 ; i<width; i++ )
+  for(i=0 ; i<g.width; i++ )
   {
     p[i] = shift + (vscale * p[i]);
   }
@@ -176,37 +203,36 @@ void init_artist_variables()
   float dh, dd;
   int pwidth;  /* longest lengthscale for update */
   
-  width= (1 << levels)+1;
-  pwidth= (1 << (levels - stop))+1;
+  g.width= (1 << g.levels)+1;
+  pwidth= (1 << (g.levels - g.stop))+1;
 
   /* make the fractal SIDE wide, this makes it easy to predict the
    * average height returned by calcalt. If we have stop != 0 then
    * make the largest update length = SIDE
    */
-  cos_phi = cos( phi );
-  sin_phi = sin( phi );
-  tan_phi = tan( phi );
+  cos_phi = cos( g.phi );
+  sin_phi = sin( g.phi );
+  tan_phi = tan( g.phi );
 
-  x_fact = cos_phi* cos(alpha);
-  y_fact = cos_phi* sin(alpha);
-  vscale = stretch * pwidth;  /* have approx same height as fractal width
+  x_fact = cos_phi* cos(g.alpha);
+  y_fact = cos_phi* sin(g.alpha);
+  vscale = g.stretch * pwidth;  /* have approx same height as fractal width
                                * this makes each pixel SIDE=1.0 wide.
                                * c.f. get_col
                                */
 
-  delta_shadow = tan_phi /cos(alpha);
-  shadow_slip = tan(alpha);
+  delta_shadow = tan_phi /cos(g.alpha);
+  shadow_slip = tan(g.alpha);
   /* guess the average height of the fractal */
-  varience = pow( SIDE ,(2.0 * fdim));
+  varience = pow( SIDE ,(2.0 * fold_param.fdim));
   varience = vscale * varience ;
-  shift = shift * varience;
+  shift = g.base_shift * varience;
   varience = varience + shift;
 
-  start = (sealevel - shift) / vscale ; /* always start at sealevel */ 
 
   /* set the position of the view point */
-  viewheight = altitude * width;
-  viewpos = - distance * width;
+  viewheight = g.altitude * g.width;
+  viewpos = - g.distance * g.width;
 
   /* set viewing angle and focal length (vertical-magnification)
    * try mapping the bottom of the fractal to the bottom of the
@@ -214,33 +240,19 @@ void init_artist_variables()
    * to be 1 pixel high
    */
   dh = viewheight;
-  dd = (width / 2.0) - viewpos;
+  dd = (g.width / 2.0) - viewpos;
   focal = sqrt( (dd*dd) + (dh*dh) );
 #ifndef SLOPPY
-  tan_vangle = (double) ((double)(viewheight-sealevel)/(double) - viewpos);
+  tan_vangle = (double) ((double)(viewheight-g.sealevel)/(double) - viewpos);
   vangle = atan ( tan_vangle );
-  vangle -= atan( (double) (height/2) / focal ); 
+  vangle -= atan( (double) (g.graph_height/2) / focal ); 
 #else
   /* we are making some horrible approximations to avoid trig funtions */
   tan_vangle = (double) ((double)(viewheight-sealevel)/(double) - viewpos);
   tan_vangle = tan_vangle - ( (double) (height/2) / focal );
 #endif
 
-  fold_param.mean=mean;
-  fold_param.rg1=smooth & 4;
-  fold_param.rg2=smooth & 2;
-  fold_param.rg3=smooth & 1;
-  fold_param.cross=cross;
-  fold_param.force_front=slope;
-  fold_param.force_back=0;
-  fold_param.forceval=forceheight;
-  fold_param.mix=mix;
-  fold_param.midmix=midmix;
-  fold_param.fdim=fdim;
-
-
-
-  top=make_fold(NULL, &fold_param, levels,stop,(SIDE / pwidth));
+  top=make_fold(NULL, &fold_param, g.levels,g.stop,(SIDE / pwidth));
 
   /* use first set of heights to set shadow value */
   shadow = extract(next_strip(top));
@@ -248,8 +260,8 @@ void init_artist_variables()
   b_strip = extract( next_strip(top) );
 
   /* initialise the light strengths */
-  vstrength = vfract * contrast /( 1.0 + vfract );
-  lstrength = contrast /( 1.0 + vfract );
+  vstrength = g.vfract * g.contrast /( 1.0 + g.vfract );
+  lstrength = g.contrast /( 1.0 + g.vfract );
 }
 /*}}}*/
 /*{{{  Col get_col(Height p, Height p_minus_x, Height p_minus_y, Height shadow) */
@@ -271,9 +283,9 @@ Height shadow;
   Col result;
   int band, shade;
   /*{{{  if underwater*/
-  if ( p < sealevel )
+  if ( p < g.sealevel )
   {
-    if( shadow > sealevel )
+    if( shadow > g.sealevel )
     {
       return( SEA_UNLIT );
     }else{
@@ -313,7 +325,7 @@ Height shadow;
   norm = sqrt( 1.0 + hypot_sqr );
 
   /*{{{  calculate effective height */
-  effective = (p + (varience * contour *
+  effective = (p + (varience * g.contour *
           (1.0/ ( 1.0 + hypot_sqr))));
   /*}}}*/
   /*{{{  calculate colour band. */
@@ -326,7 +338,7 @@ Height shadow;
   {
     band = (N_BANDS -1);
   }
-  result = (BAND_BASE + (band * band_size));
+  result = (BAND_BASE + (band * g.band_size));
   /*}}}*/
 
   /*{{{calculate the illumination stength*/
@@ -354,10 +366,10 @@ Height shadow;
    * if the light intensities add to 1.0
    * now convert to an integer
    */
-  shade = dshade * (double) band_size;
-  if( shade > (band_size-1))
+  shade = dshade * (double) g.band_size;
+  if( shade > (g.band_size-1))
   {
-    shade = (band_size-1);
+    shade = (g.band_size-1);
   }
   /*{{{  if shade is negative then point is really in deep shadow */
   if( shade < 0 )
@@ -367,9 +379,9 @@ Height shadow;
   /*}}}*/
   /*}}}*/
   result += shade;
-  if( (result >= n_col) || (result < 0) )
+  if( (result >= g.n_col) || (result < 0) )
   {
-    fprintf(stderr,"INTERNAL ERROR colour out of range %d\n",result);
+    fprintf(stderr,"INTERNAL ERROR colour out of range %d max %d\n",result,g.n_col);
     exit(1);
   }
   return(result);
@@ -385,14 +397,14 @@ Col *res;
 int i;
 
   /* This routine returns a plan view of the surface */
-  res = (Col *) malloc(width * sizeof(Col) );
+  res = (Col *) malloc(g.width * sizeof(Col) );
   if (res == NULL)
   {
     fprintf(stderr,"malloc failed for colour strip\n");
     exit(1);
   }
   res[0] = BLACK;
-  for(i=1 ; i<width ; i++)
+  for(i=1 ; i<g.width ; i++)
   {
     res[i] = get_col(b[i],a[i],b[i-1],shadow[i]);
   }
@@ -410,7 +422,7 @@ Height *shadow;
   Col *res, col;
 
   /* this routine returns a perspective view of the surface */
-  res = (Col *) malloc( height * sizeof(Col) );
+  res = (Col *) malloc( g.graph_height * sizeof(Col) );
   if( res == NULL )
   {
     fprintf(stderr,"malloc failed for picture strip\n");
@@ -422,11 +434,11 @@ Height *shadow;
    * scan from front to back, we can avoid calculating the
    * colour if the point is not visable.
    */
-  for( i=0, last=0 ; (i < width)&&(last < height) ; i++ )
+  for( i=0, last=0 ; (i < g.width)&&(last < g.graph_height) ; i++ )
   {
-    if( a[i] < sealevel )
+    if( a[i] < g.sealevel )
     {
-      a[i] = sealevel;
+      a[i] = g.sealevel;
     }
     coord = 1 + project( i, a[i] );
     if( coord > last )
@@ -438,9 +450,9 @@ Height *shadow;
       }else{
         col = get_col(b[i],a[i],b[i-1],shadow[i]);
       }
-      if( coord > height )
+      if( coord > g.graph_height )
       {
-        coord = height;
+        coord = g.graph_height;
       }
       for(;last<coord;last++)
       {
@@ -448,7 +460,7 @@ Height *shadow;
       }
     }
   }
-  for(;last<height;last++)
+  for(;last<g.graph_height;last++)
   {
     res[last]=SKY;
   }
@@ -470,14 +482,14 @@ Height *shadow;
    * with reflections in the water
    *
    */
-  res = (Col *) malloc( height * sizeof(Col) );
+  res = (Col *) malloc( g.graph_height * sizeof(Col) );
   if( res == NULL )
   {
     fprintf(stderr,"malloc failed for picture strip\n");
     exit(1);
   }
   last_col=SKY;
-  last_top=height-1;
+  last_top=g.graph_height-1;
   last_bottom=0;
   /*
    * many of the optimisation in the camera routine are
@@ -488,8 +500,8 @@ Height *shadow;
    * for water stipple the colour so the reflection is still visable
    */
   map=makemap(a,b,shadow);
-  pivot=2.0*sealevel;
-  for(i=width-1;i>0;i--)
+  pivot=2.0*g.sealevel;
+  for(i=g.width-1;i>0;i--)
   {
     if(map[i] < BAND_BASE)
     {
@@ -500,10 +512,10 @@ Height *shadow;
       }
       last_col=map[i];
       /* invalidate strip so last stip does not exist */
-      last_bottom=height;
+      last_bottom=g.graph_height;
       last_top= -1;
       /* fill in water values */
-      coord=1+project(i,sealevel);
+      coord=1+project(i,g.sealevel);
       for(j=0;j<coord;j++)
       {
         /* do not print on every other point
@@ -562,9 +574,9 @@ Height *shadow;
   {
     res[j]=last_col;
   }
-  if( a[0] < sealevel )
+  if( a[0] < g.sealevel )
   {
-    coord=1+project(0,sealevel);
+    coord=1+project(0,g.sealevel);
   }else{
     coord=1+project(0,a[0]);
   }
@@ -592,7 +604,7 @@ Height y;
 
   theta = atan( (double) ((viewheight - y)/( x - viewpos)) );
   theta = theta - vangle;
-  pos = (height/2) - (focal * tan( theta));
+  pos = (g.graph_height/2) - (focal * tan( theta));
 #else
   float tan_theta;
 
@@ -600,9 +612,9 @@ Height y;
   tan_theta = (viewheight -y)/(x-viewpos) - tan_vangle;
   pos = (height/2) - (focal * tan_theta);
 #endif
-  if( pos > (height-1))
+  if( pos > (g.graph_height-1))
   {
-    pos = height-1;
+    pos = g.graph_height-1;
   }
   else if( pos < 0 )
   {
@@ -623,3 +635,265 @@ void finish_artist()
   free_fold(top);
 }
 /*}}}*/
+
+/* {{{ void init_parameters() */
+
+void init_parameters()
+{
+  g.graph_height=768;
+  g.graph_width=1024;
+  g.levels = 10;
+  g.stop=2;
+  g.n_col=DEF_COL;
+  g.band_size=BAND_SIZE;
+  g.ambient=0.3;
+  g.contrast=1.0;
+  g.contour=0.3;
+  g.vfract=0.6;
+  g.altitude=2.5;
+  g.distance=4.0;
+  g.phi=(40.0 * PI)/180.0;
+  g.alpha=0.0;
+  g.base_shift=0.5;
+  g.sealevel=0.0;
+  g.stretch=0.6;
+  g.map=FALSE;
+  g.reflec=TRUE;
+  g.repeat=20;
+  g.pos=0;
+  g.scroll=0;
+
+  fold_param.mean=0;
+  fold_param.rg1=FALSE;
+  fold_param.rg2=FALSE;
+  fold_param.rg3=TRUE;
+  fold_param.cross=TRUE;
+  fold_param.force_front=TRUE;
+  fold_param.force_back=FALSE;
+  fold_param.forceval=-1.0;
+  fold_param.fdim = 0.65;
+  fold_param.mix   =0.0;
+  fold_param.midmix=0.0;
+
+}
+
+/* }}} */
+
+/* {{{  Col *next_col(int paint, int reflec) */
+
+Col *next_col (paint, reflec)
+int paint;
+int reflec;
+{
+  Col *res;
+  int i,offset=0;
+  
+  /* {{{   update strips */
+  if(paint)
+  {
+    if(reflec)
+    {
+      res = mirror( a_strip,b_strip,shadow);
+    }else{
+      res = camera( a_strip,b_strip,shadow);
+    }
+  }else{
+    res = makemap(a_strip,b_strip,shadow);
+  }
+  free(a_strip);
+  a_strip=b_strip;
+  b_strip = extract( next_strip(top) );
+  /* }}} */
+
+  /* {{{ update the shadows*/
+
+  /* shadow_slip is the Y component of the light vector.
+   * The shadows can only step an integer number of points in the Y
+   * direction so we maintain shadow_register as the deviation between
+   * where the shadows are and where they should be. When the magnitude of
+   * this gets larger then 1 the shadows are slipped by the required number of
+   * points.
+   * This will not work for very oblique angles so the horizontal angle
+   * of illumination should be constrained.
+   */
+  shadow_register += shadow_slip;
+  if( shadow_register >= 1.0 )
+  {
+    /* {{{ negative offset*/
+
+    while( shadow_register >= 1.0 )
+    {
+      shadow_register -= 1.0;
+      offset++;
+    }
+    for(i=g.width-1 ; i>=offset ; i--)
+    {
+      shadow[i] = shadow[i-offset]-delta_shadow;
+      if( shadow[i] < b_strip[i] )
+      {
+        shadow[i] = b_strip[i];
+      }
+      /* {{{   stop shadow at sea level */
+
+      if( shadow[i] < g.sealevel )
+      {
+        shadow[i] = g.sealevel;
+      }
+
+      /* }}} */
+    }
+    for(i=0;i<offset;i++)
+    {
+      shadow[i] = b_strip[i];
+      /* {{{   stop shadow at sea level*/
+      if( shadow[i] < g.sealevel )
+      {
+        shadow[i] = g.sealevel;
+      }
+      /* }}} */
+    }
+
+    /* }}} */
+  }else if( shadow_register <= -1.0 ){
+    /* {{{ positive offset*/
+    while( shadow_register <= -1.0 )
+    {
+      shadow_register += 1.0;
+      offset++;
+    }
+    for(i=0 ; i<g.width-offset ; i++)
+    {
+      shadow[i] = shadow[i+offset]-delta_shadow;
+      if( shadow[i] < b_strip[i] )
+      {
+        shadow[i] = b_strip[i];
+      }
+      /* {{{   stop shadow at sea level */
+      if( shadow[i] < g.sealevel )
+      {
+        shadow[i] = g.sealevel;
+      }
+      /* }}} */
+    }
+    for(;i<g.width;i++)
+    {
+      shadow[i] = b_strip[i];
+      /* {{{   stop shadow at sea level*/
+      if( shadow[i] < g.sealevel )
+      {
+        shadow[i] = g.sealevel;
+      }
+      /* }}} */
+    }
+    /* }}} */
+  }else{
+    /* {{{ no offset*/
+    for(i=0 ; i<g.width ; i++)
+    {
+      shadow[i] -= delta_shadow;
+      if( shadow[i] < b_strip[i] )
+      {
+        shadow[i] = b_strip[i];
+      }
+      /* {{{   stop shadow at sea level */
+      if( shadow[i] < g.sealevel )
+      {
+        shadow[i] = g.sealevel;
+      }
+      /* }}} */
+    }
+    /* }}} */
+  }
+
+  /* }}} */
+  
+  return(res);
+}
+
+/* }}} */
+
+
+/* {{{ void plot_column(g)*/
+void plot_column(g)
+Graph *g;
+{
+  Col *l;
+  int j;
+  int mapwid;
+  int scrolled=FALSE;
+
+  /* blank if we are doing the full window */
+  if( g->repeat >= 0){
+    if(g->pos == 0){
+      blank_region(0,0,g->graph_width,g->graph_height);
+    }
+  }else{
+    if( g->pos == g->graph_width-1){
+      blank_region(0,0,g->graph_width,g->graph_height);
+    }
+  }
+  if( g->scroll ){
+    scroll_screen(g->scroll);
+  }
+
+  l = next_col(1-g->map,g->reflec); 
+  if( g->map )
+  {
+    if( g->graph_height > g->width ){
+      mapwid=g->width;
+    }else{
+      mapwid=g->graph_height;
+    }
+    for( j=0 ;j<(g->graph_height-mapwid); j++)
+    {
+      plot_pixel(g->pos,((g->graph_height-1)-j),BLACK);
+    }
+    for(j=0; j<mapwid ; j++)
+    {
+      plot_pixel(g->pos,((mapwid-1)-j),l[j]);
+    }
+  }else{
+    for(j=0 ; j<g->graph_height ; j++)
+    {
+      /* we assume that the scroll routine fills the
+       * new region with a SKY value. This allows us to
+       * use a testured sky for B/W displays
+       */
+      if( l[j] != SKY )
+      {
+        plot_pixel(g->pos,((g->graph_height-1)-j),l[j]);
+      }
+    }
+  }
+  free(l);
+  flush_region(g->pos,0,1,g->graph_height);
+  g->scroll = 0;
+  /* now update pos ready for next time */
+  if( g->repeat >=0 ){
+    g->pos++;
+    if(g->pos > g->graph_width)
+    {
+      g->pos = g->graph_width - g->repeat;
+      if( g->pos < 0 || g->pos > g->graph_width-1 )
+      {
+        g->pos=0; 
+      }else{
+        g->scroll = g->repeat;
+      }
+    }
+  }else{
+    g->pos--;
+    if( g->pos < 0 ){
+      g->pos =  - g->repeat;
+      if( g->pos < 0 || g->pos > (g->graph_width-1) ){
+	g->pos=g->graph_width-1;
+      }else{
+	g->scroll = g->repeat;
+      }
+    }
+  }
+
+}
+/* }}} */
+
+

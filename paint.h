@@ -1,4 +1,4 @@
-/* $Id: paint.h,v 1.13 1995/06/13 09:14:23 spb Exp $ */
+/* $Id: paint.h,v 1.14 1997/10/24 14:52:10 spb Exp $ */
 #ifndef PAINT
 #define PAINT
 
@@ -8,6 +8,38 @@
 typedef int Col;
 typedef unsigned short Gun;
 
+typedef struct graph{
+  int graph_height;     /* height of display */
+  int graph_width ;     /* width of display */
+
+  int width;            /* width of terrain strip */
+
+  float ambient;        /* level of ambient light */
+  float contrast;       /* contrast,
+                         * increases or decreases effect of cosine rule */
+  float contour;
+  float vfract;         /* relative strength of vertical light relative
+                        * to the main light source
+                        */
+  float altitude;
+  float distance;
+  double phi;           /* angle of the light (vertical plane)*/
+  double alpha;         /* angle of the light (horizontal plane) 
+                         * must have -pi/4 < alpha < pi/4
+                         */
+  Height base_shift;    /* offset from calcalt to artist coordinates */
+  Height sealevel;
+  double stretch;       /* vertical stretch */
+  int n_col;
+  int band_size;
+  int levels;
+  int stop;
+  int map;
+  int reflec;
+  int repeat;
+  int pos;
+  int scroll;
+}Graph;
 
 #define BLACK       0
 #define WHITE       1

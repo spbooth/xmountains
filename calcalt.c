@@ -20,7 +20,7 @@
 #include <math.h>
 #include "crinkle.h"
 
-char calcalt_Id[] = "$Id: calcalt.c,v 2.15 1997/10/23 08:37:54 spb Exp $";
+char calcalt_Id[] = "$Id: calcalt.c,v 2.16 1997/10/24 14:52:10 spb Exp $";
 
 #ifdef DEBUG
 #define DB(A,B) dump_pipeline(A,B)
@@ -30,9 +30,12 @@ char calcalt_Id[] = "$Id: calcalt.c,v 2.15 1997/10/23 08:37:54 spb Exp $";
 
 
 /* {{{   Strip *make_strip(Fold *f) */
-
+#ifdef ANSI
+  Strip *make_strip(Fold *f) 
+#else
 Strip *make_strip (f)
 Fold *f;
+#endif
 {
   Strip *p;
   int n;
@@ -56,8 +59,12 @@ Fold *f;
 
 /* }}} */
 /* {{{   void free_strip(Strip *p) */
+#ifdef ANSI
+void free_strip(Strip *p) 
+#else
 void free_strip (p)
 Strip *p;
+#endif
 {
   if( p->d )
   {
@@ -67,9 +74,13 @@ Strip *p;
   free(p);
 }
 /* }}} */
-/* {{{   Strip *double_strip(Strip s) */
+/* {{{   Strip *double_strip(Strip *s) */
+#ifdef ANSI
+Strip *double_strip(Strip *s) 
+#else
 Strip *double_strip (s)
 Strip *s;
+#endif
 {
   Strip *p;
   Height *a, *b;
@@ -93,9 +104,13 @@ Strip *s;
 }
 /* }}} */
 /* {{{   Strip *set_strip(Fold *f, Height value)*/
+#ifdef ANSI
+Strip *set_strip(Fold *f, Height value)
+#else
 Strip *set_strip (f,value)
 Fold *f;
 Height value;
+#endif
 {
   int i;
   Strip *s;
@@ -112,10 +127,15 @@ Height value;
   }
   return(s);
 }
+
 /* }}} */
 /* {{{   Strip *random_strip(Fold *f)*/
+#ifdef ANSI
+Strip *random_strip(Fold *f)
+#else
 Strip *random_strip(f)
 Fold *f;
+#endif
 {
   Strip *result;
   int i, count;
@@ -131,9 +151,12 @@ Fold *f;
 /* }}} */
 
 /* {{{ void reset_fold(Fold *f) */
-
+#ifdef ANSI
+void reset_fold(Fold *f) 
+#else
 void reset_fold(f)
 Fold *f;
+#endif
 {
   /*
    * resets any cached values within the fold structure
@@ -171,12 +194,16 @@ Fold *f;
  *   len gets smaller as the level increases.
  * start, the starting height for a non-fractal start.
  */
+#ifdef ANSI
+Fold *make_fold(Fold *parent,Parm *param, int levels, int stop, Length length) 
+#else
 Fold *make_fold (parent,param,levels,stop,length)
 struct fold *parent;
 struct parm *param;
 int levels;
 int stop;
 Length length;
+#endif
 {
   Fold *p;
   int i;
@@ -219,8 +246,12 @@ Length length;
 }
 /* }}} */
 /* {{{   void free_fold(Fold *f) */
+#ifdef ANSI
+void free_fold(Fold *f) 
+#else
 void free_fold (f)
 Fold *f;
+#endif
 {
   int i;
   if( f->next ){
@@ -241,8 +272,12 @@ Fold *f;
 /* }}} */
 
 /* {{{   Strip *next_strip(Fold *fold) */
+#ifdef ANSI
+Strip *next_strip(Fold *fold) 
+#else
 Strip *next_strip (fold)
 Fold *fold;
+#endif
 {
   Strip *result=NULL;
   Strip *tmp;
@@ -428,6 +463,9 @@ Fold *fold;
 /* }}} */
 
 /* {{{ void x_update(Fold *fold,float scale, float mix, Strip *a, Strip *b, Strip *c)*/
+#ifdef ANSI
+void x_update(Fold *fold,float scale, float mix, Strip *a, Strip *b, Strip *c)
+#else
 void x_update(fold, scale, mix, a, b, c)
 Fold *fold;
 float scale;
@@ -435,6 +473,7 @@ float mix;
 Strip *a;
 Strip *b;
 Strip *c;
+#endif
 {
   int i;
   int count=fold->count;
@@ -491,6 +530,9 @@ Strip *c;
 }    
 /* }}} */
 /* {{{ void p_update(Fold *fold,float scale, float mix, Strip *a, Strip *b, Strip *c)*/
+#ifdef ANSI
+void p_update(Fold *fold,float scale, float mix, Strip *a, Strip *b, Strip *c)
+#else
 void p_update(fold, scale, mix, a, b, c)
 Fold *fold;
 float scale;
@@ -498,6 +540,7 @@ float mix;
 Strip *a;
 Strip *b;
 Strip *c;
+#endif
 {
   int i;
   int count=fold->count;
@@ -560,6 +603,9 @@ Strip *c;
 
 /* }}} */
 /* {{{ void t_update(Fold *fold,float scale, float mix, Strip *a, Strip *b, Strip *c)*/
+#ifdef ANSI
+void t_update(Fold *fold,float scale, float mix, Strip *a, Strip *b, Strip *c)
+#else
 void t_update(fold, scale, mix, a, b, c)
 Fold *fold;
 float scale;
@@ -567,6 +613,7 @@ float mix;
 Strip *a;
 Strip *b;
 Strip *c;
+#endif
 {
   int i;
   int count=fold->count;
@@ -641,6 +688,9 @@ Strip *c;
 
 /* }}} */
 /* {{{ void v_update(Fold *fold,float scale, float mix, Strip *a, Strip *b, Strip *c)*/
+#ifdef ANSI
+void v_update(Fold *fold,float scale, float mix, Strip *a, Strip *b, Strip *c)
+#else
 void v_update(fold, scale, mix, a, b, c)
 Fold *fold;
 float scale;
@@ -648,6 +698,7 @@ float mix;
 Strip *a;
 Strip *b;
 Strip *c;
+#endif
 {
   int i;
   int count=fold->count;
@@ -720,11 +771,15 @@ Strip *c;
 
 /* }}} */
 /* {{{ void vside_update(Fold *fold,float scale, float mix, Strip *a)*/
+#ifdef ANSI
+void vside_update(Fold *fold,float scale, float mix, Strip *a)
+#else
 void vside_update(fold, scale, mix, a)
 Fold *fold;
 float scale;
 float mix;
 Strip *a;
+#endif
 {
   int i;
   int count=fold->count;
@@ -771,6 +826,9 @@ Strip *a;
 
 /* }}} */
 /* {{{ void hside_update(Fold *fold,float scale, float mix, Strip *a, Strip *b, Strip *c)*/
+#ifdef ANSI
+void hside_update(Fold *fold,float scale, float mix, Strip *a, Strip *b, Strip *c)
+#else
 void hside_update(fold, scale, mix, a, b, c)
 Fold *fold;
 float scale;
@@ -778,6 +836,7 @@ float mix;
 Strip *a;
 Strip *b;
 Strip *c;
+#endif
 {
   int i;
   int count=fold->count;
