@@ -23,10 +23,11 @@
 #include <math.h>
 #include "crinkle.h"
 
-char calcalt_Id[] = "$Id: calcalt.c,v 1.7 1994/01/19 13:13:09 spb Exp $";
+char calcalt_Id[] = "$Id: calcalt.c,v 1.8 1994/01/21 11:53:47 spb Rel $";
 
 /*{{{  Strip *make_strip(int level) */
-Strip *make_strip(int level)
+Strip *make_strip (level)
+int level;
 {
   Strip *p;
   int i , points;
@@ -49,7 +50,8 @@ Strip *make_strip(int level)
 }
 /*}}}*/
 /*{{{  void free_strip(Strip *p) */
-void free_strip(Strip *p)
+void free_strip (p)
+Strip *p;
 {
   if( p->d )
   {
@@ -60,7 +62,8 @@ void free_strip(Strip *p)
 }
 /*}}}*/
 /*{{{  Strip *double_strip(Strip s) */
-Strip *double_strip(Strip *s)
+Strip *double_strip (s)
+Strip *s;
 {
   Strip *p;
   Height *a, *b;
@@ -82,7 +85,9 @@ Strip *double_strip(Strip *s)
 }
 /*}}}*/
 /*{{{  Strip *set_strip(int level, Height value) */
-Strip *set_strip(int level, Height value)
+Strip *set_strip (level,value)
+int level;
+Height value;
 {
   int i;
   Strip *s;
@@ -103,7 +108,9 @@ Strip *set_strip(int level, Height value)
  * this could be combined with the double routine but it would
  * make the code even messier than it already is
  */
-void side_update(Strip *strip, Length scale)
+void side_update (strip,scale)
+Strip *strip;
+Length scale;
 {
   int count;
   int i;
@@ -123,7 +130,12 @@ void side_update(Strip *strip, Length scale)
  * the "left" strip should be only half the size of the other
  * two.
  */
-void mid_update(Strip *left, Strip *new, Strip *right,Length scale, Length midscale)
+void mid_update (left,new,right,scale,midscale)
+Strip *left;
+Strip *new;
+Strip *right;
+Length scale;
+Length midscale;
 {
   int count;
   int i;
@@ -157,7 +169,11 @@ void mid_update(Strip *left, Strip *new, Strip *right,Length scale, Length midsc
  * creases. However it may change the effective fractal dimension
  * a litle bit. But who cares ?
  */
-void recalc(Strip *left, Strip *regen, Strip *right,Length scale)
+void recalc (left,regen,right,scale)
+Strip *left;
+Strip *regen;
+Strip *right;
+Length scale;
 {
   int count;
   int i;
@@ -188,7 +204,8 @@ void recalc(Strip *left, Strip *regen, Strip *right,Length scale)
 }
 /*}}}*/
 /*{{{  Strip *next_strip(Fold *fold) */
-Strip *next_strip(Fold *fold)
+Strip *next_strip (fold)
+Fold *fold;
 {
   Strip *result;
   int i;
@@ -272,7 +289,16 @@ Strip *next_strip(Fold *fold)
  * mean is the mean height.
  * fdim is the fractal dimension
  */
-Fold *make_fold(int levels, int stop, int fractal_start, int slope, int smooth, Length length, Height start, Height mean, float fdim)
+Fold *make_fold (levels,stop,fractal_start,slope,smooth,length,start,mean,fdim)
+int levels;
+int stop;
+int fractal_start;
+int slope;
+int smooth;
+Length length;
+Height start;
+Height mean;
+float fdim;
 {
   Fold *p;
   Length scale, midscale;
@@ -336,7 +362,8 @@ Fold *make_fold(int levels, int stop, int fractal_start, int slope, int smooth, 
 }
 /*}}}*/
 /*{{{  void free_fold(Fold *f) */
-void free_fold(Fold *f)
+void free_fold (f)
+Fold *f;
 {
   if( f->new != NULL )
   {

@@ -7,17 +7,20 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.16 1994/01/20 14:57:47 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.17 1994/01/21 11:53:47 spb Exp $";
 #define SIDE 1.0
 #ifndef PI
 #define PI 3.14159265
 #endif
 
-/*{{{  void set_clut() */
+/*{{{  void set_clut(Gun *red, Gun *green, Gun *blue)*/
 /*
  * setup the colour lookup table
  */
-void set_clut(Gun *red, Gun *green, Gun *blue)
+void set_clut (red,green,blue)
+Gun *red;
+Gun *green;
+Gun *blue;
 {
   int band,shade;
   float ambient = 0.5;  
@@ -51,8 +54,8 @@ void set_clut(Gun *red, Gun *green, Gun *blue)
   blue[WHITE]      = COL_RANGE;
   /*}}}*/
   /*{{{  sky */
-  red[SKY]         = 0;
-  green[SKY]       = 0;
+  red[SKY]         = 0.404*COL_RANGE;
+  green[SKY]       = 0.588*COL_RANGE;
   blue[SKY]        = COL_RANGE;
   /*}}}*/
   /*{{{  sea (lit) */
@@ -131,7 +134,8 @@ void set_clut(Gun *red, Gun *green, Gun *blue)
  * extract the table of heights from the Strip struct
  * and discard the rest of the struct.
  */
-Height *extract(Strip *s)
+Height *extract (s)
+Strip *s;
 {
   int i;
   
@@ -204,7 +208,11 @@ void init_artist_variables()
 /*
  * calculate the colour of a point.
  */
-Col get_col(Height p, Height p_minus_x, Height p_plus_y, Height shadow)
+Col get_col (p,p_minus_x,p_plus_y,shadow)
+Height p;
+Height p_minus_x;
+Height p_plus_y;
+Height shadow;
 {
   Height delta_x, delta_y;
   Height delta_x_sqr, delta_y_sqr;
@@ -282,7 +290,10 @@ Col get_col(Height p, Height p_minus_x, Height p_plus_y, Height shadow)
 /*}}}*/
 /*{{{  Col *artist(Height *a, Height *b, Height *shadow) */
 /* Calculates a set of colours for the a strip */
-Col *artist(Height *a, Height *b, Height *shadow)
+Col *artist (a,b,shadow)
+Height *a;
+Height *b;
+Height *shadow;
 {
 Col *res;
 int i;
@@ -303,7 +314,9 @@ int i;
   
 /*}}}*/
 /*{{{  Col *camera( Height *a, Col *c ) */
-Col *camera( Height *a, Col *c )
+Col *camera (a,c)
+Height *a;
+Col *c;
 {
   int i, j, coord, last;
   Col *res, last_col;
@@ -373,7 +386,9 @@ Col *camera( Height *a, Col *c )
 /*
  *  project a point onto the screen position
  */
-int project( int x , Height y )
+int project (x,y)
+int x;
+Height y;
 {
   int pos;
 #ifndef SLOPPY

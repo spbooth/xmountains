@@ -1,4 +1,4 @@
-/* $Id: paint.h,v 1.6 1994/01/11 10:12:07 spb Exp $ */
+/* $Id: paint.h,v 1.7 1994/01/21 11:53:47 spb Exp $ */
 #ifndef PAINT
 #define PAINT
 
@@ -19,6 +19,7 @@ typedef unsigned short Gun;
 #define MAX_COL     (BAND_BASE + (N_BANDS * BAND_SIZE))
 #define COL_RANGE   65535
 
+#ifdef ANSI
 void set_clut(Gun *, Gun *, Gun *);
 Height *extract(Strip *s);
 void init_artist_variables();
@@ -26,7 +27,15 @@ Col get_col(Height p, Height p_plus_x, Height p_plus_y, Height shadow);
 Col *artist(Height *a, Height *b, Height *shadow);
 Col *camera( Height *a, Col *c );
 int project( int x , Height y );
-
+#else
+void set_clut();
+Height *extract();
+void init_artist_variables();
+Col get_col();
+Col *artist();
+Col *camera();
+int project();
+#endif
 
 
 #endif

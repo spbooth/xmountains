@@ -6,7 +6,7 @@
 
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.9 1994/01/20 14:57:47 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.10 1994/01/21 11:53:47 spb Exp $";
 
 extern char *display;
 extern char *geom;
@@ -16,7 +16,10 @@ int optind=1;
 char *optarg;
 int opterr=1;
 
-int getopt(int argc, char **argv, char *pat)
+int getopt (argc, argv, pat)
+int argc;
+char **argv;
+char *pat;
 {
   char *flag;
   
@@ -68,7 +71,8 @@ int getopt(int argc, char **argv, char *pat)
 /*}}}*/
 
 /*{{{  Col *next_col(int paint) */
-Col *next_col(int paint)
+Col *next_col (paint)
+int paint;
 {
   Col *res;
   Col *map;
@@ -105,14 +109,23 @@ Col *next_col(int paint)
 }
 /*}}}*/
 double atof();
-void init_graphics(int, int *, int *, int, Gun *, Gun *, Gun *);
+#ifdef ANSI
+void init_graphics (int, int *, int *, int, Gun *, Gun *, Gun *);
 void finish_graphics();
-void plot_pixel(int, int, unsigned char);
-void scroll_screen( int );
+void plot_pixel (int, int, unsigned char);
+void scroll_screen ( int );
+#else
+void init_graphics ();
+void finish_graphics();
+void plot_pixel ();
+void scroll_screen ();
+#endif
 
 void finish_prog();
 
-main(int argc, char **argv)
+main (argc,argv)
+int argc;
+char **argv;
 {
   int s_height=768, s_width=1024;
   int i,j,p,code;
@@ -295,14 +308,13 @@ main(int argc, char **argv)
         zap_events();
       }
   }
-  finish_prog();
 }
     
+extern int quit_xmount;
+
 void finish_prog()
 {
-  zap_events();
-  finish_graphics();
-  finish_artist();
-  exit(0);
+  /* The next time zap_events is called the program will quit */
+  quit_xmount=TRUE;
 }
 

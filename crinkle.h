@@ -1,4 +1,4 @@
-/* $Id: crinkle.h,v 1.3 1993/03/18 19:53:09 spb Exp $ */
+/* $Id: crinkle.h,v 1.4 1994/01/21 11:53:47 spb Rel $ */
 #ifndef CRINKLE
 #define CRINKLE
 /*{{{  typedefs */
@@ -43,16 +43,30 @@ typedef struct fold{
 } Fold;
 /*}}}*/
 /*{{{  prototypes */
-Strip *make_strip(int );
-void free_strip(Strip *);
-Strip *double_strip(Strip *);;
-Strip *set_strip(int , Height );
-void side_update(Strip *, Length );
-void mid_update(Strip *, Strip *, Strip *,Length , Length );
-void recalc(Strip *, Strip *, Strip *,Length );
-Strip *next_strip(Fold *);
-Fold *make_fold(int ,int ,int , int, int, Length , Height , Height , float );
-void free_fold(Fold *);
-Length gaussian();
+#ifdef ANSI
+Strip *make_strip (int );
+void free_strip (Strip *);
+Strip *double_strip (Strip *);;
+Strip *set_strip (int , Height );
+void side_update (Strip *, Length );
+void mid_update (Strip *, Strip *, Strip *,Length , Length );
+void recalc (Strip *, Strip *, Strip *,Length );
+Strip *next_strip (Fold *);
+Fold *make_fold (int ,int ,int , int, int, Length , Height , Height , float );
+void free_fold (Fold *);
+Length gaussian ();
+#else
+Strip *make_strip ();
+void free_strip ();
+Strip *double_strip ();
+Strip *set_strip ();
+void side_update ();
+void mid_update ();
+void recalc ();
+Strip *next_strip ();
+Fold *make_fold ();
+void free_fold ();
+Length gaussian ();
+#endif
 /*}}}*/
 #endif

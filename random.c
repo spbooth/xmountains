@@ -10,7 +10,7 @@
 
 
 
-char uni_id[] = "$Id: random.c,v 1.3 1994/01/19 13:14:57 spb Exp $" ;
+char uni_id[] = "$Id: random.c,v 1.4 1994/01/21 11:53:47 spb Exp $" ;
 /*
  *	Global variables for rstart & uni
  */
@@ -33,7 +33,7 @@ Uni_save;
 
 Uni_save uni_data;
 
-float uni(void)
+float uni()
 {
 	float luni;			/* local variable for uni */
 
@@ -52,7 +52,11 @@ float uni(void)
 	return ((float) luni);
 }
 
-void rstart(int i, int j, int k, int l)
+void rstart(i,j,k,l)
+int i;
+int j;
+int k;
+int l;
 {
 	int ii, jj, m;
 	float s, t;
@@ -89,15 +93,10 @@ void rstart(int i, int j, int k, int l)
  *	To reduce the modifications to the existing code, seed_uni now
  *	takes the role of a preprocessor for rstart.
  *
- *	This is useful for the parallel version of the code as James
- *	states that any integer ijkl will produce a statistically
- *	independent sequence of random numbers.
- *
- *     Very funny. If that statement was worth anything he would have provided
- *     a proof to go with it. spb 12/12/90 
  */
 
-void seed_uni(int ijkl)
+void seed_uni(ijkl)
+int ijkl;
 {
 	int i, j, k, l, ij, kl;
 
@@ -166,9 +165,9 @@ void seed_uni(int ijkl)
 
 }
 
-float gaussian(void)
+float gaussian()
 {
-	const double pi = 3.1415926536, two = 2.0, zero = 0.0;
+        double pi = 3.1415926536, two = 2.0, zero = 0.0;
 	double ran1, ran2;
 
 	do {
