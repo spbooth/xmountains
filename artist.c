@@ -7,7 +7,7 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.8 1993/03/16 12:56:04 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.9 1993/03/18 13:05:52 spb Exp $";
 #define SIDE 1.0
 #define PI 3.14159265
 
@@ -163,7 +163,7 @@ void init_artist_variables()
     shadow[i] = start;
   }
   /* set the position of the view point */
-  viewheight = width;
+  viewheight = 1.5 * width;
   viewpos = -2.0 * width;
   /* choose a point to look towards */
   dh = viewheight;
