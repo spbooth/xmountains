@@ -10,14 +10,17 @@
 
 
 
-char uni_id[] = "$Id: random.c,v 1.4 1994/01/21 11:53:47 spb Exp $" ;
+char uni_id[] = "$Id: random.c,v 1.5 1994/01/24 10:42:21 spb Rel $" ;
 /*
  *	Global variables for rstart & uni
  */
 
 #define PARANOID
-#include <sys/types.h>
-#include <sys/time.h>
+/* need types and time */
+#include <X11/Xos.h> 
+/* #include <sys/types.h>
+ * #include <sys/time.h>
+ */
 #include <stdio.h>
 #include <math.h>
 typedef struct
