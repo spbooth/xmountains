@@ -14,3 +14,11 @@ LOCAL_LIBRARIES = -lX11
 
 xmountains: $(OBJS)
 	$(CC) $(LDFLAGS) -o xmountains $(OBJS) -lX11 -lm
+
+
+calcalt.o: crinkle.h
+artist.o: global.h paint.h crinkle.h
+global.o: crinkle.h paint.h
+xmountains.o: paint.h global.h patchlevel.h copyright.h crinkle.h
+X_graphics.o: paint.h crinkle.h
+
