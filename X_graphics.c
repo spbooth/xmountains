@@ -2,11 +2,12 @@
 #include<X11/Xlib.h>
 #include<X11/Xutil.h>
 #include<X11/Xatom.h>
+# define VROOT /* always do this */
 #ifdef VROOT
 #include"vroot.h"
 #endif
 #include "paint.h"
-char X_graphics_Id[]="$Id: X_graphics.c,v 1.24 2001/03/30 12:13:04 spb Exp $";
+char X_graphics_Id[]="$Id: X_graphics.c,v 1.25 2004/05/05 08:29:48 spb Exp $";
 
 char *display=NULL;       /* name of display to open, NULL for default */
 char *geom=NULL;          /* geometry of window, NULL for default */
@@ -206,8 +207,9 @@ int pos;
 /*}}}*/
 
 /*{{{void init_graphics( ... )*/
-void init_graphics( want_use_root, use_background, want_clear, s_graph_width,s_graph_height,ncol,red,green,blue )
+void init_graphics( want_use_root, use_window, use_background, want_clear, s_graph_width,s_graph_height,ncol,red,green,blue )
 int want_use_root;    /* display on the root window */
+Window use_window;    /* display on external window */
 int  use_background;  /* install the pixmap as the background-pixmap */
 int want_clear;
 int *s_graph_width;
@@ -239,6 +241,8 @@ Gun *blue;
 
 /*}}}*/
 
+  if (use_window) use_root = 0;
+
   do_clear = want_clear;
   use_root = want_use_root;
   pixmap_installed = use_background;
@@ -254,7 +258,7 @@ Gun *blue;
     exit(1);
   }
   screen = DefaultScreen(dpy);
-  parent = RootWindow(dpy, screen);
+  parent = (use_window ? use_window : RootWindow(dpy, screen));
 /*}}}*/
 /*{{{find appropriate vis*/
   /* map=defaultmap=DefaultColormap(dpy,screen); */
@@ -290,9 +294,9 @@ Gun *blue;
 /*}}}*/
 /*{{{create window*/
   attmask = 0;
-  if( use_root )
+  if( use_root || use_window )
   {
-    win = parent;
+    win = (use_window ? use_window : parent);
     if( ! use_background )
     {
       attmask |= CWEventMask;
@@ -363,15 +367,16 @@ Gun *blue;
   /* if we are going to install this as a root pixmap, throw away
    * the old one FIRST. this reduces fragmentation
    */
-  if( use_background && use_root )
+  if( use_background && (use_root || use_window))
   {
     XSetWindowBackgroundPixmap(dpy,win,None);
   }
   if( use_root )
   {
     /* in case of virtual window manager set to size of display */
-    graph_width = DisplayWidth(dpy,screen);
-    graph_height = DisplayHeight(dpy,screen);
+/* This is bogus -- always obey the size of the window itself */
+/*    graph_width = DisplayWidth(dpy,screen); */
+/*    graph_height = DisplayHeight(dpy,screen); */
   }
   pix = XCreatePixmap(dpy,win,graph_width,graph_height,depth);
 

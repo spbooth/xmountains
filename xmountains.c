@@ -9,7 +9,7 @@
 #define VERSION 2
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.38 2001/03/30 12:34:34 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.39 2004/05/05 08:29:48 spb Exp $";
 extern Graph g;
 Parm fold_param;
 char *display;
@@ -77,7 +77,7 @@ char *pat;
 
 double atof();
 #ifdef ANSI
-void init_graphics (int, int, int *, int *, int, Gun *, Gun *, Gun *);
+void init_graphics (int, unsigned long, int, int *, int *, int, Gun *, Gun *, Gun *);
 void clear_col( int );
 void finish_graphics();
 void plot_pixel (int, int, unsigned char);
@@ -97,6 +97,39 @@ void finish_prog();
 int s_height=768, s_width=1024;
 int mapwid;
 
+/* Go through argv and find and extract any "-window-id NNNN" or
+   "-window-id 0xXXXX" option.  (Maybe this can be done with
+   getopt, but I can't be bothered to figure it out.)
+ */
+static unsigned long
+window_id_kludge (argcP, argv)
+int *argcP;
+char **argv;
+{
+  unsigned long id = 0;
+  int i;
+  int j;
+  for (i = 1; i < *argcP; i++)
+    {
+      if (!strcmp (argv[i], "-window-id") && i+1 < *argcP)
+        {
+          char c;
+          char *str = argv[i+1];
+
+          if (1 != ((str[0] == '0' && (str[1] == 'x' || str[1] == 'X'))
+                    ? sscanf (str+2, "%lx %c", &id, &c)
+                    : sscanf (str,   "%lu %c", &id, &c)))
+            continue;
+
+          /* remove "-window-id xxx" from the arglist */
+          for (j = i+2; j < *argcP; j++)
+            argv[j-2] = argv[j];
+          *argcP -= 2;
+        }
+    }
+  return id;
+}
+
 main (argc,argv)
 int argc;
 char **argv;
@@ -107,6 +140,7 @@ char **argv;
   int smooth;
   int snooze=10;
   int root= 0;
+  unsigned long window_id = 0;
   int seed=0;
 
   int c, errflg=0;
@@ -118,6 +152,8 @@ char **argv;
 
   init_parameters();
   /* {{{ handle command line flags*/
+
+  window_id = window_id_kludge (&argc, argv);
 
   mesg[0]="false";
   mesg[1]="true";
@@ -353,6 +389,7 @@ char **argv;
     fprintf(stderr," -s       [%x] smoothing (0-7)\n",smooth);
     fprintf(stderr," -X float [%f] fraction of old value for rg2 & rg3\n",fold_param.mix);
     fprintf(stderr," -Y float [%f] fraction of old value for rg1\n",fold_param.midmix);
+    fprintf(stderr," -window-id 0xNNNNN  draw on existing external window.\n");
     fprintf(stderr," -H            print short description of algorithm.\n");
     exit(1);
   }
@@ -368,7 +405,7 @@ char **argv;
     }
   }
   set_clut(g.n_col,clut[0], clut[1], clut[2]);
-  init_graphics(root,(! e_events),request_clear,&g.graph_width,&g.graph_height,g.n_col,clut[0],clut[1],clut[2]);
+  init_graphics(root, window_id, (! e_events),request_clear,&g.graph_width,&g.graph_height,g.n_col,clut[0],clut[1],clut[2]);
   for(i=0;i<3;i++)
   {
     free(clut[i]);
