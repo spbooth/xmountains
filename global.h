@@ -3,6 +3,7 @@
 
 extern Fold *top;
 extern int levels;
+extern int stop;
 extern int smooth;
 extern float fdim;
 extern float start;

@@ -22,7 +22,7 @@
 #include <math.h>
 #include "crinkle.h"
 
-char calcalt_Id[] = "$Id: calcalt.c,v 1.2 1993/02/19 12:12:20 spb Exp $";
+char calcalt_Id[] = "$Id: calcalt.c,v 1.3 1993/03/16 12:56:04 spb Exp $";
 
 /*{{{  Strip *make_strip(int level) */
 Strip *make_strip(int level)
@@ -186,13 +186,16 @@ void recalc(Strip *left, Strip *regen, Strip *right,Length scale)
 Strip *next_strip(Fold *fold)
 {
   Strip *result;
+  int i;
 
-  if( fold->level == 0)
+  if( fold->level == fold->stop)
   {
     /*{{{  generate values from scratch */
-    result=make_strip(0);
-    result->d[0] = fold->mean + (fold->scale * gaussian());
-    result->d[1] = fold->mean + (fold->scale * gaussian());
+    result=make_strip(fold->stop);
+    for( i=0 ; i < ((1 << fold->stop) +1) ; i++)
+    {
+      result->d[i] = fold->mean + (fold->scale * gaussian());
+    }
     return(result);
     /*}}}*/
   }
@@ -237,13 +240,15 @@ Strip *next_strip(Fold *fold)
   return(NULL);
 }
 /*}}}*/
-/*{{{  Fold *make_fold(int levels, int smooth, Length len, Height start, Height mean, float fdim) */
+/*{{{  Fold *make_fold(int levels, int stop, int smooth, Length len, Height start, Height mean, float fdim) */
 /*
  * Initialise the fold structures.
  * As everything else reads the parameters from their fold
  * structs we need to set these here,
  * levels is the number of levels of recursion below this one.
  *    Number of points = 2^levels+1
+ * stop is the number of levels that are generated as random offsets from a
+ *    constant rather than from an average.
  * smooth turns the smoothing algorithm on or off
  * len is the length of the side of the square at this level.
  *   N.B this means the update square NOT the width of the fractal.
@@ -251,12 +256,18 @@ Strip *next_strip(Fold *fold)
  * mean is the mean height.
  * fdim is the fractal dimension
  */
-Fold *make_fold(int levels, int smooth, Length length, Height start, Height mean, float fdim)
+Fold *make_fold(int levels, int stop, int smooth, Length length, Height start, Height mean, float fdim)
 {
   Fold *p;
   Length scale, midscale;
   double root2;
 
+  if( (levels < stop) || (stop<0) )
+  {
+    printf("make_fold: invalid parameters\n");
+    printf("make_fold: levels = %d , stop = %d \n",levels,stop);
+    exit(1);
+  }
   p = (Fold *)malloc(sizeof(Fold));
   if( p == NULL )
   {
@@ -267,6 +278,7 @@ Fold *make_fold(int levels, int smooth, Length length, Height start, Height mean
   scale = pow((double) length, (double) (2.0 * fdim));
   midscale = pow((((double) length)*root2), (double) (2.0 * fdim));
   p->level = levels;
+  p->stop = stop;
   p->state = 0;
   p->smooth = smooth;
   p->mean = mean;
@@ -274,11 +286,11 @@ Fold *make_fold(int levels, int smooth, Length length, Height start, Height mean
   p->midscale = midscale;
   p->new = NULL;
   p->working = NULL;
-  if( levels != 0 )
+  if( levels > stop )
   {
     p->regen = set_strip(levels,start);
     p->old = set_strip(levels,start);
-    p->next = make_fold((levels-1),smooth,(2.0*length),start,mean,fdim);
+    p->next = make_fold((levels-1),stop,smooth,(2.0*length),start,mean,fdim);
   }else{
     p->regen = NULL;
     p->old = NULL;

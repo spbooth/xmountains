@@ -7,7 +7,7 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.7 1993/03/15 12:13:35 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.8 1993/03/16 12:56:04 spb Exp $";
 #define SIDE 1.0
 #define PI 3.14159265
 
@@ -132,10 +132,13 @@ void init_artist_variables()
 {
   int i;
   float dh, dd;
+  int pwidth;  /* longest lengthscale for update */
   
   width= (1 << levels)+1;
+  pwidth= (1 << (levels - stop))+1;
   /* make the fractal SIDE wide, this makes it easy to predict the
-   * average height returned by calcalt.
+   * average height returned by calcalt. If we have stop != 0 then
+   * make the largest update length = SIDE
    */
   /* height of the shadows */
   shadow = (Height *) malloc(width * sizeof(Height));
@@ -144,13 +147,12 @@ void init_artist_variables()
     fprintf(stderr,"malloc failed for shadow array\n");
     exit(1);
   }
-
   cos_phi = cos( phi );
   sin_phi = sin( phi );
   tan_phi = tan( phi );
-  vscale = 0.8 * width;  /* have approx same height as width */
+  vscale = 0.8 * pwidth;  /* have approx same height as fractal width */
   /* guess the average height of the fractal */
-  varience = pow( SIDE,(2.0 * fdim));
+  varience = pow( SIDE ,(2.0 * fdim));
   varience = vscale * varience ;
   shift = 0.5 * varience;
   varience = varience + shift;
@@ -161,17 +163,17 @@ void init_artist_variables()
     shadow[i] = start;
   }
   /* set the position of the view point */
-  viewheight = 1.5 * varience;
+  viewheight = width;
   viewpos = -2.0 * width;
   /* choose a point to look towards */
-  dh = viewheight - (0.5 * varience);
-  dd = (width / 2.0) - viewpos;
+  dh = viewheight;
+  dd = (3.0 * width / 4.0) - viewpos;
   /* set viewing angle and focal length (vertical-magnification) */
   focal = sqrt( (dd*dd) + (dh*dh) );
   tan_vangle = (double) (dh/dd);
   vangle = atan ( tan_vangle );
 
-  top=make_fold(levels,smooth,(SIDE / width),start,mean,fdim);
+  top=make_fold(levels,stop,smooth,(SIDE / pwidth),start,mean,fdim);
   a_strip = extract( next_strip(top) ); 
   b_strip = extract( next_strip(top) );
 }

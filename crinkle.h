@@ -1,4 +1,4 @@
-/* $Id: crinkle.h,v 1.1 1991/10/22 23:18:57 spb Exp $ */
+/* $Id: crinkle.h,v 1.2 1993/03/16 12:56:04 spb Exp $ */
 #ifndef CRINKLE
 #define CRINKLE
 /*{{{  typedefs */
@@ -27,6 +27,7 @@ typedef struct strip{
 /* The parameter struct for the recursive procedure */
 typedef struct fold{
   int level;                /* levels of recursion below us */
+  int stop;                 /* level to stop recursion */
   int state;                
   int smooth;               /* is smoothing on or off */
   Height mean;              /* mean altitude */
@@ -48,7 +49,7 @@ void side_update(Strip *, Length );
 void mid_update(Strip *, Strip *, Strip *,Length , Length );
 void recalc(Strip *, Strip *, Strip *,Length );
 Strip *next_strip(Fold *);
-Fold *make_fold(int , int , Length , Height , Height , float );
+Fold *make_fold(int ,int ,int , Length , Height , Height , float );
 void free_fold(Fold *);
 Length gaussian();
 /*}}}*/

@@ -4,6 +4,7 @@
 
 Fold *top;
 int levels = 10;
+int stop = 0;
 int smooth = TRUE;
 float fdim = 0.65;
 float start;      /* starting value for the surface */
