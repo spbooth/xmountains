@@ -2,17 +2,18 @@
  *   routines to render a fractal landscape as an image
  */
 #include <math.h>
+#include <stdio.h>
 #include "paint.h"
 #include "crinkle.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.1 1991/10/22 23:18:57 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.2 1991/10/24 13:36:33 spb Exp $";
 #define SIDE 1.0
 #define PI 3.14159265
 /*{{{  global (uggh) variables */
 Fold *top;
-int levels = 9;
+int levels = 10;
 int smooth = TRUE;
-float fdim = 0.75;
+float fdim = 0.65;
 float start=0.0;  /* starting value for the surface */
 float mean=0.0;
 float varience;   /* rough estimate of the height of the range */
@@ -22,7 +23,7 @@ double phi=(45.0 * PI)/180.0; /* angle of the light */
 double cos_phi;
 double sin_phi;
 double tan_phi;
-Height sealevel = -10000.0;
+Height sealevel = 0.0;
 int width;
 unsigned char red[256] ,green[256], blue[256];
 
@@ -34,11 +35,17 @@ Height *a_strip, *b_strip;    /* the two most recent strips */
 void set_clut()
 {
   int band,shade;
+  float ambient = 0.1;  
+  float top, bot;
+  float intensity;
+  int tmp;
   int i;
-  int rb[N_BANDS] = { 0,1,1,2,2,3 };
-  int gb[N_BANDS] = { 6,4,4,3,3,3 };
-  int bb[N_BANDS] = { 3,3,2,2,1,0 };
-
+  float rb[N_BANDS] = { 0.167,0.167,0.167,0.333,0.333,0.500 };
+  float gb[N_BANDS] = { 1.000,0.667,0.667,0.500,0.500,0.500 };
+  float bb[N_BANDS] = { 0.500,0.500,0.333,0.333,0.167,0.000 };
+#if MAX_COL > 255
+Error Error Error max_col too large
+#endif
   /*{{{  black */
   red[BLACK]       = 0;
   green[BLACK]     = 0;
@@ -61,11 +68,56 @@ void set_clut()
   /*}}}*/
   for( band=0 ; band<N_BANDS; band++)
   {
-    for(shade=1 ; shade < (BAND_SIZE+1) ; shade++)
+    for(shade=0 ; shade < BAND_SIZE ; shade++)
     {
-      red[BAND_BASE + (band*BAND_SIZE) + shade] = rb[band] * shade;
-      green[BAND_BASE + (band*BAND_SIZE) + shade] = gb[band] * shade;
-      blue[BAND_BASE + (band*BAND_SIZE) + shade] = bb[band] * shade;
+      /*{{{  set red */
+      top = rb[band];
+      bot = ambient * top;
+      intensity = bot + ((shade * (top - bot))/BAND_SIZE);
+      tmp = 255 * intensity;
+      if (tmp < 0)
+      {
+        fprintf(stderr,"set_clut: internal error: invalid code %d\n",tmp);
+        exit(2);
+      }
+      if( tmp > 255 )
+      {
+        tmp = 255;
+      }
+      red[BAND_BASE + (band*BAND_SIZE) + shade] = tmp;
+      /*}}}*/
+      /*{{{  set green */
+      top = gb[band];
+      bot = ambient * top;
+      intensity = bot + ((shade * (top - bot))/BAND_SIZE);
+      tmp = 255 * intensity;
+      if (tmp < 0)
+      {
+        fprintf(stderr,"set_clut: internal error: invalid code %d\n",tmp);
+        exit(2);
+      }
+      if( tmp > 255 )
+      {
+        tmp = 255;
+      }
+      green[BAND_BASE + (band*BAND_SIZE) + shade] = tmp;
+      /*}}}*/
+      /*{{{  set blue */
+      top = bb[band];
+      bot = ambient * top;
+      intensity = bot + ((shade * (top - bot))/BAND_SIZE);
+      tmp = 255 * intensity;
+      if (tmp < 0)
+      {
+        fprintf(stderr,"set_clut: internal error: invalid code %d\n",tmp);
+        exit(2);
+      }
+      if( tmp > 255 )
+      {
+        tmp = 255;
+      }
+      blue[BAND_BASE + (band*BAND_SIZE) + shade] = tmp;
+      /*}}}*/
     }
   }
 }
@@ -102,18 +154,17 @@ void init_artist_variables()
   sin_phi = sin( phi );
   tan_phi = tan( phi );
   varience = pow( (width * SIDE),(2.0 * fdim));
-  varience = varience * 2.0;
+  varience = varience * 0.1;
 }
 /*}}}*/
-/*{{{  Col get_col(Height p, Height p_plus_x, Height p_plus_y, Height shadow) */
-Col get_col(Height p, Height p_plus_x, Height p_plus_y, Height shadow)
+/*{{{  Col get_col(Height p, Height p_minus_x, Height p_plus_y, Height shadow) */
+Col get_col(Height p, Height p_minus_x, Height p_plus_y, Height shadow)
 {
   Height delta_x, delta_y;
   double cos_theta;         /* angle between the normal and the ray */
   Height effective;
   Col result;
   int band, shade;
-
   /*{{{  if underwater */
   if ( p < sealevel )
   {
@@ -125,13 +176,14 @@ Col get_col(Height p, Height p_plus_x, Height p_plus_y, Height shadow)
     }
   }
   /*}}}*/
-  delta_x = p_plus_x - p;
+  delta_x = p - p_minus_x;
   delta_y = p_plus_y - p;
+  /*{{{  calculate effective height */
   effective = (p + (varience * contour *
           ((SIDE *SIDE)/ ((SIDE*SIDE) +
           (delta_x*delta_x) +
           (delta_y*delta_y)))));
-          
+  /*}}}*/
   /*{{{  calculate colour band. */
   band = ( effective * N_BANDS ) / varience ;
   if ( band < 0 )
@@ -150,13 +202,24 @@ Col get_col(Height p, Height p_plus_x, Height p_plus_y, Height shadow)
     return(result);
   }
   /*}}}*/
+  /*{{{  calculate cosine */
   cos_theta = ((delta_x * cos_phi) + (SIDE * sin_phi))/
               sqrt( SIDE + (delta_x*delta_x) + (delta_y*delta_y) );
-  shade = contrast * cos_theta * BAND_SIZE;
+  /*}}}*/
+  /*{{{  calculate shading */
+  shade = ((double) contrast * cos_theta) * (double) BAND_SIZE;
   if( shade > (BAND_SIZE-1))
   {
     shade = (BAND_SIZE-1);
   }
+  /*{{{  if cos_theta is negative then point is really in shadow */
+  if( shade < 0 )
+  {
+    fprintf(stderr,"warning bad angle\n");
+    shade = 0;
+  }
+  /*}}}*/
+  /*}}}*/
   result += shade;
   return(result);
 }
@@ -177,7 +240,7 @@ int i;
   res[0] = BLACK;
   for(i=1 ; i<width ; i++)
   {
-    res[i] = get_col(a[i],b[i],a[i-1],shadow[i]);
+    res[i] = get_col(b[i],a[i],b[i-1],shadow[i]);
   }
   return(res);
 }
