@@ -4,7 +4,7 @@
 #include<X11/Xatom.h>
 #include "paint.h"
 
-char X_graphics_Id[]="$Id: X_graphics.c,v 1.10 1994/01/19 13:36:56 spb Exp $";
+char X_graphics_Id[]="$Id: X_graphics.c,v 1.11 1994/01/20 14:57:47 spb Exp $";
 
 char *display=NULL;       /* name of display to open, NULL for default */
 char *geom=NULL;          /* geometry of window, NULL for default */
@@ -23,6 +23,9 @@ Atom wm_delete_window;
   Window parent, win, root;
   int use_root=FALSE;
   
+#include <X11/bitmaps/gray>
+
+  Pixmap stip;
   GC gc;
   Pixmap pix;
   Colormap map, defaultmap;
@@ -99,6 +102,7 @@ void finish_graphics()
   
   XFreePixmap(dpy,pix);
   XFreeGC(dpy,gc);
+  XFreePixmap(dpy,stip);
   /* reset things if this was the root window. */
   if( use_root )
   {
@@ -140,6 +144,7 @@ void init_graphics( int want_use_root, int *s_graph_width, int *s_graph_height,i
   unsigned int border;
   unsigned long gcvmask;
   XGCValues gcv;
+  
   int i;
   int newmap=FALSE;
 
@@ -236,17 +241,25 @@ void init_graphics( int want_use_root, int *s_graph_width, int *s_graph_height,i
 /*}}}*/
 /*{{{create pixmap*/
   XGetGeometry(dpy,win,&root,&x,&y,&graph_width,&graph_height,&border,&depth);
+  stip = XCreateBitmapFromData(dpy,win,gray_bits,gray_width,gray_height);
+
   gcvmask = 0;
   gcvmask |= GCForeground;
   gcv.foreground = WhitePixel(dpy,screen);
   gcvmask |= GCBackground;
   gcv.background = BlackPixel(dpy,screen);
-  gcvmask |= GCFillStyle;
-  gcv.fill_style = FillSolid;
   gcvmask |= GCGraphicsExposures;
   gcv.graphics_exposures = FALSE;
+  gcvmask |= GCStipple;
+  gcv.stipple = stip;
+  gcvmask |= GCFillStyle;
+  gcv.fill_style = FillSolid;
+  gcv.graphics_exposures = FALSE;
+  
   gc = XCreateGC(dpy,win,gcvmask,&gcv);
   pix = XCreatePixmap(dpy,win,graph_width,graph_height,depth);
+
+
 /*}}}*/
   XSetForeground(dpy,gc,BlackPixel(dpy,screen));
   XFillRectangle(dpy,pix,gc,0,0,graph_width,graph_height); 
@@ -273,8 +286,12 @@ void scroll_screen( int dist )
   /* copy the data */
   XCopyArea(dpy,pix,pix,gc,dist,0,graph_width-dist,graph_height,0,0);
   /* blank new region */
-  XSetForeground(dpy,gc,BlackPixel(dpy,screen));
+  XSetBackground(dpy,gc,WhitePixel(dpy,screen));
+  XSetForeground(dpy,gc,table[SKY].pixel);
+  XSetFillStyle(dpy,gc,FillOpaqueStippled);
   XFillRectangle(dpy,pix,gc,graph_width-dist,0,dist,graph_height);
+  XSetFillStyle(dpy,gc,FillSolid);
+  XSetBackground(dpy,gc,BlackPixel(dpy,screen));
   /* update the window to match */
   XCopyArea(dpy,pix,win,gc,0,0,graph_width,graph_height,0,0);
 

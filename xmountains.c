@@ -6,7 +6,7 @@
 
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.8 1994/01/11 12:53:57 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.9 1994/01/20 14:57:47 spb Exp $";
 
 extern char *display;
 extern char *geom;
@@ -166,6 +166,10 @@ main(int argc, char **argv)
          {
            repeat = 1;
          }
+         /* we want repeat to be a multiple of 2 as we are using
+          * a textured field for the sky.
+          */
+         repeat = (2 * ((repeat +1)/2));
          break;
       case 'R':                     /* set seed, read clock if 0 */
          seed = atoi( optarg );
@@ -276,7 +280,14 @@ main(int argc, char **argv)
         }else{
           for(j=0 ; j<height ; j++)
           {
-            plot_pixel(p,((s_height-1)-j),l[j]);
+            /* we assume that the croll routine fills the
+             * new region with a SKY value. This allows us to
+             * use a testured sky for B/W displays
+             */
+            if( l[j] != SKY )
+            {
+              plot_pixel(p,((s_height-1)-j),l[j]);
+            }
           }
           free(l);
         }

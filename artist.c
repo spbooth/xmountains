@@ -7,7 +7,7 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.15 1994/01/19 13:25:37 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.16 1994/01/20 14:57:47 spb Exp $";
 #define SIDE 1.0
 #ifndef PI
 #define PI 3.14159265
@@ -51,8 +51,8 @@ void set_clut(Gun *red, Gun *green, Gun *blue)
   blue[WHITE]      = COL_RANGE;
   /*}}}*/
   /*{{{  sky */
-  red[SKY]         = 0.404*COL_RANGE;
-  green[SKY]       = 0.588*COL_RANGE;
+  red[SKY]         = 0;
+  green[SKY]       = 0;
   blue[SKY]        = COL_RANGE;
   /*}}}*/
   /*{{{  sea (lit) */
