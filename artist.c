@@ -7,7 +7,7 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.10 1993/03/18 19:53:09 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.11 1993/03/18 21:26:35 spb Exp $";
 #define SIDE 1.0
 #define PI 3.14159265
 
@@ -136,6 +136,7 @@ void init_artist_variables()
   
   width= (1 << levels)+1;
   pwidth= (1 << (levels - stop))+1;
+
   /* make the fractal SIDE wide, this makes it easy to predict the
    * average height returned by calcalt. If we have stop != 0 then
    * make the largest update length = SIDE
@@ -143,17 +144,21 @@ void init_artist_variables()
   cos_phi = cos( phi );
   sin_phi = sin( phi );
   tan_phi = tan( phi );
-  vscale = 0.6 * pwidth;  /* have approx same height as fractal width */
+
+  vscale = stretch * pwidth;  /* have approx same height as fractal width */
+
   /* guess the average height of the fractal */
   varience = pow( SIDE ,(2.0 * fdim));
   varience = vscale * varience ;
-  shift = 0.5 * varience;
+  shift = shift * varience;
   varience = varience + shift;
 
   start = (sealevel - shift) / vscale ; /* always start at sealevel */ 
+
   /* set the position of the view point */
-  viewheight = 2.5 * width;
-  viewpos = -4.0 * width;
+  viewheight = altitude * width;
+  viewpos = - distance * width;
+
   /* set viewing angle and focal length (vertical-magnification)
    * try mapping the bottom of the fractal to the bottom of the
    * screen. Try to get points in the middle of the fractal
@@ -167,6 +172,7 @@ void init_artist_variables()
   vangle -= atan( (double) (height/2) / focal ); 
 
   top=make_fold(levels,stop,frac_start,slope,smooth,(SIDE / pwidth),start,mean,fdim);
+
   /* use first set of heights to set shadow value */
   shadow = extract(next_strip(top));
   a_strip = extract( next_strip(top) ); 
@@ -180,6 +186,9 @@ void init_artist_variables()
 Col get_col(Height p, Height p_minus_x, Height p_plus_y, Height shadow)
 {
   Height delta_x, delta_y;
+  Height delta_x_sqr, delta_y_sqr;
+  Height hypot_sqr;
+  
   double cos_theta;         /* angle between the normal and the ray */
   Height effective;
   Col result;
@@ -197,11 +206,13 @@ Col get_col(Height p, Height p_minus_x, Height p_plus_y, Height shadow)
   /*}}}*/
   delta_x = p - p_minus_x;
   delta_y = p_plus_y - p;
+  delta_x_sqr = delta_x * delta_x;
+  delta_y_sqr = delta_y * delta_y;
+  hypot_sqr = delta_x_sqr + delta_y_sqr;
+  
   /*{{{  calculate effective height */
   effective = (p + (varience * contour *
-          ((SIDE *SIDE)/ ((SIDE*SIDE) +
-          (delta_x*delta_x) +
-          (delta_y*delta_y)))));
+          (1.0/ ( 1.0 + hypot_sqr))));
   /*}}}*/
   /*{{{  calculate colour band. */
   band = ( effective * N_BANDS ) / varience ;
@@ -222,8 +233,8 @@ Col get_col(Height p, Height p_minus_x, Height p_plus_y, Height shadow)
   }
   /*}}}*/
   /*{{{  calculate cosine */
-  cos_theta = ((delta_x * cos_phi) + (SIDE * sin_phi))/
-              sqrt( SIDE + (delta_x*delta_x) + (delta_y*delta_y) );
+  cos_theta = ((delta_x * cos_phi) + sin_phi)/
+              sqrt( 1.0 + hypot_sqr );
   /*}}}*/
   /*{{{  calculate shading */
   shade = ((double) contrast * cos_theta) * (double) BAND_SIZE;
@@ -339,7 +350,7 @@ Col *camera( Height *a, Col *c )
 int project( int x , Height y )
 {
   int pos;
-#if TRUE
+#ifndef SLOPPY
   double theta;
 
   theta = atan( (double) ((viewheight - y)/( x - viewpos)) );
