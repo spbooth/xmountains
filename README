@@ -29,7 +29,7 @@ usage, ./xmountains -[bxmslrftISTRapgd]
 The program breaks down into three sections
 1) Fractal generation (calcalt.c random.c crinkle.h) This code should be
    fairly solid, It also contains some algorithmic tricks I had to
-   invent (though it is not inconcevable that somebody else has also
+   invent (though it is not inconceivable that somebody else has also
    thought of them)
 2) Image rendering & main program (artist.c global.c scroll.c global.h
    paint.h) This code is a bit more sloppy but seems to work OK.
@@ -43,6 +43,11 @@ PROBLEMS
 as the CPU and the X server let it.
  The choice of colours looks strange on some hardware.
 
+
+If you have any comments/fixes etc for this program 
+Email me at
+ S.Booth@ed.ac.uk    or 
+ spb@castle.ed.ac.uk
 
 Copyright 1994 Stephen Booth, see copyright.h
 
