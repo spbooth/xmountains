@@ -1,4 +1,4 @@
-/* $Id: paint.h,v 1.10 1994/02/15 16:30:39 spb Exp $ */
+/* $Id: paint.h,v 1.11 1994/04/05 20:55:34 spb Exp $ */
 #ifndef PAINT
 #define PAINT
 
@@ -31,6 +31,7 @@ void init_artist_variables();
 Col get_col(Height p, Height p_plus_x, Height p_plus_y, Height shadow);
 Col *makemap(Height *a, Height *b, Height *shadow);
 Col *camera(Height *a, Height *b, Height *shadow);
+Col *mirror(Height *a, Height *b, Height *shadow);
 int project( int x , Height y );
 #else
 void set_clut();
@@ -39,6 +40,7 @@ void init_artist_variables();
 Col get_col();
 Col *makemap();
 Col *camera();
+Col *mirror();
 int project();
 #endif
 

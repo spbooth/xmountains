@@ -7,7 +7,7 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.26 1994/04/04 19:27:55 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.27 1994/04/05 20:55:34 spb Exp $";
 #define SIDE 1.0
 #ifndef PI
 #define PI 3.14159265
@@ -15,7 +15,7 @@ char artist_Id[] = "$Id: artist.c,v 1.26 1994/04/04 19:27:55 spb Exp $";
 
 float vstrength; /* strength of vertical light source */
 float lstrength; /* strength of vertical light source */
-
+int base=0;      /* parity flag for mirror routine */
 /*{{{  void set_clut(Gun *red, Gun *green, Gun *blue)*/
 /*
  * setup the colour lookup table
@@ -424,6 +424,81 @@ Height *shadow;
   {
     res[last]=SKY;
   }
+  return(res);
+}
+/*}}}*/
+/*{{{  Col *mirror(Height *a, Height *b, Height *shadow)*/
+Col *mirror(a,b,shadow)
+Height *a;
+Height *b;
+Height *shadow;
+{
+  Col *res, *map;
+  int i,j, top, bottom, coord;
+  Height pivot;
+  /* this routine returns a perspective view of the surface
+   * with reflections in the water
+   *
+   */
+  res = (Col *) malloc( height * sizeof(Col) );
+  if( res == NULL )
+  {
+    fprintf(stderr,"malloc failed for picture strip\n");
+    exit(1);
+  }
+  for(i=0;i<height;i++)
+  {
+    res[i] = SKY;
+  }
+  /*
+   * many of the optimisation in the camera routine are
+   * hard to implement in this case so we revert to the
+   * simple painters algorithm modified to produce reflections
+   * scan from back to front drawing strips between the
+   * projected position of height and -height.
+   * for water stipple the colour so the reflection is still visable
+   */
+  map=makemap(a,b,shadow);
+  pivot=2.0*sealevel;
+  for(i=width-1;i>0;i--)
+  {
+    if(a[i]<sealevel)
+    {
+      a[i]=sealevel;
+    }
+    if(map[i]==SEA_LIT || map[i]==SEA_UNLIT)
+    {
+      /*{{{stipple water values*/
+      coord=1+project(i,a[i]);
+      for(j=base;j<coord;j+=2)
+      {
+        res[j]=map[i];
+      }
+      /*}}}*/
+    }else{
+      /*{{{draw land values*/
+      top = project(i,a[i]);
+      bottom=project(i,pivot-a[i]);
+      for(j=bottom;j<=top;j++)
+      {
+        res[j]=map[i];
+      }
+      /*}}}*/
+    }
+  }
+  /*{{{draw in front face*/
+  if( a[0] < sealevel )
+  {
+    a[0] = sealevel;
+  }
+  coord=1+project(0,a[0]);
+  for(j=0;j<coord;j++)
+  {
+    res[j] = map[0];
+  }
+  /*}}}*/
+  base=1-base;
+  free(map);
   return(res);
 }
 /*}}}*/

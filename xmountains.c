@@ -9,7 +9,7 @@
 #define VERSION 1
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.25 1994/04/05 14:01:35 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.26 1994/04/05 20:55:34 spb Exp $";
 
 extern char *display;
 extern char *geom;
@@ -74,9 +74,10 @@ char *pat;
 }
 /*}}}*/
 
-/*{{{  Col *next_col(int paint) */
-Col *next_col (paint)
+/*{{{  Col *next_col(int paint, int reflec) */
+Col *next_col (paint, reflec)
 int paint;
+int reflec;
 {
   Col *res;
   int i,offset=0;
@@ -84,7 +85,12 @@ int paint;
   /*{{{  update strips */
   if(paint)
   {
-    res = camera( a_strip,b_strip,shadow);
+    if(reflec)
+    {
+      res = mirror( a_strip,b_strip,shadow);
+    }else{
+      res = camera( a_strip,b_strip,shadow);
+    }
   }else{
     res = makemap(a_strip,b_strip,shadow);
   }
@@ -213,16 +219,17 @@ int s_height=768, s_width=1024;
 int mapwid;
 
 
-/*{{{void plot_column(p,map,snooze)*/
-void plot_column(p,map,snooze)
+/*{{{void plot_column(p,map,reflec,snooze)*/
+void plot_column(p,map,reflec,snooze)
 int p;
 int map;
+int reflec;
 int snooze;
 {
   Col *l;
   int j;
   
-  l = next_col(1-map); 
+  l = next_col(1-map,reflec); 
   if( map )
   {
     for( j=0 ;j<(s_height-mapwid); j++)
@@ -260,6 +267,7 @@ char **argv;
 
   int repeat=20;
   int map = 0;
+  int reflec = 0;
   int root= 0;
 
   int c, errflg=0;
@@ -271,7 +279,7 @@ char **argv;
   /*{{{handle command line flags*/
   mesg[0]="false";
   mesg[1]="true";
-  while((c = getopt(argc,argv,"bxmsqEl:r:f:t:I:A:S:T:C:a:p:B:R:g:d:c:e:v:Z:"))!= -1)
+  while((c = getopt(argc,argv,"bxmsqMEl:r:f:t:I:A:S:T:C:a:p:B:R:g:d:c:e:v:Z:"))!= -1)
   {
     switch(c){
       case 'b':
@@ -291,6 +299,9 @@ char **argv;
         break;
       case 'm':                     /* Map view only */
         map = 1 - map;
+        break;
+      case 'M':                     /* put in reflections */
+        reflec = 1 - reflec;
         break;
       case 'l':                     /* Set # levels of recursion */
          levels = atoi( optarg );
@@ -432,6 +443,7 @@ char **argv;
     fprintf(stderr," -q       [%s] reset root window on exit\n",mesg[request_clear]);
     fprintf(stderr," -x       [%s] flat start \n",mesg[1-frac_start]);
     fprintf(stderr," -m       [%s] print map \n",mesg[map]);
+    fprintf(stderr," -M       [%s] implement reflections \n",mesg[reflec]);
     fprintf(stderr," -s       [%s] toggle smoothing \n",mesg[smooth]);
     fprintf(stderr," -E       [%s] toggle explicit expose events \n",mesg[smooth]);
     fprintf(stderr," -l int   [%d] # levels of recursion \n",levels);
@@ -509,12 +521,12 @@ char **argv;
   {
     for(p=0 ; p < s_width ; p++)
     {
-      plot_column(p,map,0);
+      plot_column(p,map,reflec,0);
     }
   }else{
     for(p=s_width-1 ; p >=0 ; p--)
     {
-      plot_column(p,map,0);
+      plot_column(p,map,reflec,0);
     }
   }
   while( TRUE )
@@ -525,15 +537,15 @@ char **argv;
       {
         for( p = s_width - repeat ; p < (s_width-1) ; p++ )
         {
-          plot_column(p,map,0);
+          plot_column(p,map,reflec,0);
         }
       }else{
         for( p = -1 - repeat ; p >=0 ; p-- )
         {
-          plot_column(p,map,0);
+          plot_column(p,map,reflec,0);
         }
       }
-      plot_column(p,map,snooze_time);
+      plot_column(p,map,reflec,snooze_time);
   }
 }
 
