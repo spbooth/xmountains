@@ -3,7 +3,7 @@
 #include<X11/Xutil.h>
 #include<X11/Xatom.h>
 
-char X_graphics_Id[]="$Id: X_graphics.c,v 1.2 1994/01/07 19:37:50 spb Exp $";
+char X_graphics_Id[]="$Id: X_graphics.c,v 1.3 1994/01/10 17:37:18 spb Exp $";
 
 Atom wm_protocols;
 Atom wm_delete_window;
@@ -21,15 +21,21 @@ Atom wm_delete_window;
 
   GC gc;
   Pixmap pix;
+  Colormap map, defaultmap;
   XColor table[256];
 
 /*{{{void finish_graphics()*/
 void finish_graphics()
 {
+  unsigned long attmask;
+  XSetWindowAttributes attributes;
   int x,y,border,depth;
   
   XGetGeometry(dpy,win,&root,&x,&y,&graph_width,&graph_height,&border,&depth);
   XClearArea(dpy,win,0,0,graph_width,graph_height,FALSE);
+  attmask = 0;
+  attributes.colormap = defaultmap;
+  XChangeWindowAttributes(dpy,win,attmask,&attributes);
   XCloseDisplay(dpy);
 }
 /*}}}*/
@@ -84,12 +90,11 @@ void zap_events()
 }
 /*}}}*/
 
-/*{{{void init_graphics(int use_root, int *s_graph_width, int *s_graph_height)*/
-void init_graphics( int want_use_root, int *s_graph_width, int *s_graph_height)
+/*{{{void init_graphics( ... )*/
+void init_graphics( int want_use_root, int *s_graph_width, int *s_graph_height,int ncol, unsigned char *red, unsigned char *green, unsigned char *blue )
 {
 /*{{{defs*/
   char *display=NULL;       /* name of display to open, NULL for default */
-  char *progname;
   int depth=0;              /* positive value requires this many planes */
   Visual *vis;
   int mask;
@@ -104,6 +109,8 @@ void init_graphics( int want_use_root, int *s_graph_width, int *s_graph_height)
   int border;
   unsigned long gcvmask;
   XGCValues gcv;
+  int i;
+  int newmap=FALSE;
 
 /*}}}*/
 
@@ -121,18 +128,41 @@ void init_graphics( int want_use_root, int *s_graph_width, int *s_graph_height)
   }
   screen = DefaultScreen(dpy);
   parent = RootWindow(dpy, screen);
+
 /*}}}*/
 /*{{{find appropriate vis*/
+  map=defaultmap=DefaultColormap(dpy,screen);
   vis = DefaultVisual(dpy,screen);
   depth = DefaultDepth(dpy,screen);
 /*}}}*/
+/*{{{set colormap*/
+  for(i=0; i<ncol ; i++)
+  {
+    table[i].red   = red[i]*257;
+    table[i].green = green[i]*257;
+    table[i].blue  = blue[i]*257;
+    while( ! XAllocColor(dpy,map,table+i) )
+    {
+      if( newmap ){
+        fprintf(stderr,"failed to allocate colour %d\n",i);
+        finish_graphics();
+        exit(1);
+      }else{
+        map = XCopyColormapAndFree(dpy,map);
+        newmap=TRUE;
+      }
+    }
+  }
+/*}}}*/
 /*{{{create window*/
-    attmask = 0;
+  attmask = 0;
   if( use_root )
   {
     win = parent;
     attmask |= CWEventMask;
     attributes.event_mask = ExposureMask; /* catch expose events */
+    attmask |= CWColormap;
+    attributes.colormap = map;
     XChangeWindowAttributes(dpy,win,attmask,&attributes);
   }else{
     attmask |= CWEventMask;
@@ -141,6 +171,8 @@ void init_graphics( int want_use_root, int *s_graph_width, int *s_graph_height)
     attributes.background_pixel = BlackPixel(dpy,screen);
     attmask |= CWBackingStore;
     attributes.backing_store = NotUseful;
+    attmask |= CWColormap;
+    attributes.colormap = map;
     win = XCreateWindow(dpy,parent,x,y,graph_width,graph_height,0,
       depth,InputOutput,vis,attmask,&attributes);
   
@@ -177,30 +209,6 @@ void init_graphics( int want_use_root, int *s_graph_width, int *s_graph_height)
   
   *s_graph_width = graph_width;
   *s_graph_height = graph_height;
-}
-/*}}}*/
-
-/*{{{void install_clut( int ncol, unsigned char *red, unsigned char *green, unsigned char *blue )*/
-void install_clut( int ncol, unsigned char *red, unsigned char *green, unsigned char *blue )
-{
-  int i;
-  int newmap=FALSE;
-  Colormap map;
-
-  map=DefaultColormap(dpy,screen);
-
-  for(i=0; i<ncol ; i++)
-  {
-    table[i].red   = red[i]*257;
-    table[i].green = green[i]*257;
-    table[i].blue  = blue[i]*257;
-    if( ! XAllocColor(dpy,map,table+i) )
-    {
-      fprintf(stderr,"failed to allocate colour %d\n",i);
-      finish_graphics();
-      exit(1);
-    }
-  }
 }
 /*}}}*/
 

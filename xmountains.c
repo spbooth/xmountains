@@ -6,7 +6,7 @@
 
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.4 1994/01/07 19:38:39 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.5 1994/01/10 17:37:18 spb Exp $";
 
 /*{{{  Col *next_col(int paint) */
 Col *next_col(int paint)
@@ -46,9 +46,8 @@ Col *next_col(int paint)
 }
 /*}}}*/
 double atof();
-void init_graphics(int, int *, int *);
+void init_graphics(int, int *, int *, int, unsigned char *, unsigned char *, unsigned char *);
 void finish_graphics();
-void install_clut( int, unsigned char *, unsigned char *, unsigned char *);
 void plot_pixel(int, int, unsigned char);
 void scroll_screen( int );
 
@@ -160,9 +159,8 @@ main(int argc, char **argv)
     fprintf(stderr," -h int   [%d] height of screen \n",s_height);
     exit(1);
   }
-  init_graphics(root,&s_width,&s_height);
   set_clut();
-  install_clut(MAX_COL+1,red,green,blue);
+  init_graphics(root,&s_width,&s_height,MAX_COL+1,red,green,blue);
 
   height = s_height;
 
