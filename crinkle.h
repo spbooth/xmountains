@@ -1,4 +1,4 @@
-/* $Id: crinkle.h,v 2.2 1994/10/27 14:04:15 spb Exp $ */
+/* $Id: crinkle.h,v 2.3 1994/12/06 19:40:56 spb Exp $ */
 #ifndef CRINKLE
 #define CRINKLE
 /*{{{  typedefs */
@@ -35,6 +35,7 @@ typedef struct parm{
   int cross;                /* use four point average on edges rather than 2 */
   int force_front;          /* keep front edge low */
   int force_back;           /* keep back edge low */
+  Height forceval;          /* value to force to */
   float mix;                /* fraction of old value to include in average */
   float midmix;             /* same but for cross updates */
   float fdim;
