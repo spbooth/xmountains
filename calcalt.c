@@ -20,7 +20,7 @@
 #include <math.h>
 #include "crinkle.h"
 
-char calcalt_Id[] = "$Id: calcalt.c,v 2.6 1995/06/12 18:58:04 spb Exp $";
+char calcalt_Id[] = "$Id: calcalt.c,v 2.7 1995/10/04 10:00:56 spb Exp $";
 
 #ifdef DEBUG
 #define DB(A,B) dump_pipeline(A,B)
@@ -151,6 +151,7 @@ Length length;
   scale = pow((double) length, (double) (2.0 * param->fdim));
   midscale = pow((((double) length)*root2), (double) (2.0 * param->fdim));
   p->level = levels;
+  p->count = (1 << levels) +1;
   p->stop = stop;
   p->state = START;
   p->save =NULL;
@@ -195,9 +196,9 @@ Fold *fold;
   Strip *result=NULL;
   Strip *tmp;
   Strip **t;
-  int i, count, iter;
+  int i, iter;
+  int count=fold->count;
 
-  count = ((1 << fold->level) +1);
   if( fold->level == fold->stop)
   {
     /*{{{  generate values from scratch */
@@ -251,7 +252,7 @@ Fold *fold;
            * t := A B A
            */
           DB("S2",fold);
-          x_update(count,fold->midscale,0.0,t[0],t[1],t[2]);
+          x_update(fold,fold->midscale,0.0,t[0],t[1],t[2]);
           DB("E2",fold);
           
           if(fold->p->rg1)
@@ -262,7 +263,7 @@ Fold *fold;
              * use the midpoints to regenerate the corner values
              * increment t by 2 so we still have and A B A pattern
              */
-            v_update(count,fold->midscale,fold->p->midmix,t[1],t[2],t[3]);
+            v_update(fold,fold->midscale,fold->p->midmix,t[1],t[2],t[3]);
             t+=2;
             DB("E3",fold);
           
@@ -276,12 +277,12 @@ Fold *fold;
           
           if( fold->p->cross )
           {
-            t_update(count,fold->scale,0.0,t[0],t[1],t[2]);
-            p_update(count,fold->scale,0.0,t[1],t[2],t[3]);
+            t_update(fold,fold->scale,0.0,t[0],t[1],t[2]);
+            p_update(fold,fold->scale,0.0,t[1],t[2],t[3]);
             t+=2;
           }else{
-            hside_update(count,fold->scale,0.0,t[0],t[1],t[2]);
-            vside_update(count,fold->scale,0.0,t[2]);
+            hside_update(fold,fold->scale,0.0,t[0],t[1],t[2]);
+            vside_update(fold,fold->scale,0.0,t[2]);
             t+=2;
           }
           DB("E4",fold);
@@ -295,9 +296,9 @@ Fold *fold;
              */
             if( fold->p->cross )
             {
-              p_update(count,fold->scale,fold->p->mix,t[0],t[1],t[2]);
+              p_update(fold,fold->scale,fold->p->mix,t[0],t[1],t[2]);
             }else{
-              vside_update(count,fold->scale,fold->p->mix,t[1]);
+              vside_update(fold,fold->scale,fold->p->mix,t[1]);
             }
             DB("E5",fold);
           
@@ -319,7 +320,7 @@ Fold *fold;
              *
              * this has to be a t_update
              */
-            t_update(count,fold->scale,fold->p->mix,t[0],t[1],t[2]);
+            t_update(fold,fold->scale,fold->p->mix,t[0],t[1],t[2]);
             t++;
             DB("E6",fold);
           
@@ -361,9 +362,9 @@ Fold *fold;
 }
 /*}}}*/
 
-/*{{{void x_update(int count,float scale, float mix, Strip *a, Strip *b, Strip *c)*/
-void x_update(count, scale, mix, a, b, c)
-int count;
+/*{{{void x_update(Fold *fold,float scale, float mix, Strip *a, Strip *b, Strip *c)*/
+void x_update(fold, scale, mix, a, b, c)
+Fold *fold;
 float scale;
 float mix;
 Strip *a;
@@ -371,6 +372,7 @@ Strip *b;
 Strip *c;
 {
   int i;
+  int count=fold->count;
   float w;
   Height *mp, *lp, *rp;
 
@@ -382,7 +384,7 @@ Strip *c;
     exit(1);
   }
   
-  w = (1.0 - mix)/4.0;
+  w = (1.0 - mix)*0.25;
   mp=b->d;
   lp=a->d;
   rp=c->d;
@@ -423,9 +425,9 @@ Strip *c;
   }
 }    
 /*}}}*/
-/*{{{void p_update(int count,float scale, float mix, Strip *a, Strip *b, Strip *c)*/
-void p_update(count, scale, mix, a, b, c)
-int count;
+/*{{{void p_update(Fold *fold,float scale, float mix, Strip *a, Strip *b, Strip *c)*/
+void p_update(fold, scale, mix, a, b, c)
+Fold *fold;
 float scale;
 float mix;
 Strip *a;
@@ -433,6 +435,7 @@ Strip *b;
 Strip *c;
 {
   int i;
+  int count=fold->count;
   float w;
   Height *mp, *lp, *rp;
 
@@ -445,11 +448,11 @@ Strip *c;
    */
   if( !c )
   {
-    vside_update(count,scale,mix,b);
+    vside_update(fold,scale,mix,b);
     return;
   }
 
-  w = (1.0 - mix)/4.0;
+  w = (1.0 - mix)*0.25;
   mp=b->d;
   lp=a->d;
   rp=c->d;
@@ -491,9 +494,9 @@ Strip *c;
 }    
 
 /*}}}*/
-/*{{{void t_update(int count,float scale, float mix, Strip *a, Strip *b, Strip *c)*/
-void t_update(count, scale, mix, a, b, c)
-int count;
+/*{{{void t_update(Fold *fold,float scale, float mix, Strip *a, Strip *b, Strip *c)*/
+void t_update(fold, scale, mix, a, b, c)
+Fold *fold;
 float scale;
 float mix;
 Strip *a;
@@ -501,8 +504,10 @@ Strip *b;
 Strip *c;
 {
   int i;
+  int count=fold->count;
   float w, we;
   Height *mp, *lp, *rp;
+  int third=(1.0/3.0);
 
   /* don't run unless we have all the parameters */
   if( !a || !c ) return;
@@ -512,15 +517,15 @@ Strip *c;
     exit(1);
   }
 
-  w = (1.0 - mix)/4.0;
-  we = (1.0 - mix)/3.0;
+  w = (1.0 - mix)*0.25;
+  we = (1.0 - mix)*third;
   mp=b->d;
   lp=a->d;
   rp=c->d;
 
   if( mix <= 0.0){
     /*{{{random offset to average of new points*/
-    mp[0] = (1.0/3.0) * ( lp[0] + rp[0] + mp[1] )
+    mp[0] = third * ( lp[0] + rp[0] + mp[1] )
             + (scale * gaussian());
     mp++;
     lp++;
@@ -533,7 +538,7 @@ Strip *c;
       lp+=2;
       rp+=2;
     }
-    mp[1] = (1.0/3.0) * ( lp[1] + rp[1] + mp[0] )
+    mp[1] = third * ( lp[1] + rp[1] + mp[0] )
           + (scale * gaussian());
     /*}}}*/
   }else if(mix >= 1.0){
@@ -570,9 +575,9 @@ Strip *c;
 
 
 /*}}}*/
-/*{{{void v_update(int count,float scale, float mix, Strip *a, Strip *b, Strip *c)*/
-void v_update(count, scale, mix, a, b, c)
-int count;
+/*{{{void v_update(Fold *fold,float scale, float mix, Strip *a, Strip *b, Strip *c)*/
+void v_update(fold, scale, mix, a, b, c)
+Fold *fold;
 float scale;
 float mix;
 Strip *a;
@@ -580,6 +585,7 @@ Strip *b;
 Strip *c;
 {
   int i;
+  int count=fold->count;
   float w, we;
   Height *mp, *lp, *rp;
 
@@ -591,8 +597,8 @@ Strip *c;
     exit(1);
   }
 
-  w = (1.0 - mix)/4.0;
-  we = (1.0 - mix)/2.0;
+  w = (1.0 - mix)*0.25;
+  we = (1.0 - mix)*0.5;
   mp=b->d;
   lp=a->d;
   rp=c->d;
@@ -648,14 +654,15 @@ Strip *c;
 }    
 
 /*}}}*/
-/*{{{void vside_update(int count,float scale, float mix, Strip *a)*/
-void vside_update(count, scale, mix, a)
-int count;
+/*{{{void vside_update(Fold *fold,float scale, float mix, Strip *a)*/
+void vside_update(fold, scale, mix, a)
+Fold *fold;
 float scale;
 float mix;
 Strip *a;
 {
   int i;
+  int count=fold->count;
   float w;
   Height *mp;
 
@@ -663,7 +670,7 @@ Strip *a;
   if( !a ) return;
 
 
-  w = (1.0 - mix)/2.0;
+  w = (1.0 - mix)*0.5;
   mp=a->d;
 
   if( mix <= 0.0){
@@ -698,9 +705,9 @@ Strip *a;
 
 
 /*}}}*/
-/*{{{void hside_update(int count,float scale, float mix, Strip *a, Strip *b, Strip *c)*/
-void hside_update(count, scale, mix, a, b, c)
-int count;
+/*{{{void hside_update(Fold *fold,float scale, float mix, Strip *a, Strip *b, Strip *c)*/
+void hside_update(fold, scale, mix, a, b, c)
+Fold *fold;
 float scale;
 float mix;
 Strip *a;
@@ -708,6 +715,7 @@ Strip *b;
 Strip *c;
 {
   int i;
+  int count=fold->count;
   float w;
   Height *mp, *lp, *rp;
 
@@ -719,7 +727,7 @@ Strip *c;
     exit(1);
   }
 
-  w = (1.0 - mix)/2.0;
+  w = (1.0 - mix)*0.5;
   mp=b->d;
   lp=a->d;
   rp=c->d;
