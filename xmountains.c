@@ -3,10 +3,11 @@
 #include "crinkle.h"
 #include "paint.h"
 #include "global.h"
+#include "patchlevel.h"
 
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.10 1994/01/21 11:53:47 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.11 1994/01/24 10:48:17 spb Exp $";
 
 extern char *display;
 extern char *geom;
