@@ -20,7 +20,7 @@
 #include <math.h>
 #include "crinkle.h"
 
-char calcalt_Id[] = "$Id: calcalt.c,v 2.14 1997/10/23 08:28:14 spb Exp $";
+char calcalt_Id[] = "$Id: calcalt.c,v 2.15 1997/10/23 08:37:54 spb Exp $";
 
 #ifdef DEBUG
 #define DB(A,B) dump_pipeline(A,B)
@@ -30,6 +30,7 @@ char calcalt_Id[] = "$Id: calcalt.c,v 2.14 1997/10/23 08:28:14 spb Exp $";
 
 
 /* {{{   Strip *make_strip(Fold *f) */
+
 Strip *make_strip (f)
 Fold *f;
 {
@@ -52,6 +53,7 @@ Fold *f;
   }
   return(p);
 }
+
 /* }}} */
 /* {{{   void free_strip(Strip *p) */
 void free_strip (p)
@@ -141,8 +143,8 @@ Fold *f;
   double root2;
 
   root2=sqrt((double) 2.0 );
-  scale = pow((double) f->p->length, (double) (2.0 * f->p->fdim));
-  midscale = pow((((double) f->p->length)*root2), (double) (2.0 * f->p->fdim));
+  scale = pow((double) f->length, (double) (2.0 * f->p->fdim));
+  midscale = pow((((double) f->length)*root2), (double) (2.0 * f->p->fdim));
   f->scale = scale;
   f->midscale = midscale;
 
@@ -203,6 +205,10 @@ Length length;
     p->s[i] = NULL;
   }
   p->parent=parent;
+
+  p->next = NULL; /* truncate recursion in reset */
+  reset_fold(p);
+
   if( levels > stop )
   {
     p->next = make_fold(p,param,(levels-1),stop,(2.0*length));
