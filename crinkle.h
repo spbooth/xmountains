@@ -1,4 +1,4 @@
-/* $Id: crinkle.h,v 2.5 1995/10/05 17:54:06 spb Exp $ */
+/* $Id: crinkle.h,v 2.6 1997/03/24 10:23:08 spb Exp $ */
 #ifndef CRINKLE
 #define CRINKLE
 #ifdef MPI
@@ -37,6 +37,12 @@ typedef struct parm{
   float mix;                /* fraction of old value to include in average */
   float midmix;             /* same but for cross updates */
   float fdim;
+#ifdef MPI
+  MPI_Comm comm;            /* MPI communicator for parallel version */
+  int 
+  int nproc;                /* number of processors available */
+  int me;                   /* own identity */
+#endif
 }Parm;
 
 /* The parameter struct for the recursive procedure */
@@ -53,9 +59,8 @@ typedef struct fold{
   struct fold *next;        /* next iteration down */
   struct fold *parent;      /* next iteration up */
 #ifdef MPI
-  MPI_Comm comm;            /* MPI communicator for parallel version */
-  int nproc;                /* number of processors available */
-  int me;                   /* own identity */
+  int up;
+  int down;
 #endif
 } Fold;
 

@@ -2,7 +2,7 @@
 .ds Rv \\$3
 .ds Dt \\$4
 ..
-.Id $Id: xmountains.man,v 1.12 1995/06/09 10:58:02 spb Exp $
+.Id $Id: xmountains.man,v 1.13 1997/03/24 10:20:41 spb Exp $
 .ds r \s-1RCS\s0
 .if n .ds - \%--
 .if t .ds - \(em
@@ -74,7 +74,8 @@ Produce reflections in the water. This may be a little slower.
 .B \-r [20] 
 .RS
 To reduce the load on the X server the program generates several columns of pixels before scrolling the image. This flag sets the number of columns.
-A negative value reverses the direction of scrolling.
+A negative value reverses the direction of scrolling. A value of zero
+makes the program scan accross the window without scrolling at all.
 .RE
 .br
 .B \-B [80] 
