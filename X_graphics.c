@@ -6,7 +6,7 @@
 #include"vroot.h"
 #endif
 #include "paint.h"
-char X_graphics_Id[]="$Id: X_graphics.c,v 1.20 1995/01/20 15:13:06 spb Exp $";
+char X_graphics_Id[]="$Id: X_graphics.c,v 1.21 1995/06/16 12:18:33 spb Exp $";
 
 char *display=NULL;       /* name of display to open, NULL for default */
 char *geom=NULL;          /* geometry of window, NULL for default */
@@ -405,6 +405,12 @@ int dist;
   /* update the window to match */
   if( pixmap_installed )
   {
+    /* this line never seems to be needed on any system I know about
+     * but the manual says an X server
+     * may make a copy of a background pixmap
+     * so in principle we should re-install.
+     */
+    XSetWindowBackgroundPixmap(dpy,win,pix);
     XClearWindow(dpy,win);
   }else{
     XCopyArea(dpy,pix,win,gc,0,0,graph_width,graph_height,0,0);
