@@ -2,7 +2,7 @@
 .ds Rv \\$3
 .ds Dt \\$4
 ..
-.Id $Id: xmountains.man,v 1.8 1994/02/24 11:08:03 spb Exp $
+.Id $Id: xmountains.man,v 1.9 1994/04/04 08:54:40 spb Exp $
 .ds r \s-1RCS\s0
 .if n .ds - \%--
 .if t .ds - \(em
@@ -20,7 +20,7 @@ xmountains \- A fractal landscape generator.
 is a X11 based fractal landscape generator.
 It generates random fractal surfaces and displays them in a window.
 While the program is running the fractal is continuously extended on the right
-and the image is scrolled from left to right to expose the newly generated area.
+and the image is scrolled from right to left to expose the newly generated area.
 
 .PP
 Flags:
