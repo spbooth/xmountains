@@ -4,7 +4,7 @@
 #include<X11/Xatom.h>
 #include "paint.h"
 
-char X_graphics_Id[]="$Id: X_graphics.c,v 1.12 1994/01/21 11:04:10 spb Exp $";
+char X_graphics_Id[]="$Id: X_graphics.c,v 1.13 1994/01/24 14:12:54 spb Rel $";
 
 char *display=NULL;       /* name of display to open, NULL for default */
 char *geom=NULL;          /* geometry of window, NULL for default */
@@ -295,9 +295,11 @@ int dist;
   /* copy the data */
   XCopyArea(dpy,pix,pix,gc,dist,0,graph_width-dist,graph_height,0,0);
   /* blank new region */
-  if( depth == 1 )
+  if( depth < 4 )
   {
-    /* use a textured gray sky on monochrome displays */
+    /* use a textured gray sky on monochrome displays
+     * we may need this on any low-depth display
+     */
     XSetForeground(dpy,gc,WhitePixel(dpy,screen));
     XSetFillStyle(dpy,gc,FillOpaqueStippled);
     XFillRectangle(dpy,pix,gc,graph_width-dist,0,dist,graph_height);
