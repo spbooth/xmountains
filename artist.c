@@ -7,7 +7,7 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.3 1993/02/18 15:36:13 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.4 1993/02/19 12:11:56 spb Exp $";
 #define SIDE 1.0
 #define PI 3.14159265
 
@@ -15,7 +15,7 @@ char artist_Id[] = "$Id: artist.c,v 1.3 1993/02/18 15:36:13 spb Exp $";
 void set_clut()
 {
   int band,shade;
-  float ambient = 0.1;  
+  float ambient = 0.3;  
   float top, bot;
   float intensity;
   int tmp;
@@ -32,18 +32,18 @@ Error Error Error max_col too large
   blue[BLACK]      = 0;
   /*}}}*/
   /*{{{  sky */
-  red[SKY]         = 80;
-  green[SKY]       = 80;
-  blue[SKY]        = 240;
+  red[SKY]         = 103;
+  green[SKY]       = 150;
+  blue[SKY]        = 255;
   /*}}}*/
   /*{{{  sea (lit) */
   red[SEA_LIT]     = 0;
-  green[SEA_LIT]   = 0;
+  green[SEA_LIT]   = 106;
   blue[SEA_LIT]    = 240;
   /*}}}*/
   /*{{{  sea (unlit) */
   red[SEA_UNLIT]   = 0;
-  green[SEA_UNLIT] = 0;
+  green[SEA_UNLIT] = 53;
   blue[SEA_UNLIT]  = 120;
   /*}}}*/
   for( band=0 ; band<N_BANDS; band++)
@@ -105,9 +105,15 @@ Error Error Error max_col too large
 /*{{{  Height *extract(Strip *s) */
 Height *extract(Strip *s)
 {
+  int i;
+  
   Height *p;
   p = s->d;
   free(s);
+  for(i=0 ; i<width; i++ )
+  {
+    p[i] = vscale * p[i];
+  }
   return(p);
 }
 /*}}}*/
@@ -121,7 +127,7 @@ void init_artist_variables()
   shadow = (Height *) malloc(width * sizeof(Height));
   if ( shadow == NULL )
   {
-    printf("malloc failed for shadow array\n");
+    fprintf(stderr,"malloc failed for shadow array\n");
     exit(1);
   }
   for(i=0 ; i<width ; i++)
@@ -134,7 +140,8 @@ void init_artist_variables()
   sin_phi = sin( phi );
   tan_phi = tan( phi );
   varience = pow( (width * SIDE),(2.0 * fdim));
-  varience = varience * 0.1;
+  varience = vscale * varience * 0.1;
+  focal = sqrt( (viewpos*viewpos) + (viewheight*viewheight) );
 }
 /*}}}*/
 /*{{{  Col get_col(Height p, Height p_minus_x, Height p_plus_y, Height shadow) */
@@ -214,7 +221,7 @@ int i;
   res = (Col *) malloc(width * sizeof(Col) );
   if (res == NULL)
   {
-    printf("malloc failed for colour strip\n");
+    fprintf(stderr,"malloc failed for colour strip\n");
     exit(1);
   }
   res[0] = BLACK;
@@ -225,4 +232,81 @@ int i;
   return(res);
 }
   
+/*}}}*/
+/*{{{  Col *camera( Height *a, Col *c ) */
+Col *camera( Height *a, Col *c )
+{
+  int i, j, coord, last;
+  Col *res, last_col;
+
+  res = (Col *) malloc( height * sizeof(Col) );
+  if( res == NULL )
+  {
+    fprintf(stderr,"malloc failed for picture strip\n");
+    exit(1);
+  }
+#if FALSE
+  for(j=0 ; j<height ; j++)
+  {
+    res[j] = SKY;
+  }
+  for( i=width-1 ; i >= 0 ; i-- )
+  {
+    if( a[i] < sealevel )
+    {
+      a[i] = sealevel;
+    }
+    coord = project( i, a[i] );
+    for(j=0; j<= coord ; j++)
+    {
+      res[j] = c[i];
+    }
+  }
+#else
+  last = height;
+  last_col = SKY;
+  for( i=width-1 ; i >= 0 ; i-- )
+  {
+    if( a[i] < sealevel )
+    {
+      a[i] = sealevel;
+    }
+    coord = 1 + project( i, a[i] );
+    if( last > coord )
+    {
+      for( j=coord; j < last ; j++ )
+      {
+        res[j] = last_col;
+      }
+    }
+    last = coord;
+    last_col = c[i];
+  }
+  for( j=0 ; j < last ; j++)
+  {
+    res[j] = c[0];
+  }
+#endif
+  return(res);
+}
+/*}}}*/
+/*{{{  int project( int x , Height y ) */
+int project( int x , Height y )
+{
+  double theta;
+  int pos;
+  
+  theta = atan( (double) ((viewheight - y)/( x - viewpos)) );
+  theta = theta - vangle;
+  pos = (height/2) - (focal * tan( theta));
+  if( pos > (height-1))
+  {
+    pos = height-1;
+  }
+  if( pos < 0 )
+  {
+    pos = 0;
+  }
+  return( pos );
+}
 /*}}}*/
