@@ -1,4 +1,4 @@
-/* $Id: crinkle.h,v 2.1 1994/07/01 12:03:27 spb Exp $ */
+/* $Id: crinkle.h,v 2.2 1994/10/27 14:04:15 spb Exp $ */
 #ifndef CRINKLE
 #define CRINKLE
 /*{{{  typedefs */
@@ -60,7 +60,7 @@ void free_strip (Strip *);
 Strip *double_strip (Strip *);
 Strip *set_strip (int , Height );
 Strip *next_strip (Fold *);
-Fold *make_fold (int, int, Length)
+Fold *make_fold (Parm *,int, int, Length)
 void free_fold (Fold *);
 Length gaussian ();
 void x_update(int, float, float, Strip *, Strip *, Strip *);
