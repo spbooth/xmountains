@@ -7,7 +7,7 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.28 1994/04/05 21:27:26 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.29 1994/04/07 11:23:24 spb Exp $";
 #define SIDE 1.0
 #ifndef PI
 #define PI 3.14159265
@@ -16,6 +16,7 @@ char artist_Id[] = "$Id: artist.c,v 1.28 1994/04/05 21:27:26 spb Exp $";
 float vstrength; /* strength of vertical light source */
 float lstrength; /* strength of vertical light source */
 int base=0;      /* parity flag for mirror routine */
+float uni();
 /*{{{  void set_clut(Gun *red, Gun *green, Gun *blue)*/
 /*
  * setup the colour lookup table
@@ -56,7 +57,7 @@ Gun *blue;
   green[WHITE]     = COL_RANGE;
   blue[WHITE]      = COL_RANGE;
   /*}}}*/
-  /*{{{  sky */
+  /*{{{  sky*/
   red[SKY]         = 0.404*COL_RANGE;
   green[SKY]       = 0.588*COL_RANGE;
   blue[SKY]        = COL_RANGE;
@@ -463,11 +464,7 @@ Height *shadow;
   pivot=2.0*sealevel;
   for(i=width-1;i>0;i--)
   {
-    if(a[i]<sealevel)
-    {
-      a[i]=sealevel;
-    }
-    if(map[i]==SEA_LIT || map[i]==SEA_UNLIT)
+    if(map[i] < BAND_BASE)
     {
       /*{{{stipple water values*/
       for(j=last_bottom;j<=last_top;j++)
@@ -479,16 +476,23 @@ Height *shadow;
       last_bottom=height;
       last_top=-1;
       /* fill in water values */
-      coord=1+project(i,a[i]);
-      for(j=base;j<coord;j+=2)
+      coord=1+project(i,sealevel);
+      for(j=0;j<coord;j++)
       {
-        res[j]=map[i];
+        /* do not print on every other point
+         * if the current value is a land value
+         */
+        if( (j+base)%2 || (res[j]<BAND_BASE) )
+        {
+          res[j]=map[i];
+        }
       }
       /* skip any adjacent bits of water with the same colour */
       while(map[i]==last_col)
       {
         i--;
       }
+      i++;  /* the end of the for loop will decrement as well */
       /*}}}*/
     }else{
       /*{{{draw land values*/
@@ -514,7 +518,7 @@ Height *shadow;
         }
         if(bottom > last_bottom)
         {
-          for(j=last_bottom;j<=bottom;j++)
+          for(j=last_bottom;j<bottom;j++)
           {
             res[j]=last_col;
           }
@@ -533,9 +537,10 @@ Height *shadow;
   }
   if( a[0] < sealevel )
   {
-    a[0] = sealevel;
+    coord=1+project(0,sealevel);
+  }else{
+    coord=1+project(0,a[0]);
   }
-  coord=1+project(0,a[0]);
   for(j=0;j<coord;j++)
   {
     res[j] = map[0];
