@@ -4,11 +4,12 @@
 #include "paint.h"
 #include "global.h"
 #include "patchlevel.h"
+#include "copyright.h"
 
 #define SIDE 1.0
 #define VERSION 1
 
-char scroll_Id[]="$Id: xmountains.c,v 1.12 1994/01/24 10:52:33 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.13 1994/01/24 14:31:26 spb Exp $";
 
 extern char *display;
 extern char *geom;
@@ -220,7 +221,7 @@ char **argv;
   if( errflg )
   {
     fprintf(stderr,"%s: version %d.%d\n",argv[0],VERSION,PATCHLEVEL);
-    fprintf(stderr,"usage, %s -[bxmslrftISTRapgd]\n",argv[0]);
+    fprintf(stderr,"usage: %s -[bxmslrftISTRapgd]\n",argv[0]);
     fprintf(stderr," -b       [%s] use root window \n",mesg[root]);
     fprintf(stderr," -x       [%s] flat start \n",mesg[1-frac_start]);
     fprintf(stderr," -m       [%s] print map \n",mesg[map]);
