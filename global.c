@@ -7,7 +7,7 @@ int stop = 2;
 int smooth = TRUE;
 int frac_start = TRUE;
 int slope = TRUE;
-int snooze_time = 0;
+int snooze_time = 1;
 #ifdef USE_E_EVENTS
 int e_events = FALSE;
 #else
