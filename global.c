@@ -6,9 +6,10 @@ Fold *top;
 int levels = 10;
 int smooth = TRUE;
 float fdim = 0.65;
-float start=0.0;  /* starting value for the surface */
-float mean=0.0;
+float start;      /* starting value for the surface */
+float mean=0.0;   /* mean value of surface */
 float varience;   /* rough estimate of the height of the range */
+float shift;      /* offset from calcalt to artist coordinates */
 float contour = 0.3;
 float contrast = 1.0;
 double phi=(45.0 * PI)/180.0; /* angle of the light */
@@ -23,12 +24,13 @@ unsigned char red[256] ,green[256], blue[256];
  * viewport parameters
  */
 int height=768;   /* height of the screen */
-double vangle=(30.0 * PI)/180.0;    /* view angle 0 == horizontal
+double vangle=(30 * PI)/180.0;    /* view angle 0 == horizontal
                                      *increase to look down
                                      */
-float vscale = 0.2;           /* rescale physical height by this amount. */
-float viewpos=-1000.0;        /* position of viewpoint */
-float viewheight=1000.0;      /* height of viewpoint */
+double tan_vangle;                                     
+float vscale;           /* rescale physical height by this amount. */
+float viewpos;        /* position of viewpoint */
+float viewheight;      /* height of viewpoint */
 float focal;                  /* focal length, calc to preserve aspect ratio */
 
 Height *shadow;               /* height of the shadows */
