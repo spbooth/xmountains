@@ -6,7 +6,7 @@ int levels = 10;
 int stop = 2;
 int smooth = 1;
 int cross = TRUE;
-int slope = TRUE;
+int slope = 1;
 int snooze_time = 10;
 int n_col=MAX_COL;
 int band_size=BAND_SIZE;
@@ -46,6 +46,7 @@ double tan_phi;
 double x_fact;
 double y_fact;
 Height sealevel = 0.0;
+Height forceheight  = -1.0;
 int width;        /* width of the landscape, (function of levels) */
 int seed=0;       /* zero means read the clock */
 

@@ -2,8 +2,11 @@
 #include<X11/Xlib.h>
 #include<X11/Xutil.h>
 #include<X11/Xatom.h>
+#ifdef VROOT
+#include"vroot.h"
+#endif
 #include "paint.h"
-char X_graphics_Id[]="$Id: X_graphics.c,v 1.19 1994/04/05 14:01:35 spb Exp $";
+char X_graphics_Id[]="$Id: X_graphics.c,v 1.20 1995/01/20 15:13:06 spb Exp $";
 
 char *display=NULL;       /* name of display to open, NULL for default */
 char *geom=NULL;          /* geometry of window, NULL for default */
@@ -89,9 +92,10 @@ int snooze;
 	  }
 	  break;
         default:
-            fprintf(stderr,"unrecognized event %d\n",event.type);
-            XCloseDisplay(dpy);
-            exit(1);
+            fprintf(stderr,"xmountains: unrecognized event %d\n",event.type);
+            /* XCloseDisplay(dpy);
+             * exit(1);
+             */
             break;
     }
   }
@@ -342,6 +346,12 @@ Gun *blue;
   if( use_background && use_root )
   {
     XSetWindowBackgroundPixmap(dpy,win,None);
+  }
+  if( use_root )
+  {
+    /* in case of virtual window manager set to size of display */
+    graph_width = DisplayWidth(dpy,screen);
+    graph_height = DisplayHeight(dpy,screen);
   }
   pix = XCreatePixmap(dpy,win,graph_width,graph_height,depth);
 

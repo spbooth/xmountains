@@ -37,6 +37,7 @@ extern double tan_phi;
 extern double x_fact;
 extern double y_fact;
 extern Height sealevel;
+extern Height forceheight;
 extern int width;
 extern int seed;
 extern unsigned char red[256] ,green[256], blue[256];

@@ -9,7 +9,7 @@
 #define VERSION 2
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.28 1994/10/27 14:03:04 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.29 1995/01/20 15:13:06 spb Exp $";
 
 extern char *display;
 extern char *geom;
@@ -275,11 +275,12 @@ char **argv;
   extern int optind;
   char *mesg[2];
   Gun *clut[3];
+  FILE *pidfile;
 
   /*{{{handle command line flags*/
   mesg[0]="false";
   mesg[1]="true";
-  while((c = getopt(argc,argv,"bxmqMEHl:r:f:t:I:A:S:T:C:a:p:B:R:g:d:c:e:v:Z:s:X:Y:"))!= -1)
+  while((c = getopt(argc,argv,"bxmqMEHl:r:f:t:I:A:S:T:W:C:a:p:B:R:g:d:c:e:v:Z:s:X:Y:P:F:G:"))!= -1)
   {
     switch(c){
       case 'b':
@@ -306,6 +307,9 @@ char **argv;
          {
            levels = 2;
          }
+         break;
+      case 'F':                     /* Set # levels to force front to mean */
+         slope = atoi( optarg );
          break;
       case 's':                     /* Set # levels of recursion */
          smooth = atoi( optarg );
@@ -352,6 +356,16 @@ char **argv;
            snooze_time = 0;
          }
          break;
+      case 'P':
+         pidfile = fopen(optarg,"w");
+         if( pidfile )
+         {
+           fprintf(pidfile,"%d\n",getpid());
+           fclose(pidfile);
+         }else{
+           perror(optarg);
+         }
+         break;
       case 'f':                     /* set fractal dimension */
          fdim = atof( optarg );
          if( fdim < 0.5 )
@@ -385,6 +399,9 @@ char **argv;
            alpha = PI/3.0;
          }
          break;
+      case 'G':                     /* set forceheight */
+         forceheight = atof( optarg );
+         break;
       case 'X':                     /* set mix */
          mix = atof( optarg );
          break;
@@ -393,6 +410,12 @@ char **argv;
          break;
       case 'S':                     /* set stretch */
          stretch = atof( optarg );
+         break;
+      case 'W':                     /* set sealevel */
+         sealevel = atof( optarg );
+         break;
+      case 'W':                     /* set sealevel */
+         forceheight = atof( optarg );
          break;
       case 'T':                     /* set shift */
          shift = atof( optarg );
@@ -448,11 +471,12 @@ char **argv;
   if( errflg )
   {
     fprintf(stderr,"%s: version %d.%d\n",argv[0],VERSION,PATCHLEVEL);
-    fprintf(stderr,"usage: %s -[bqgdEmMrBZIASTCapcevfRltxsXYH]\n",argv[0]);
+    fprintf(stderr,"usage: %s -[bqgdPEmMrBZIASFTCapcevfRltxsXYH]\n",argv[0]);
     fprintf(stderr," -b       [%s] use root window \n",mesg[root]);
     fprintf(stderr," -q       [%s] reset root window on exit\n",mesg[request_clear]);
     fprintf(stderr," -g string     window geometry\n");
     fprintf(stderr," -d string     display\n");
+    fprintf(stderr," -P filename   write PID to file\n");
     fprintf(stderr," -E       [%s] toggle explicit expose events \n",mesg[e_events]);
     fprintf(stderr," -m       [%s] print map \n",mesg[map]);
     fprintf(stderr," -M       [%s] implement reflections \n",mesg[reflec]);
@@ -463,6 +487,10 @@ char **argv;
     fprintf(stderr," -A float [%f] horizontal angle of light \n",(alpha*180.0)/PI);
     fprintf(stderr," -S float [%f] vertical stretch \n",stretch);
     fprintf(stderr," -T float [%f] vertical shift \n",shift);
+    fprintf(stderr," -W float [%f] sealevel \n",sealevel);
+    fprintf(stderr," -F int   [%d] reduce variation in the foreground \n",slope);
+    fprintf(stderr," -w float [%f] mean foreground height \n",forceheight);
+    fprintf(stderr," -G float [%f] average foreground height \n",forceheight);
     fprintf(stderr," -C float [%f] contour parameter \n",contour);
     fprintf(stderr," -a float [%f] altitude of viewpoint \n",altitude);
     fprintf(stderr," -p float [%f] distance of viewpoint \n",distance);

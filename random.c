@@ -10,7 +10,7 @@
 
 
 
-char uni_id[] = "$Id: random.c,v 1.5 1994/01/24 10:42:21 spb Rel $" ;
+char uni_id[] = "$Id: random.c,v 1.6 1995/01/20 15:13:06 spb Exp $" ;
 /*
  *	Global variables for rstart & uni
  */
