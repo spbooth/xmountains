@@ -16,6 +16,7 @@ extern float stretch;
 extern float contour;
 extern float ambient;
 extern float contrast;
+extern float vfract;
 extern float altitude;
 extern float distance;
 extern double phi;

@@ -4,7 +4,7 @@
 #include<X11/Xatom.h>
 #include "paint.h"
 
-char X_graphics_Id[]="$Id: X_graphics.c,v 1.13 1994/01/24 14:12:54 spb Rel $";
+char X_graphics_Id[]="$Id: X_graphics.c,v 1.14 1994/02/04 20:17:32 spb Exp $";
 
 char *display=NULL;       /* name of display to open, NULL for default */
 char *geom=NULL;          /* geometry of window, NULL for default */
@@ -124,6 +124,26 @@ void finish_graphics()
     fprintf(stderr,"WARNING: %d events still pending\n",count);
   }
   XCloseDisplay(dpy);
+}
+/*}}}*/
+
+/*{{{void blank_region(lx,ly,ux,uy)*/
+void blank_region(lx,ly,ux,uy)
+int lx,ly,ux,uy;
+{
+  if( depth < 4 )
+  {
+    /* use a textured gray sky on monochrome displays
+     * we may need this on any low-depth display
+     */
+    XSetForeground(dpy,gc,WhitePixel(dpy,screen));
+    XSetFillStyle(dpy,gc,FillOpaqueStippled);
+    XFillRectangle(dpy,pix,gc,lx,ly,ux,uy);
+    XSetFillStyle(dpy,gc,FillSolid);
+  }else{
+    XSetForeground(dpy,gc,table[SKY].pixel);
+    XFillRectangle(dpy,pix,gc,lx,ly,ux,uy);
+  }
 }
 /*}}}*/
 
@@ -269,8 +289,7 @@ Gun *blue;
 
 
 /*}}}*/
-  XSetForeground(dpy,gc,BlackPixel(dpy,screen));
-  XFillRectangle(dpy,pix,gc,0,0,graph_width,graph_height); 
+  blank_region(0,0,graph_width,graph_height); 
   if( ! use_root )
   {
     XMapWindow(dpy, win );
@@ -295,19 +314,7 @@ int dist;
   /* copy the data */
   XCopyArea(dpy,pix,pix,gc,dist,0,graph_width-dist,graph_height,0,0);
   /* blank new region */
-  if( depth < 4 )
-  {
-    /* use a textured gray sky on monochrome displays
-     * we may need this on any low-depth display
-     */
-    XSetForeground(dpy,gc,WhitePixel(dpy,screen));
-    XSetFillStyle(dpy,gc,FillOpaqueStippled);
-    XFillRectangle(dpy,pix,gc,graph_width-dist,0,dist,graph_height);
-    XSetFillStyle(dpy,gc,FillSolid);
-  }else{
-    XSetForeground(dpy,gc,table[SKY].pixel);
-    XFillRectangle(dpy,pix,gc,graph_width-dist,0,dist,graph_height);
-  }
+  blank_region(graph_width-dist,0,dist,graph_height);
   /* update the window to match */
   XCopyArea(dpy,pix,win,gc,0,0,graph_width,graph_height,0,0);
 

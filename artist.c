@@ -7,11 +7,14 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.19 1994/01/24 20:29:58 spb Rel $";
+char artist_Id[] = "$Id: artist.c,v 1.20 1994/02/04 20:17:32 spb Exp $";
 #define SIDE 1.0
 #ifndef PI
 #define PI 3.14159265
 #endif
+
+float vstrength; /* strength of vertical light source */
+float lstrength; /* strength of vertical light source */
 
 /*{{{  void set_clut(Gun *red, Gun *green, Gun *blue)*/
 /*
@@ -59,13 +62,13 @@ Gun *blue;
   /*}}}*/
   /*{{{  sea (lit) */
   red[SEA_LIT]     = 0;
-  green[SEA_LIT]   = 0.416*COL_RANGE;
-  blue[SEA_LIT]    = 0.941*COL_RANGE;
+  green[SEA_LIT]   = 0.500*COL_RANGE;
+  blue[SEA_LIT]    = 0.700*COL_RANGE;
   /*}}}*/
   /*{{{  sea (unlit) */
   red[SEA_UNLIT]   = 0;
-  green[SEA_UNLIT] = (ambient*0.416)*COL_RANGE;
-  blue[SEA_UNLIT]  = (ambient*0.941)*COL_RANGE;
+  green[SEA_UNLIT] = ((ambient+(vfract/(1.0+vfract)))*0.500)*COL_RANGE;
+  blue[SEA_UNLIT]  = ((ambient+(vfract/(1.0+vfract)))*0.700)*COL_RANGE;
   /*}}}*/
   for( band=0 ; band<N_BANDS; band++)
   {
@@ -201,6 +204,10 @@ void init_artist_variables()
   shadow = extract(next_strip(top));
   a_strip = extract( next_strip(top) ); 
   b_strip = extract( next_strip(top) );
+
+  /* initialise the light strengths */
+  vstrength = vfract * contrast /( 1.0 + vfract );
+  lstrength = contrast /( 1.0 + vfract );
 }
 /*}}}*/
 /*{{{  Col get_col(Height p, Height p_minus_x, Height p_plus_y, Height shadow) */
@@ -217,11 +224,11 @@ Height shadow;
   Height delta_x_sqr, delta_y_sqr;
   Height hypot_sqr;
   
-  double cos_theta;         /* angle between the normal and the ray */
+  double norm, dshade;
   Height effective;
   Col result;
   int band, shade;
-  /*{{{  if underwater */
+  /*{{{  if underwater*/
   if ( p < sealevel )
   {
     if( shadow > sealevel )
@@ -232,12 +239,33 @@ Height shadow;
     }
   }
   /*}}}*/
+  /*
+   * We have three light sources, one slanting in from the left
+   * one directly from above and an ambient light.
+   * For the directional sources illumination is proportional to the
+   * cosine between the normal to the surface and the light.
+   *
+   * The surface contains two vectors
+   * ( 1, 0, delta_x )
+   * ( 0, 1, delta_y )
+   *
+   * The normal therefore is parallel to
+   * (  -delta_x, -delta_y, 1)
+   *
+   * normalised by
+   * For light parallel to ( cos_phi, 0, -sin_phi) the cosine is
+   *        (cos_phi*delta_x + sin_phi)/sqrt( 1 + delta_x^2 + delta_y^2)
+   * For vertical light the cosine is
+   *        1 / sqrt( 1 + delta_x^2 + delta_y^2)
+   */
+   
   delta_x = p - p_minus_x;
   delta_y = p_plus_y - p;
   delta_x_sqr = delta_x * delta_x;
   delta_y_sqr = delta_y * delta_y;
   hypot_sqr = delta_x_sqr + delta_y_sqr;
-  
+  norm = sqrt( 1.0 + hypot_sqr );
+
   /*{{{  calculate effective height */
   effective = (p + (varience * contour *
           (1.0/ ( 1.0 + hypot_sqr))));
@@ -254,26 +282,39 @@ Height shadow;
   }
   result = (BAND_BASE + (band * BAND_SIZE));
   /*}}}*/
-  /*{{{  if in shadow */
-  if( p < shadow )
+
+  /*{{{calculate the illumination stength*/
+  /*
+   * add in a contribution for the vertical light. The normalisation factor
+   * is applied later
+   *
+   */
+  dshade = vstrength;
+  
+  if( p >= shadow )
   {
-    return(result);
+    /*
+     * add in contribution from the main light source
+     */
+    dshade += ((double) lstrength * ((delta_x * cos_phi) + sin_phi));
   }
-  /*}}}*/
-  /*{{{  calculate cosine */
-  cos_theta = ((delta_x * cos_phi) + sin_phi)/
-              sqrt( 1.0 + hypot_sqr );
+  /* divide by the normalisation factor (the same for both light sources) */
+  dshade /= norm;
   /*}}}*/
   /*{{{  calculate shading */
-  shade = ((double) contrast * cos_theta) * (double) BAND_SIZE;
+  /* dshade should be in the range 0.0 -> 1.0
+   * if the light intensities add to 1.0
+   * now convert to an integer
+   */
+  shade = dshade * (double) BAND_SIZE;
   if( shade > (BAND_SIZE-1))
   {
     shade = (BAND_SIZE-1);
   }
-  /*{{{  if cos_theta is negative then point is really in shadow */
+  /*{{{  if shade is negative then point is really in deep shadow */
   if( shade < 0 )
   {
-    shade = 0;
+      shade = 0;
   }
   /*}}}*/
   /*}}}*/

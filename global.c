@@ -14,9 +14,12 @@ float varience;   /* rough estimate of the height of the range */
 float shift=0.5;      /* offset from calcalt to artist coordinates */
 float stretch=0.6;   /* vertical stretch */
 float contour = 0.3;
-float ambient = 0.6;  /* level of ambient light */
+float ambient = 0.49;  /* level of ambient light */
 float contrast = 1.0; /* contrast,
                        * increases or decreases effect of cosine rule */
+float vfract   = 0.4; /* relative strength of vertical light relative
+                        * to the main light source
+                        */
 float altitude = 2.5;
 float distance = 4.0;
 double phi=(45.0 * PI)/180.0; /* angle of the light */

@@ -9,7 +9,7 @@
 #define SIDE 1.0
 #define VERSION 1
 
-char scroll_Id[]="$Id: xmountains.c,v 1.14 1994/01/24 20:29:58 spb Rel $";
+char scroll_Id[]="$Id: xmountains.c,v 1.15 1994/02/04 20:17:32 spb Exp $";
 
 extern char *display;
 extern char *geom;
@@ -127,28 +127,66 @@ void scroll_screen ();
 
 void finish_prog();
 
+int s_height=768, s_width=1024;
+int mapwid;
+
+
+void plot_column(p,map)
+int p;
+int map;
+{
+  Col *l;
+  int j;
+  
+  l = next_col(1-map); 
+  if( map )
+  {
+    for(j=0; j<mapwid ; j++)
+    {
+      plot_pixel(p,((mapwid-1)-j),l[j]);
+    }
+    for( j=0 ;j<(s_height-mapwid); j++)
+    {
+      plot_pixel(p,((s_height-1)-j),BLACK);
+    }
+  }else{
+    for(j=0 ; j<height ; j++)
+    {
+      /* we assume that the scroll routine fills the
+       * new region with a SKY value. This allows us to
+       * use a testured sky for B/W displays
+       */
+      if( l[j] != SKY )
+      {
+        plot_pixel(p,((s_height-1)-j),l[j]);
+      }
+    }
+    free(l);
+  }
+  flush_region(p,0,1,height,p,0);
+  zap_events();
+}
+
 main (argc,argv)
 int argc;
 char **argv;
 {
-  int s_height=768, s_width=1024;
   int i,j,p,code;
-  Col *l;
 
   int repeat=20;
   int map = 0;
   int root= 0;
 
   int c, errflg=0;
-  int mapwid;
   extern char *optarg;
   extern int optind;
   char *mesg[2];
   Gun red[MAX_COL], green[MAX_COL], blue[MAX_COL];
 
+  /*{{{handle command line flags*/
   mesg[0]="false";
   mesg[1]="true";
-  while((c = getopt(argc,argv,"bxmsl:r:f:t:I:S:T:a:p:R:g:d:c:e:"))!= -1)
+  while((c = getopt(argc,argv,"bxmsl:r:f:t:I:S:T:a:p:R:g:d:c:e:v:"))!= -1)
   {
     switch(c){
       case 'b':
@@ -243,6 +281,13 @@ char **argv;
           ambient=1.0;
          }
          break;
+      case 'v':
+         vfract = atof( optarg );
+         if( vfract < 0.0 )
+         {
+          vfract = 0.0;
+         }
+         break;
       case 'g':
          geom = optarg;
          break;
@@ -273,15 +318,16 @@ char **argv;
     fprintf(stderr," -p float [%f] distance of viewpoint \n",distance);
     fprintf(stderr," -c float [%f] contrast\n",contrast);
     fprintf(stderr," -e float [%f] ambient light level\n",ambient);
+    fprintf(stderr," -v float [%f] vertical light level\n",vfract);
     fprintf(stderr," -g string     window geometry\n");
     fprintf(stderr," -d string     display\n");
     exit(1);
   }
+  /*}}}*/
   set_clut(red, green, blue);
   init_graphics(root,&s_width,&s_height,MAX_COL,red,green,blue);
 
   height = s_height;
-
     
   seed_uni(seed);
 
@@ -313,42 +359,21 @@ char **argv;
   }else{
     mapwid=s_height;
   }
+  for(p=0 ; p < s_width ; p++)
+  {
+    plot_column(p,map);
+  }
   while( TRUE )
   {
       /* do the scroll */
       scroll_screen(repeat);
       for( p = s_width - repeat ; p < s_width ; p++ )
       {
-        l = next_col(1-map); 
-        if( map )
-        {
-          for(j=0; j<mapwid ; j++)
-          {
-            plot_pixel(p,((mapwid-1)-j),l[j]);
-          }
-          for( j=0 ;j<(s_height-mapwid); j++)
-          {
-            plot_pixel(p,((s_height-1)-j),BLACK);
-          }
-        }else{
-          for(j=0 ; j<height ; j++)
-          {
-            /* we assume that the croll routine fills the
-             * new region with a SKY value. This allows us to
-             * use a testured sky for B/W displays
-             */
-            if( l[j] != SKY )
-            {
-              plot_pixel(p,((s_height-1)-j),l[j]);
-            }
-          }
-          free(l);
-        }
-        flush_region(p,0,1,height,p,0);
-        zap_events();
+        plot_column(p,map);
       }
   }
 }
+
     
 extern int quit_xmount;
 

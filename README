@@ -6,7 +6,7 @@ generated area.
 
 
 
-./xmountains: version 1.1
+./xmountains: version 1.2
 usage: ./xmountains -[bxmslrftISTRapcegd]
  -b       [false] use root window 
  -x       [false] flat start 
@@ -23,7 +23,8 @@ usage: ./xmountains -[bxmslrftISTRapcegd]
  -a float [2.500000] altitude of viewpoint 
  -p float [4.000000] distance of viewpoint 
  -c float [1.000000] contrast
- -e float [0.500000] ambient light level
+ -e float [0.490000] ambient light level
+ -v float [0.400000] vertical light level
  -g string     window geometry
  -d string     display
 
