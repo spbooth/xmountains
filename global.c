@@ -10,6 +10,7 @@ int slope = TRUE;
 int snooze_time = 10;
 int n_col=MAX_COL;
 int band_size=BAND_SIZE;
+int request_clear = FALSE;
 #ifdef USE_E_EVENTS
 int e_events = FALSE;
 #else

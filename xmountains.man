@@ -2,7 +2,7 @@
 .ds Rv \\$3
 .ds Dt \\$4
 ..
-.Id $Id: xmountains.man,v 1.7 1994/02/18 14:19:01 spb Exp $
+.Id $Id: xmountains.man,v 1.8 1994/02/24 11:08:03 spb Exp $
 .ds r \s-1RCS\s0
 .if n .ds - \%--
 .if t .ds - \(em
@@ -28,6 +28,12 @@ Flags:
 .B \-b 
 .RS
 Use the root window.
+.RE
+.br
+.B \-q 
+.RS
+Reset the root window when the program exits. This option is ignored
+unless the program is using the root window.
 .RE
 .br
 .B \-x 

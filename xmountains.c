@@ -9,7 +9,7 @@
 #define VERSION 1
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.21 1994/02/18 14:19:01 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.22 1994/02/24 11:08:03 spb Exp $";
 
 extern char *display;
 extern char *geom;
@@ -189,7 +189,7 @@ char **argv;
   /*{{{handle command line flags*/
   mesg[0]="false";
   mesg[1]="true";
-  while((c = getopt(argc,argv,"bxmsEl:r:f:t:I:S:T:C:a:p:B:R:g:d:c:e:v:Z:"))!= -1)
+  while((c = getopt(argc,argv,"bxmsqEl:r:f:t:I:S:T:C:a:p:B:R:g:d:c:e:v:Z:"))!= -1)
   {
     switch(c){
       case 'b':
@@ -200,6 +200,9 @@ char **argv;
         break;
       case 'E':
         e_events = 1 - e_events;
+        break;
+      case 'q':
+        request_clear = 1 - request_clear;
         break;
       case 'x':                     /* Toggle fractal Start */
         frac_start = 1 - frac_start;
@@ -324,8 +327,9 @@ char **argv;
   if( errflg )
   {
     fprintf(stderr,"%s: version %d.%d\n",argv[0],VERSION,PATCHLEVEL);
-    fprintf(stderr,"usage: %s -[bxmsElrftISTCBZRapcevgd]\n",argv[0]);
+    fprintf(stderr,"usage: %s -[bqxmsElrftISTCBZRapcevgd]\n",argv[0]);
     fprintf(stderr," -b       [%s] use root window \n",mesg[root]);
+    fprintf(stderr," -q       [%s] reset root window on exit\n",mesg[request_clear]);
     fprintf(stderr," -x       [%s] flat start \n",mesg[1-frac_start]);
     fprintf(stderr," -m       [%s] print map \n",mesg[map]);
     fprintf(stderr," -s       [%s] toggle smoothing \n",mesg[smooth]);
@@ -362,7 +366,7 @@ char **argv;
     }
   }
   set_clut(n_col,clut[0], clut[1], clut[2]);
-  init_graphics(root,(! e_events),&s_width,&s_height,n_col,clut[0],clut[1],clut[2]);
+  init_graphics(root,(! e_events),request_clear,&s_width,&s_height,n_col,clut[0],clut[1],clut[2]);
   for(i=0;i<3;i++)
   {
     free(clut[i]);

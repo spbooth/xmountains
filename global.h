@@ -8,6 +8,7 @@ extern int smooth;
 extern int frac_start;
 extern int slope;
 extern int snooze_time;
+extern int request_clear;
 extern int n_col;
 extern int band_size;
 extern int e_events;

@@ -6,8 +6,9 @@ generated area.
 
 
 ./xmountains: version 1.3
-usage: ./xmountains -[bxmsElrftISTCBZRapcevgd]
+usage: ./xmountains -[bqxmsElrftISTCBZRapcevgd]
  -b       [false] use root window 
+ -q       [false] reset root window on exit
  -x       [false] flat start 
  -m       [false] print map 
  -s       [true] toggle smoothing 

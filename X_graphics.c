@@ -3,7 +3,7 @@
 #include<X11/Xutil.h>
 #include<X11/Xatom.h>
 #include "paint.h"
-char X_graphics_Id[]="$Id: X_graphics.c,v 1.17 1994/02/22 12:58:44 spb Exp $";
+char X_graphics_Id[]="$Id: X_graphics.c,v 1.18 1994/02/24 11:08:03 spb Exp $";
 
 char *display=NULL;       /* name of display to open, NULL for default */
 char *geom=NULL;          /* geometry of window, NULL for default */
@@ -23,6 +23,7 @@ Atom wm_delete_window;
   unsigned int graph_height;
   Window parent, win, root;
   int use_root=FALSE;
+  int do_clear=FALSE;
   int pixmap_installed=FALSE;
   
 #include <X11/bitmaps/gray>
@@ -125,15 +126,26 @@ void finish_graphics()
   XFreePixmap(dpy,pix);
   XFreeGC(dpy,gc);
   XFreePixmap(dpy,stip);
+
   /* reset things if this was the root window. */
   if( use_root )
   {
-    XGetGeometry(dpy,win,&root,&x,&y,&graph_width,&graph_height,&border,&depth);
-    XClearArea(dpy,win,0,0,graph_width,graph_height,FALSE);
-    attmask = 0;
-    attmask |= CWColormap;
-    attributes.colormap = defaultmap;
-    XChangeWindowAttributes(dpy,win,attmask,&attributes);
+    if( pixmap_installed &&  do_clear )
+    {
+      /* restore default pixmap for the root window */
+      XSetWindowBackgroundPixmap(dpy,win,ParentRelative);
+      XClearWindow(dpy,win);
+    }else{
+      XGetGeometry(dpy,win,&root,&x,&y,&graph_width,&graph_height,&border,&depth);
+      XClearArea(dpy,win,0,0,graph_width,graph_height,FALSE);
+    }
+    if( map != defaultmap )
+    {
+      attmask = 0;
+      attmask |= CWColormap;
+      attributes.colormap = defaultmap;
+      XChangeWindowAttributes(dpy,win,attmask,&attributes);
+    }
   }
   if( map != defaultmap )
   {
@@ -168,9 +180,10 @@ int lx,ly,ux,uy;
 /*}}}*/
 
 /*{{{void init_graphics( ... )*/
-void init_graphics( want_use_root, use_background, s_graph_width,s_graph_height,ncol,red,green,blue )
+void init_graphics( want_use_root, use_background, want_clear, s_graph_width,s_graph_height,ncol,red,green,blue )
 int want_use_root;    /* display on the root window */
 int  use_background;  /* install the pixmap as the background-pixmap */
+int want_clear;
 int *s_graph_width;
 int *s_graph_height;
 int ncol;
@@ -199,6 +212,7 @@ Gun *blue;
 
 /*}}}*/
 
+  do_clear = want_clear;
   use_root = want_use_root;
   pixmap_installed = use_background;
   graph_width = *s_graph_width;
@@ -316,6 +330,14 @@ Gun *blue;
   gcv.graphics_exposures = FALSE;
   
   gc = XCreateGC(dpy,win,gcvmask,&gcv);
+
+  /* if we are going to install this as a root pixmap, throw away
+   * the old one FIRST. this reduces fragmentation
+   */
+  if( use_background && use_root )
+  {
+    XSetWindowBackgroundPixmap(dpy,win,None);
+  }
   pix = XCreatePixmap(dpy,win,graph_width,graph_height,depth);
 
 /*}}}*/
