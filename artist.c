@@ -7,7 +7,7 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.22 1994/02/07 11:34:39 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.23 1994/02/07 14:08:15 spb Exp $";
 #define SIDE 1.0
 #ifndef PI
 #define PI 3.14159265
@@ -332,9 +332,8 @@ Height shadow;
   return(result);
 }
 /*}}}*/
-/*{{{  Col *artist(Height *a, Height *b, Height *shadow) */
-/* Calculates a set of colours for the a strip */
-Col *artist (a,b,shadow)
+/*{{{  Col *makemap(Height *a, Height *b, Height *shadow) */
+Col *makemap (a,b,shadow)
 Height *a;
 Height *b;
 Height *shadow;
@@ -342,6 +341,7 @@ Height *shadow;
 Col *res;
 int i;
 
+  /* This routine returns a plan view of the surface */
   res = (Col *) malloc(width * sizeof(Col) );
   if (res == NULL)
   {
@@ -357,72 +357,58 @@ int i;
 }
   
 /*}}}*/
-/*{{{  Col *camera( Height *a, Col *c ) */
-Col *camera (a,c)
+/*{{{  Col *camera(Height *a, Height *b, Height *shadow) */
+Col *camera(a,b,shadow)
 Height *a;
-Col *c;
+Height *b;
+Height *shadow;
 {
   int i, j, coord, last;
-  Col *res, last_col;
+  Col *res, col;
 
+  /* this routine returns a perspective view of the surface */
   res = (Col *) malloc( height * sizeof(Col) );
   if( res == NULL )
   {
     fprintf(stderr,"malloc failed for picture strip\n");
     exit(1);
   }
-#if FALSE
-  /* very simple painters algorithm */
-  for(j=0 ; j<height ; j++)
-  {
-    res[j] = SKY;
-  }
-  for( i=width-1 ; i >= 0 ; i-- )
-  {
-    if( a[i] < sealevel )
-    {
-      a[i] = sealevel;
-    }
-    coord = project( i, a[i] );
-    for(j=0; j<= coord ; j++)
-    {
-      res[j] = c[i];
-    }
-  }
-#else
-  /* optimised painters algorithm */
-  last = height;
-  last_col = SKY;
-  for( i=width-1 ; i >= 0 ; i-- )
+  /*
+   * optimised painters algorithm
+   *
+   * scan from front to back, we can avoid calculating the
+   * colour if the point is not visable.
+   */
+  for( i=0, last=0 ; (i < width)&&(last < height) ; i++ )
   {
     if( a[i] < sealevel )
     {
       a[i] = sealevel;
     }
     coord = 1 + project( i, a[i] );
-    if( last > coord )
+    if( coord > last )
     {
-      if( c[i] == last_col )
+      /* get the colour of this point, the front strip should be black */
+      if( i==0 )
       {
-        /* if the colours are the same just ensure that
-         * last end up as the greater of the 2
-         */
-        coord = last;
+        col = BLACK;
       }else{
-        for( j=coord; j < last ; j++ )
-        {
-          res[j] = last_col;
-        }
+        col = get_col(b[i],a[i],b[i-1],shadow[i]);
+      }
+      if( coord > height )
+      {
+        coord = height;
+      }
+      for(;last<coord;last++)
+      {
+        res[last]=col;
       }
     }
-    last = coord;
-    last_col = c[i];
   }
-  for( j=0 ; j < last ; j++)
+  for(;last<height;last++)
   {
-    res[j] = c[0];
+    res[last]=SKY;
   }
-#endif
   return(res);
 }
 /*}}}*/

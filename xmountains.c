@@ -9,7 +9,7 @@
 #define SIDE 1.0
 #define VERSION 1
 
-char scroll_Id[]="$Id: xmountains.c,v 1.16 1994/02/07 11:34:25 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.17 1994/02/07 14:08:15 spb Exp $";
 
 extern char *display;
 extern char *geom;
@@ -79,10 +79,20 @@ Col *next_col (paint)
 int paint;
 {
   Col *res;
-  Col *map;
   int i;
   
-  map = artist(a_strip,b_strip,shadow);
+  /*{{{  update strips */
+  if(paint)
+  {
+    res = camera( a_strip,b_strip,shadow);
+  }else{
+    res = makemap(a_strip,b_strip,shadow);
+  }
+  free(a_strip);
+  a_strip=b_strip;
+  b_strip = extract( next_strip(top) );
+  /*}}}*/
+
   for(i=0 ; i<width ; i++)
   {
     shadow[i] -= (tan_phi * SIDE);
@@ -97,18 +107,6 @@ int paint;
     }
     /*}}}*/
   }
-  /*{{{  update strips */
-  if(paint)
-  {
-    res = camera( a_strip, map );
-    free(map);
-  }else{
-    res = map;
-  }
-  free(a_strip);
-  a_strip=b_strip;
-  b_strip = extract( next_strip(top) );
-  /*}}}*/
   return(res);
 }
 /*}}}*/
