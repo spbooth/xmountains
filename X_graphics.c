@@ -3,8 +3,7 @@
 #include<X11/Xutil.h>
 #include<X11/Xatom.h>
 #include "paint.h"
-
-char X_graphics_Id[]="$Id: X_graphics.c,v 1.15 1994/02/15 16:30:39 spb Exp $";
+char X_graphics_Id[]="$Id: X_graphics.c,v 1.16 1994/02/18 14:19:01 spb Exp $";
 
 char *display=NULL;       /* name of display to open, NULL for default */
 char *geom=NULL;          /* geometry of window, NULL for default */
@@ -32,7 +31,7 @@ Atom wm_delete_window;
   GC gc;
   Pixmap pix;
   Colormap map, defaultmap;
-  XColor table[MAX_COL];
+  XColor *table=NULL;
 void zap_events();
 void finish_graphics();
   
@@ -42,17 +41,11 @@ int snooze;
 {
   XEvent event;
   XExposeEvent *expose = (XExposeEvent *)&event;
-  int exw, exh;
+  int exw, exh, i;
 
 #ifndef NO_SLEEP
-  if( snooze )
-  {
-    /* this is very bad because it will prevent
-     * events being processed but I suppose it is better
-     * than being a CPU hog
-     */
-    sleep(snooze);
-  }
+  i=0;
+  do{
 #endif
   while( XPending(dpy) ){
     XNextEvent(dpy, &event);
@@ -101,6 +94,21 @@ int snooze;
     finish_artist();
     exit(0);
   }
+#ifndef NO_SLEEP
+    /* sleeping is very bad because it will prevent
+     * events being processed but I suppose it is better
+     * than being a CPU hog, as a compremise always check for
+     * events at least once a second, looping for longer sleep times.
+     * process the events before a sleep to make sure the screen is up to date.
+     * the events must always be processed at least once.
+     */
+    if( snooze )
+    {
+      sleep(1);
+    }
+    i++;
+  }while( i<snooze );
+#endif
 }
 /*}}}*/
   
@@ -211,9 +219,10 @@ Gun *blue;
   depth = DefaultDepth(dpy,screen);
 /*}}}*/
 /*{{{set colormap*/
-  if( ncol > MAX_COL )
+  table=(XColor *)malloc(ncol * sizeof(XColor));
+  if( NULL == table )
   {
-    fprintf(stderr,"INTERNAL ERROR too many colours requested %d > %d\n",ncol,MAX_COL);
+    fprintf(stderr,"malloc failed for colour table\n");
     exit(1);
   }
   for(i=0; i<ncol ; i++)

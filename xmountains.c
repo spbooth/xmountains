@@ -9,7 +9,7 @@
 #define VERSION 1
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.20 1994/02/15 17:53:37 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.21 1994/02/18 14:19:01 spb Exp $";
 
 extern char *display;
 extern char *geom;
@@ -184,12 +184,12 @@ char **argv;
   extern char *optarg;
   extern int optind;
   char *mesg[2];
-  Gun red[MAX_COL], green[MAX_COL], blue[MAX_COL];
+  Gun *clut[3];
 
   /*{{{handle command line flags*/
   mesg[0]="false";
   mesg[1]="true";
-  while((c = getopt(argc,argv,"bxmsEl:r:f:t:I:S:T:C:a:p:R:g:d:c:e:v:Z:"))!= -1)
+  while((c = getopt(argc,argv,"bxmsEl:r:f:t:I:S:T:C:a:p:B:R:g:d:c:e:v:Z:"))!= -1)
   {
     switch(c){
       case 'b':
@@ -231,6 +231,13 @@ char **argv;
           * a textured field for the sky.
           */
          repeat = (2 * ((repeat +1)/2));
+         break;
+      case 'B':                     /* set band_size */
+         band_size = atoi( optarg );
+         if( band_size < 2 )
+         {
+           band_size=2;
+         }
          break;
       case 'R':                     /* set seed, read clock if 0 */
          seed = atoi( optarg );
@@ -317,7 +324,7 @@ char **argv;
   if( errflg )
   {
     fprintf(stderr,"%s: version %d.%d\n",argv[0],VERSION,PATCHLEVEL);
-    fprintf(stderr,"usage: %s -[bxmsElrftISTCZRapcevgd]\n",argv[0]);
+    fprintf(stderr,"usage: %s -[bxmsElrftISTCBZRapcevgd]\n",argv[0]);
     fprintf(stderr," -b       [%s] use root window \n",mesg[root]);
     fprintf(stderr," -x       [%s] flat start \n",mesg[1-frac_start]);
     fprintf(stderr," -m       [%s] print map \n",mesg[map]);
@@ -326,8 +333,9 @@ char **argv;
     fprintf(stderr," -l int   [%d] # levels of recursion \n",levels);
     fprintf(stderr," -t int   [%d] # non fractal iterations \n",stop);
     fprintf(stderr," -r int   [%d] # columns before scrolling \n",repeat);
+    fprintf(stderr," -B int   [%d] # shades in a colour band\n",band_size);
     fprintf(stderr," -R int   [%d] rng seed, read clock if 0 \n",seed);
-    fprintf(stderr," -Z int   [%d] time to sleep between columns\n",snooze_time);
+    fprintf(stderr," -Z int   [%d] time to sleep before scrolling\n",snooze_time);
     fprintf(stderr," -f float [%f] fractal dimension \n",fdim);
     fprintf(stderr," -I float [%f] angle of light \n",(phi*180.0)/PI);
     fprintf(stderr," -S float [%f] vertical stretch \n",stretch);
@@ -343,8 +351,22 @@ char **argv;
     exit(1);
   }
   /*}}}*/
-  set_clut(red, green, blue);
-  init_graphics(root,(! e_events),&s_width,&s_height,MAX_COL,red,green,blue);
+  n_col = (BAND_BASE + (N_BANDS * band_size));
+  for(i=0 ;i<3 ;i++)
+  {
+    clut[i] = (Gun *) malloc(n_col * sizeof(Gun));
+    if( ! clut[i] )
+    {
+      fprintf(stderr,"malloc failed for clut\n");
+      exit(1);
+    }
+  }
+  set_clut(n_col,clut[0], clut[1], clut[2]);
+  init_graphics(root,(! e_events),&s_width,&s_height,n_col,clut[0],clut[1],clut[2]);
+  for(i=0;i<3;i++)
+  {
+    free(clut[i]);
+  }
 
   height = s_height;
     
@@ -386,10 +408,11 @@ char **argv;
   {
       /* do the scroll */
       scroll_screen(repeat);
-      for( p = s_width - repeat ; p < s_width ; p++ )
+      for( p = s_width - repeat ; p < (s_width-1) ; p++ )
       {
-        plot_column(p,map,snooze_time);
+        plot_column(p,map,0);
       }
+      plot_column(p,map,snooze_time);
   }
 }
 

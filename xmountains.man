@@ -2,7 +2,7 @@
 .ds Rv \\$3
 .ds Dt \\$4
 ..
-.Id $Id: xmountains.man,v 1.6 1994/02/15 17:34:26 spb Exp $
+.Id $Id: xmountains.man,v 1.7 1994/02/18 14:19:01 spb Exp $
 .ds r \s-1RCS\s0
 .if n .ds - \%--
 .if t .ds - \(em
@@ -12,7 +12,7 @@ xmountains \- A fractal landscape generator.
 .SH SYNOPSIS
 .B xmountains
 [
-.B bxmslrftISCTRapcevgd
+.B bxmsElrftISTCBZRapcevgd
 ]
 
 .SH DESCRIPTION
@@ -70,16 +70,19 @@ Set the number of non\-fractal iterations. Increasing this value by one doubles 
 To reduce the load on the X server the program generates several columns of pixels before scrolling the image. This flag sets the number of columns.
 .RE
 .br
+.B \-B [80] 
+.RS
+Set the number of shades of each colour that the program allocates.
+.RE
+.br
 .B \-R [0] 
 .RS
 Set the seed for the random number generator. A value of 0 causes the seed to be set from the clock.
 .RE
 .br
-.B \-Z [1] 
+.B \-Z [10] 
 .RS
-Set the number of seconds that the program sleeps between drawing
-columns of pixels. This option has no effect until one full image has
-been generated.
+Set the number of seconds that the program sleeps after scrolling the screen.
 .RE
 .br
 .B \-f [0.65] 
@@ -124,13 +127,13 @@ Set the distance of the viewpoint from the front of the surface.
 Set the contrast parameter. Values too far from 1.0 will give strange results
 .RE
 .br
-.B \-e [0.49] 
+.B \-e [0.3] 
 .RS
 Set the ambient light level. This is a fractional value that sets how
 bright shaded areas will be compared to fully illuminated ground.
 .RE
 .br
-.B \-v [0.5] 
+.B \-v [0.6] 
 .RS
 Set the vertical light level. The program also implements a secondary
 light source shining from directly above the surface. This flag sets how

@@ -7,7 +7,7 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.24 1994/02/15 16:30:39 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.25 1994/02/18 14:19:01 spb Exp $";
 #define SIDE 1.0
 #ifndef PI
 #define PI 3.14159265
@@ -20,7 +20,8 @@ float lstrength; /* strength of vertical light source */
 /*
  * setup the colour lookup table
  */
-void set_clut (red,green,blue)
+void set_clut (max_col,red,green,blue)
+int max_col;
 Gun *red;
 Gun *green;
 Gun *blue;
@@ -72,9 +73,9 @@ Gun *blue;
   /*}}}*/
   for( band=0 ; band<N_BANDS; band++)
   {
-    for(shade=0 ; shade < BAND_SIZE ; shade++)
+    for(shade=0 ; shade < band_size ; shade++)
     {
-      if( (BAND_BASE + (band*BAND_SIZE) + shade) >= MAX_COL )
+      if( (BAND_BASE + (band*band_size) + shade) >= max_col )
       {
         fprintf(stderr,"INTERNAL ERROR, overflowed clut\n");
         exit(1);
@@ -82,7 +83,7 @@ Gun *blue;
       /*{{{  set red */
       top = rb[band];
       bot = ambient * top;
-      intensity = bot + ((shade * (top - bot))/BAND_SIZE);
+      intensity = bot + ((shade * (top - bot))/(band_size-1));
       tmp = COL_RANGE * intensity;
       if (tmp < 0)
       {
@@ -93,12 +94,12 @@ Gun *blue;
       {
         tmp = COL_RANGE;
       }
-      red[BAND_BASE + (band*BAND_SIZE) + shade] = tmp;
+      red[BAND_BASE + (band*band_size) + shade] = tmp;
       /*}}}*/
       /*{{{  set green */
       top = gb[band];
       bot = ambient * top;
-      intensity = bot + ((shade * (top - bot))/BAND_SIZE);
+      intensity = bot + ((shade * (top - bot))/(band_size-1));
       tmp = COL_RANGE * intensity;
       if (tmp < 0)
       {
@@ -109,12 +110,12 @@ Gun *blue;
       {
         tmp = COL_RANGE;
       }
-      green[BAND_BASE + (band*BAND_SIZE) + shade] = tmp;
+      green[BAND_BASE + (band*band_size) + shade] = tmp;
       /*}}}*/
       /*{{{  set blue */
       top = bb[band];
       bot = ambient * top;
-      intensity = bot + ((shade * (top - bot))/BAND_SIZE);
+      intensity = bot + ((shade * (top - bot))/(band_size-1));
       tmp = COL_RANGE * intensity;
       if (tmp < 0)
       {
@@ -125,7 +126,7 @@ Gun *blue;
       {
         tmp = COL_RANGE;
       }
-      blue[BAND_BASE + (band*BAND_SIZE) + shade] = tmp;
+      blue[BAND_BASE + (band*band_size) + shade] = tmp;
       /*}}}*/
     }
   }
@@ -288,7 +289,7 @@ Height shadow;
   {
     band = (N_BANDS -1);
   }
-  result = (BAND_BASE + (band * BAND_SIZE));
+  result = (BAND_BASE + (band * band_size));
   /*}}}*/
 
   /*{{{calculate the illumination stength*/
@@ -314,10 +315,10 @@ Height shadow;
    * if the light intensities add to 1.0
    * now convert to an integer
    */
-  shade = dshade * (double) BAND_SIZE;
-  if( shade > (BAND_SIZE-1))
+  shade = dshade * (double) band_size;
+  if( shade > (band_size-1))
   {
-    shade = (BAND_SIZE-1);
+    shade = (band_size-1);
   }
   /*{{{  if shade is negative then point is really in deep shadow */
   if( shade < 0 )
@@ -327,7 +328,7 @@ Height shadow;
   /*}}}*/
   /*}}}*/
   result += shade;
-  if( (result >= MAX_COL) || (result < 0) )
+  if( (result >= n_col) || (result < 0) )
   {
     fprintf(stderr,"INTERNAL ERROR colour out of range %d\n",result);
     exit(1);

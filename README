@@ -5,9 +5,8 @@ and the image is scrolled from left to right to expose the newly
 generated area.
 
 
-
-./xmountains: version 1.2
-usage: ./xmountains -[bxmslrftISTCRapcevgd]
+./xmountains: version 1.3
+usage: ./xmountains -[bxmsElrftISTCBZRapcevgd]
  -b       [false] use root window 
  -x       [false] flat start 
  -m       [false] print map 
@@ -16,8 +15,9 @@ usage: ./xmountains -[bxmslrftISTCRapcevgd]
  -l int   [10] # levels of recursion 
  -t int   [2] # non fractal iterations 
  -r int   [20] # columns before scrolling 
+ -B int   [80] # shades in a colour band
  -R int   [0] rng seed, read clock if 0 
- -Z int   [1] time to sleep between columns
+ -Z int   [10] time to sleep before scrolling
  -f float [0.650000] fractal dimension 
  -I float [40.000000] angle of light 
  -S float [0.600000] vertical stretch 
@@ -50,6 +50,10 @@ The program breaks down into three sections
 PROBLEMS
  All parameters are set on the command line.
  The choice of colours looks strange on some hardware.
+
+CHANGES from V1.2
+1) program now sleeps after a scroll rather than once per column.
+2) added a -B flag to control the number of colours needed.
 
 CHANGES from V1.1
 Several changes including:
