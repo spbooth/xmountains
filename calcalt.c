@@ -20,7 +20,7 @@
 #include <math.h>
 #include "crinkle.h"
 
-char calcalt_Id[] = "$Id: calcalt.c,v 2.7 1995/10/04 10:00:56 spb Exp $";
+char calcalt_Id[] = "$Id: calcalt.c,v 2.8 1995/10/04 11:48:12 spb Exp $";
 
 #ifdef DEBUG
 #define DB(A,B) dump_pipeline(A,B)
@@ -507,7 +507,7 @@ Strip *c;
   int count=fold->count;
   float w, we;
   Height *mp, *lp, *rp;
-  int third=(1.0/3.0);
+  float third=(1.0/3.0);
 
   /* don't run unless we have all the parameters */
   if( !a || !c ) return;
