@@ -6,9 +6,10 @@
 #include "patchlevel.h"
 #include "copyright.h"
 
+#define VERSION 1
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.19 1994/02/15 16:30:39 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.20 1994/02/15 17:53:37 spb Exp $";
 
 extern char *display;
 extern char *geom;
@@ -316,7 +317,7 @@ char **argv;
   if( errflg )
   {
     fprintf(stderr,"%s: version %d.%d\n",argv[0],VERSION,PATCHLEVEL);
-    fprintf(stderr,"usage: %s -[bxmslrftISTCRapcevgd]\n",argv[0]);
+    fprintf(stderr,"usage: %s -[bxmsElrftISTCZRapcevgd]\n",argv[0]);
     fprintf(stderr," -b       [%s] use root window \n",mesg[root]);
     fprintf(stderr," -x       [%s] flat start \n",mesg[1-frac_start]);
     fprintf(stderr," -m       [%s] print map \n",mesg[map]);
