@@ -5,31 +5,11 @@
 #include <stdio.h>
 #include "paint.h"
 #include "crinkle.h"
+#include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.2 1991/10/24 13:36:33 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.3 1993/02/18 15:36:13 spb Exp $";
 #define SIDE 1.0
 #define PI 3.14159265
-/*{{{  global (uggh) variables */
-Fold *top;
-int levels = 10;
-int smooth = TRUE;
-float fdim = 0.65;
-float start=0.0;  /* starting value for the surface */
-float mean=0.0;
-float varience;   /* rough estimate of the height of the range */
-float contour = 0.1;
-float contrast = 1.0;
-double phi=(45.0 * PI)/180.0; /* angle of the light */
-double cos_phi;
-double sin_phi;
-double tan_phi;
-Height sealevel = 0.0;
-int width;
-unsigned char red[256] ,green[256], blue[256];
-
-Height *shadow;               /* height of the shadows */
-Height *a_strip, *b_strip;    /* the two most recent strips */
-/*}}}*/
 
 /*{{{  void set_clut() */
 void set_clut()
@@ -40,9 +20,9 @@ void set_clut()
   float intensity;
   int tmp;
   int i;
-  float rb[N_BANDS] = { 0.167,0.167,0.167,0.333,0.333,0.500 };
-  float gb[N_BANDS] = { 1.000,0.667,0.667,0.500,0.500,0.500 };
-  float bb[N_BANDS] = { 0.500,0.500,0.333,0.333,0.167,0.000 };
+  float rb[N_BANDS] = { 0.167,0.200,0.333,0.450,0.600,1.000 };
+  float gb[N_BANDS] = { 0.667,0.667,0.500,0.500,0.600,1.000 };
+  float bb[N_BANDS] = { 0.500,0.450,0.333,0.200,0.000,1.000 };
 #if MAX_COL > 255
 Error Error Error max_col too large
 #endif
