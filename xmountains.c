@@ -6,7 +6,66 @@
 
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.6 1994/01/11 10:12:07 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.7 1994/01/11 11:57:39 spb Exp $";
+
+extern char *display;
+extern char *geom;
+
+/*{{{my version on getopt*/
+int optind=1;
+char *optarg;
+int opterr=1;
+
+int getopt(int argc, char **argv, char *pat)
+{
+  char *flag;
+  
+  if((optind >= argc) || (argv[optind][0] != '-'))
+  {
+    return -1;
+  }
+  if( argv[optind][1] == '-' )
+  {
+    return -1;
+  }
+  if( argv[optind][1] == ':' )
+  {
+    if( opterr )
+    {
+      fprintf(stderr,"getopt: found \":\" in optstring\n");
+    }
+    return '?';
+  }
+  for(flag=pat;*flag;flag++)
+  {
+    if( *flag == argv[optind][1] )
+    {
+      optind++;
+      if( *(flag+1) == ':' )
+      {
+        if(optind >= argc )
+        {
+          if( opterr )
+          {
+            fprintf(stderr,"getopt: no option for flag %c\n",*flag);
+          }
+          return '?';
+        }
+        optarg = argv[optind];
+        optind++;
+      }
+      return *flag;
+    }
+      
+  }
+  if( opterr )
+  {
+    fprintf(stderr,"getopt: flag %s not recognized\n",argv[optind]);
+  }
+  optind++;
+  return '?';
+}
+/*}}}*/
 
 /*{{{  Col *next_col(int paint) */
 Col *next_col(int paint)
@@ -71,7 +130,7 @@ main(int argc, char **argv)
 
   mesg[0]="false";
   mesg[1]="true";
-  while((c = getopt(argc,argv,"bxmsl:r:f:t:I:S:T:a:d:R:w:h:"))!= -1)
+  while((c = getopt(argc,argv,"bxmsl:r:f:t:I:S:T:a:p:R:g:d:"))!= -1)
   {
     switch(c){
       case 'b':
@@ -125,14 +184,14 @@ main(int argc, char **argv)
       case 'a':                     /* set altitude */
          altitude = atof( optarg );
          break;
-      case 'd':                     /* set distance */
+      case 'p':                     /* set distance */
          distance = atof( optarg );
          break;
-      case 'w':
-         s_width = atoi( optarg );
+      case 'g':
+         geom = optarg;
          break;
-      case 'h':
-         s_height = atoi( optarg );
+      case 'd':
+         display = optarg;
          break;
       case '?':
          errflg++;
@@ -141,7 +200,7 @@ main(int argc, char **argv)
   if( errflg )
   {
     fprintf(stderr,"%s: illegal argument\n",argv[0]);
-    fprintf(stderr,"usage, %s -[bxmslrftISTRadhw]\n",argv[0]);
+    fprintf(stderr,"usage, %s -[bxmslrftISTRapgd]\n",argv[0]);
     fprintf(stderr," -b       [%s] use root window \n",mesg[root]);
     fprintf(stderr," -x       [%s] flat start \n",mesg[1-frac_start]);
     fprintf(stderr," -m       [%s] print map \n",mesg[map]);
@@ -155,9 +214,9 @@ main(int argc, char **argv)
     fprintf(stderr," -S float [%f] vertical stretch \n",stretch);
     fprintf(stderr," -T float [%f] vertical shift \n",shift);
     fprintf(stderr," -a float [%f] altitude of viewpoint \n",altitude);
-    fprintf(stderr," -d float [%f] distance of viewpoint \n",distance);
-    fprintf(stderr," -w int   [%d] width of screen \n",s_width);
-    fprintf(stderr," -h int   [%d] height of screen \n",s_height);
+    fprintf(stderr," -p float [%f] distance of viewpoint \n",distance);
+    fprintf(stderr," -g string     window geometry\n");
+    fprintf(stderr," -d string     display\n");
     exit(1);
   }
   set_clut(red, green, blue);
@@ -228,3 +287,4 @@ void finish_prog()
   finish_artist();
   exit(0);
 }
+

@@ -4,7 +4,10 @@
 #include<X11/Xatom.h>
 #include "paint.h"
 
-char X_graphics_Id[]="$Id: X_graphics.c,v 1.5 1994/01/11 10:12:07 spb Exp $";
+char X_graphics_Id[]="$Id: X_graphics.c,v 1.6 1994/01/11 11:57:39 spb Exp $";
+
+char *display=NULL;       /* name of display to open, NULL for default */
+char *geom=NULL;          /* geometry of window, NULL for default */
 
 Atom wm_protocols;
 Atom wm_delete_window;
@@ -121,13 +124,13 @@ void finish_graphics()
 void init_graphics( int want_use_root, int *s_graph_width, int *s_graph_height,int ncol, Gun *red, Gun *green, Gun *blue )
 {
 /*{{{defs*/
-  char *display=NULL;       /* name of display to open, NULL for default */
   int depth=0;              /* positive value requires this many planes */
   Visual *vis;
   int mask;
   int count;
   int x=0;
   int y=0;
+  int gbits=0;
   unsigned long attmask;
   XSetWindowAttributes attributes;
   char * winname="Mountains";
@@ -197,6 +200,17 @@ void init_graphics( int want_use_root, int *s_graph_width, int *s_graph_height,i
     attributes.colormap = map;
     XChangeWindowAttributes(dpy,win,attmask,&attributes);
   }else{
+    if( geom )
+    {
+      gbits =XParseGeometry(geom,&x,&y,&graph_width,&graph_height);
+      if((gbits & XValue) && (gbits & XNegative))
+      {
+        x += DisplayWidth(dpy,screen) - graph_width;
+      }
+      if((gbits & YValue) && (gbits & YNegative))
+      {
+        y += DisplayHeight(dpy,screen) - graph_height;
+      }
     attmask |= CWEventMask;
     attributes.event_mask = ButtonPressMask|ButtonReleaseMask|ExposureMask;
     attmask |= CWBackPixel;
