@@ -7,7 +7,7 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.27 1994/04/05 20:55:34 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.28 1994/04/05 21:27:26 spb Exp $";
 #define SIDE 1.0
 #ifndef PI
 #define PI 3.14159265
@@ -434,7 +434,9 @@ Height *b;
 Height *shadow;
 {
   Col *res, *map;
+  Col last_col;
   int i,j, top, bottom, coord;
+  int last_top, last_bottom;
   Height pivot;
   /* this routine returns a perspective view of the surface
    * with reflections in the water
@@ -446,10 +448,9 @@ Height *shadow;
     fprintf(stderr,"malloc failed for picture strip\n");
     exit(1);
   }
-  for(i=0;i<height;i++)
-  {
-    res[i] = SKY;
-  }
+  last_col=SKY;
+  last_top=height-1;
+  last_bottom=0;
   /*
    * many of the optimisation in the camera routine are
    * hard to implement in this case so we revert to the
@@ -469,24 +470,67 @@ Height *shadow;
     if(map[i]==SEA_LIT || map[i]==SEA_UNLIT)
     {
       /*{{{stipple water values*/
+      for(j=last_bottom;j<=last_top;j++)
+      {
+        res[j]=last_col;
+      }
+      last_col=map[i];
+      /* invalidate strip so last stip does not exist */
+      last_bottom=height;
+      last_top=-1;
+      /* fill in water values */
       coord=1+project(i,a[i]);
       for(j=base;j<coord;j+=2)
       {
         res[j]=map[i];
+      }
+      /* skip any adjacent bits of water with the same colour */
+      while(map[i]==last_col)
+      {
+        i--;
       }
       /*}}}*/
     }else{
       /*{{{draw land values*/
       top = project(i,a[i]);
       bottom=project(i,pivot-a[i]);
-      for(j=bottom;j<=top;j++)
+      if(last_col == map[i])
       {
-        res[j]=map[i];
+        if( top > last_top)
+        {
+          last_top=top;
+        }
+        if( bottom < last_bottom)
+        {
+          last_bottom=bottom;
+        }
+      }else{
+        if(top < last_top)
+        {
+          for(j=top+1;j<=last_top;j++)
+          {
+            res[j]=last_col;
+          }
+        }
+        if(bottom > last_bottom)
+        {
+          for(j=last_bottom;j<=bottom;j++)
+          {
+            res[j]=last_col;
+          }
+        }
+        last_top=top;
+        last_bottom=bottom;
+        last_col=map[i];
       }
       /*}}}*/
     }
   }
   /*{{{draw in front face*/
+  for(j=last_bottom;j<=last_top;j++)
+  {
+    res[j]=last_col;
+  }
   if( a[0] < sealevel )
   {
     a[0] = sealevel;
