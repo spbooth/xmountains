@@ -20,7 +20,7 @@
 #include <math.h>
 #include "crinkle.h"
 
-char calcalt_Id[] = "$Id: calcalt.c,v 2.9 1995/10/05 17:54:06 spb Exp $";
+char calcalt_Id[] = "$Id: calcalt.c,v 2.10 1995/11/27 20:25:48 spb Exp $";
 
 #ifdef DEBUG
 #define DB(A,B) dump_pipeline(A,B)
@@ -34,6 +34,7 @@ Strip *make_strip (f)
 Fold *f;
 {
   Strip *p;
+  int n;
 
   p = (Strip *) malloc( sizeof(Strip) );
   if( p == NULL )
@@ -42,7 +43,12 @@ Fold *f;
     exit(1);
   }
   p->f = f;
-  p->d = (Height *)malloc( f->count * sizeof(Height) );
+#ifdef MPI
+  n = f->size;
+#else
+  n = f->count;
+#endif
+  p->d = (Height *)malloc( n * sizeof(Height) );
   if( p->d == NULL )
   {
     fprintf(stderr,"make_strip: malloc failed\n");
@@ -73,6 +79,9 @@ Strip *s;
   int count;
 
   p = make_strip(s->f->parent);
+#ifdef MPI
+  redistribude data
+#else
   a = s->d;
   b = p->d;
   count = s->f->count;
@@ -85,6 +94,7 @@ Strip *s;
     b++;
   }
   *b = *a;
+#endif
   return(p);
 }
 /*}}}*/
@@ -100,7 +110,11 @@ Height value;
   
   s = make_strip(f);
   h = s->d;
+#ifdef MPI
+  count = f->size;
+#else
   count = f->count;
+#endif
   for( i=0 ; i < count ; i++)
   {
     *h = value;
@@ -117,7 +131,11 @@ Fold *f;
   int i, count;
   
   result=make_strip(f);
+#ifdef MPI
+  count=f->size;  /* this is a little wasteful as it also sets the halo */
+#else
   count = f->count;
+#endif
   for( i=0 ; i < count ; i++)
   {
     result->d[i] = f->p->mean + (f->scale * gaussian());
@@ -183,6 +201,10 @@ Length length;
     p->s[i] = NULL;
   }
   p->parent=parent;
+#ifdef MPI
+  /* work out the distribution at this level */
+  p->first = ( p->p-me == 0 );
+#endif
   if( levels > stop )
   {
     p->next = make_fold(p,param,(levels-1),stop,(2.0*length));
@@ -560,7 +582,7 @@ Strip *c;
     /*}}}*/
   }else if(mix >= 1.0){
     /*{{{random offset to old values*/
-    for(i=0; i<count-2; i+=2)
+    for(i=0; i<count-1; i+=2)
     {
       mp[0] = mp[0]
             + (scale * gaussian());
@@ -640,7 +662,7 @@ Strip *c;
     /*}}}*/
   }else if(mix >= 1.0){
     /*{{{random offset to old values*/
-    for(i=0; i<count-2; i+=2)
+    for(i=0; i<count-1; i+=2)
     {
       mp[0] = mp[0]
             + (scale * gaussian());
