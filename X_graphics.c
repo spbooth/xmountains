@@ -4,7 +4,7 @@
 #include<X11/Xatom.h>
 #include "paint.h"
 
-char X_graphics_Id[]="$Id: X_graphics.c,v 1.7 1994/01/11 12:00:27 spb Exp $";
+char X_graphics_Id[]="$Id: X_graphics.c,v 1.8 1994/01/19 13:12:08 spb Exp $";
 
 char *display=NULL;       /* name of display to open, NULL for default */
 char *geom=NULL;          /* geometry of window, NULL for default */
@@ -182,7 +182,6 @@ void init_graphics( int want_use_root, int *s_graph_width, int *s_graph_height,i
         XCloseDisplay(dpy);
         exit(1);
       }else{
-        printf("making new cmap for %d\n",i);
         map = XCopyColormapAndFree(dpy,map);
         newmap=TRUE;
       }

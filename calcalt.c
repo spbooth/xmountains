@@ -22,7 +22,7 @@
 #include <math.h>
 #include "crinkle.h"
 
-char calcalt_Id[] = "$Id: calcalt.c,v 1.5 1993/04/28 21:06:57 spb Exp $";
+char calcalt_Id[] = "$Id: calcalt.c,v 1.6 1994/01/19 13:12:08 spb Exp $";
 
 /*{{{  Strip *make_strip(int level) */
 Strip *make_strip(int level)
@@ -33,7 +33,7 @@ Strip *make_strip(int level)
   p = (Strip *) malloc( sizeof(Strip) );
   if( p == NULL )
   {
-    printf("malloc failed\n");
+    fprintf(stderr,"make_strip: malloc failed\n");
     exit(1);
   }
   p->level = level;
@@ -41,7 +41,7 @@ Strip *make_strip(int level)
   p->d = (Height *)malloc( points * sizeof(Height) );
   if( p->d == NULL )
   {
-    printf("malloc failed\n");
+    fprintf(stderr,"make_strip: malloc failed\n");
     exit(1);
   }
   return(p);
@@ -130,7 +130,7 @@ void mid_update(Strip *left, Strip *new, Strip *right,Length scale, Length midsc
 
   if( (left->level != (new->level - 1)) || (new->level != right->level))
   {
-    printf("mid_update: inconsistant sizes\n");
+    fprintf(stderr,"mid_update: inconsistant sizes\n");
     exit(2);
   }
   count = ( 1 << left->level);
@@ -164,7 +164,7 @@ void recalc(Strip *left, Strip *regen, Strip *right,Length scale)
 
   if((left->level != regen->level) || (regen->level != right->level))
   {
-    printf("mid_update: inconsistant sizes\n");
+    fprintf(stderr,"recalc: inconsistant sizes\n");
     exit(2);
   }
   count = ( (1 << (regen->level-1)) - 1 );
@@ -245,7 +245,7 @@ Strip *next_strip(Fold *fold)
       return(result);
       /*}}}*/
     default:
-      printf("next_strip: invalid state\n");
+      fprintf(stderr,"next_strip: invalid state\n");
       exit(3);
   }
   return(NULL);
@@ -279,14 +279,14 @@ Fold *make_fold(int levels, int stop, int fractal_start, int slope, int smooth, 
 
   if( (levels < stop) || (stop<0) )
   {
-    printf("make_fold: invalid parameters\n");
-    printf("make_fold: levels = %d , stop = %d \n",levels,stop);
+    fprintf(stderr,"make_fold: invalid parameters\n");
+    fprintf(stderr,"make_fold: levels = %d , stop = %d \n",levels,stop);
     exit(1);
   }
   p = (Fold *)malloc(sizeof(Fold));
   if( p == NULL )
   {
-    printf("malloc failed\n");
+    fprintf(stderr,"make_fold: malloc failed\n");
     exit(1);
   }
   root2=sqrt((double) 2.0 );
@@ -318,7 +318,7 @@ Fold *make_fold(int levels, int stop, int fractal_start, int slope, int smooth, 
       p->smooth = FALSE;
       if( NULL != next_strip( p ) )
       {
-        printf("make_fold: internal logic error\n");
+        fprintf(stderr,"make_fold: internal logic error\n");
         exit(2);
       }
       p->smooth = smooth;

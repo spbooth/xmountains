@@ -10,7 +10,7 @@
 
 
 
-char uni_id[] = "$Id: random.c,v 1.1 1993/02/18 15:40:50 spb Exp $" ;
+char uni_id[] = "$Id: random.c,v 1.2 1994/01/19 13:12:08 spb Exp $" ;
 /*
  *	Global variables for rstart & uni
  */
@@ -108,7 +108,7 @@ void seed_uni(int ijkl)
 	/* check ijkl is within range */
 	if( (ijkl < 0) || (ijkl > 900000000) )
 		{
-		printf("seed_uni: ijkl = %d -- out of range\n\n", ijkl);
+		fprintf(stderr,"seed_uni: ijkl = %d -- out of range\n\n", ijkl);
 		exit(3);
                	}
 
@@ -131,31 +131,31 @@ void seed_uni(int ijkl)
 #ifdef PARANOID
 	if( (i <= 0) || (i > 178) )
 		{
-		printf("seed_uni: i = %d -- out of range\n\n", i);
+		fprintf(stderr,"seed_uni: i = %d -- out of range\n\n", i);
 		exit(3);
                	}
 
 	if( (j <= 0) || (j > 178) )
 		{
-		printf("seed_uni: j = %d -- out of range\n\n", j);
+		fprintf(stderr,"seed_uni: j = %d -- out of range\n\n", j);
 		exit(3);
                	}
 
 	if( (k <= 0) || (k > 178) )
 		{
-		printf("seed_uni: k = %d -- out of range\n\n", k);
+		fprintf(stderr,"seed_uni: k = %d -- out of range\n\n", k);
 		exit(3);
                	}
 
 	if( (l < 0) || (l > 168) )
 		{
-		printf("seed_uni: l = %d -- out of range\n\n", l);
+		fprintf(stderr,"seed_uni: l = %d -- out of range\n\n", l);
 		exit(3);
                	}
 
 	if (i == 1 && j == 1 && k == 1)
 		{
-                printf("seed_uni: 1 1 1 not allowed for 1st 3 seeds\n\n");
+                fprintf(stderr,"seed_uni: 1 1 1 not allowed for 1st 3 seeds\n\n");
 		exit(4);
                 }
 #endif
