@@ -7,7 +7,7 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.6 1993/03/15 12:00:00 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.7 1993/03/15 12:13:35 spb Exp $";
 #define SIDE 1.0
 #define PI 3.14159265
 
@@ -337,7 +337,7 @@ Col *camera( Height *a, Col *c )
 /*}}}*/
 /*{{{  int project( int x , Height y ) */
 /*
- *  project a point onto the screen position */
+ *  project a point onto the screen position
  */
 int project( int x , Height y )
 {
