@@ -9,7 +9,7 @@
 #define VERSION 1
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.22 1994/02/24 11:08:03 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.23 1994/02/25 09:59:35 spb Exp $";
 
 extern char *display;
 extern char *geom;
@@ -163,8 +163,8 @@ int snooze;
         plot_pixel(p,((s_height-1)-j),l[j]);
       }
     }
-    free(l);
   }
+  free(l);
   flush_region(p,0,1,height,p,0);
   zap_events(snooze);
 }
