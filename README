@@ -4,6 +4,10 @@ program is running the fractal is continuously extended on the right
 and the image is scrolled from right to left to expose the newly
 generated area.
 
+This distribution contains an Imakefile. If your X-window software has
+been correctly installed a Makefile appropriate to your system can be
+generated from this using the command "xmkmf". Once this has been done
+the program is compiled with the command "make".
 
 ./xmountains: version 1.4
 usage: ./xmountains -[bqxmsElrftIASTCBZRapcevgd]
@@ -53,6 +57,10 @@ The program breaks down into three sections
 PROBLEMS
  All parameters are set on the command line.
  The choice of colours looks strange on some hardware.
+ The program will not work with Xscreensaver or virtual window 
+managers. This can be fixed by including vroot.h in X_graphics.c but I
+was a little wary of putting this in by default.
+
 
 CHANGES from V1.3
 1) There is now a flag to control the horizontal light angle.
