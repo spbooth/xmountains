@@ -1,0 +1,15 @@
+LOCAL_LIBRARIES = $(XLIB)
+  SYS_LIBRARIES = -lm
+           SRCS = calcalt.c random.c  artist.c global.c xmountains.c X_graphics.c
+           OBJS = calcalt.o random.o  artist.o global.o xmountains.o X_graphics.o
+           HDRS = crinkle.h global.h paint.h patchlevel.h copyright.h
+          SHARS = README ALGORITHM $(SRC) $(HDRS) Imakefile xmountains.man
+ComplexProgramTarget(xmountains)
+
+
+xmountains.shar: $(SHARS)
+	shar -o xmountains.shar $(SHARS)
+
+xmountains.tar: $(SHARS)
+	tar cvf xmountains.tar $(SHARS)
+
