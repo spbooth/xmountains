@@ -4,7 +4,7 @@
 #include<X11/Xatom.h>
 #include "paint.h"
 
-char X_graphics_Id[]="$Id: X_graphics.c,v 1.14 1994/02/04 20:17:32 spb Exp $";
+char X_graphics_Id[]="$Id: X_graphics.c,v 1.15 1994/02/15 16:30:39 spb Exp $";
 
 char *display=NULL;       /* name of display to open, NULL for default */
 char *geom=NULL;          /* geometry of window, NULL for default */
@@ -36,13 +36,24 @@ Atom wm_delete_window;
 void zap_events();
 void finish_graphics();
   
-/*{{{void zap_events()*/
-void zap_events()
+/*{{{void zap_events(int snooze)*/
+void zap_events(snooze)
+int snooze;
 {
   XEvent event;
   XExposeEvent *expose = (XExposeEvent *)&event;
   int exw, exh;
-  
+
+#ifndef NO_SLEEP
+  if( snooze )
+  {
+    /* this is very bad because it will prevent
+     * events being processed but I suppose it is better
+     * than being a CPU hog
+     */
+    sleep(snooze);
+  }
+#endif
   while( XPending(dpy) ){
     XNextEvent(dpy, &event);
     switch(event.type) {
@@ -148,8 +159,9 @@ int lx,ly,ux,uy;
 /*}}}*/
 
 /*{{{void init_graphics( ... )*/
-void init_graphics( want_use_root, s_graph_width,s_graph_height,ncol,red,green,blue )
-int want_use_root;
+void init_graphics( want_use_root, use_background, s_graph_width,s_graph_height,ncol,red,green,blue )
+int want_use_root;    /* display on the root window */
+int  use_background;  /* install the pixmap as the background-pixmap */
 int *s_graph_width;
 int *s_graph_height;
 int ncol;
@@ -227,8 +239,11 @@ Gun *blue;
   if( use_root )
   {
     win = parent;
-    attmask |= CWEventMask;
-    attributes.event_mask = ExposureMask; /* catch expose events */
+    if( ! use_background )
+    {
+      attmask |= CWEventMask;
+      attributes.event_mask = ExposureMask; /* catch expose events */
+    }
     attmask |= CWColormap;
     attributes.colormap = map;
     XChangeWindowAttributes(dpy,win,attmask,&attributes);
@@ -246,7 +261,12 @@ Gun *blue;
       }
     }
     attmask |= CWEventMask;
-    attributes.event_mask = ButtonPressMask|ButtonReleaseMask|ExposureMask;
+    if( ! use_background )
+    {
+      attributes.event_mask = ButtonPressMask|ButtonReleaseMask|ExposureMask;
+    }else{
+      attributes.event_mask = ButtonPressMask|ButtonReleaseMask;
+    }
     attmask |= CWBackPixel;
     attributes.background_pixel = BlackPixel(dpy,screen);
     attmask |= CWBackingStore;
@@ -287,15 +307,19 @@ Gun *blue;
   gc = XCreateGC(dpy,win,gcvmask,&gcv);
   pix = XCreatePixmap(dpy,win,graph_width,graph_height,depth);
 
-
 /*}}}*/
   blank_region(0,0,graph_width,graph_height); 
+
+  if( use_background )
+  {
+    XSetWindowBackgroundPixmap(dpy,win,pix);
+  }
   if( ! use_root )
   {
     XMapWindow(dpy, win );
   }
 
-  zap_events();
+  zap_events(0);
   
   *s_graph_width = graph_width;
   *s_graph_height = graph_height;

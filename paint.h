@@ -1,4 +1,4 @@
-/* $Id: paint.h,v 1.9 1994/02/08 10:06:32 spb Exp $ */
+/* $Id: paint.h,v 1.10 1994/02/15 16:30:39 spb Exp $ */
 #ifndef PAINT
 #define PAINT
 
@@ -15,7 +15,9 @@ typedef unsigned short Gun;
 #define SEA_UNLIT   3
 #define SKY         4
 #define BAND_BASE   5
+#ifndef BAND_SIZE
 #define BAND_SIZE   80
+#endif
 #define N_BANDS     3
 #define MAX_COL     (BAND_BASE + (N_BANDS * BAND_SIZE))
 #define COL_RANGE   65535

@@ -7,7 +7,7 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.23 1994/02/07 14:08:15 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.24 1994/02/15 16:30:39 spb Exp $";
 #define SIDE 1.0
 #ifndef PI
 #define PI 3.14159265
@@ -172,7 +172,10 @@ void init_artist_variables()
   sin_phi = sin( phi );
   tan_phi = tan( phi );
 
-  vscale = stretch * pwidth;  /* have approx same height as fractal width */
+  vscale = stretch * pwidth;  /* have approx same height as fractal width
+                               * this makes each pixel 1.0 wide.
+                               * c.f. get_col
+                               */
 
   /* guess the average height of the fractal */
   varience = pow( SIDE ,(2.0 * fdim));

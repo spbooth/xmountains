@@ -7,9 +7,8 @@
 #include "copyright.h"
 
 #define SIDE 1.0
-#define VERSION 1
 
-char scroll_Id[]="$Id: xmountains.c,v 1.18 1994/02/07 14:24:42 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.19 1994/02/15 16:30:39 spb Exp $";
 
 extern char *display;
 extern char *geom;
@@ -112,15 +111,17 @@ int paint;
 /*}}}*/
 double atof();
 #ifdef ANSI
-void init_graphics (int, int *, int *, int, Gun *, Gun *, Gun *);
+void init_graphics (int, int, int *, int *, int, Gun *, Gun *, Gun *);
 void finish_graphics();
 void plot_pixel (int, int, unsigned char);
 void scroll_screen ( int );
+void zap_events( int );
 #else
 void init_graphics ();
 void finish_graphics();
 void plot_pixel ();
 void scroll_screen ();
+void zap_events();
 #endif
 
 void finish_prog();
@@ -129,9 +130,11 @@ int s_height=768, s_width=1024;
 int mapwid;
 
 
-void plot_column(p,map)
+/*{{{void plot_column(p,map,snooze)*/
+void plot_column(p,map,snooze)
 int p;
 int map;
+int snooze;
 {
   Col *l;
   int j;
@@ -162,8 +165,9 @@ int map;
     free(l);
   }
   flush_region(p,0,1,height,p,0);
-  zap_events();
+  zap_events(snooze);
 }
+/*}}}*/
 
 main (argc,argv)
 int argc;
@@ -184,7 +188,7 @@ char **argv;
   /*{{{handle command line flags*/
   mesg[0]="false";
   mesg[1]="true";
-  while((c = getopt(argc,argv,"bxmsl:r:f:t:I:S:T:C:a:p:R:g:d:c:e:v:"))!= -1)
+  while((c = getopt(argc,argv,"bxmsEl:r:f:t:I:S:T:C:a:p:R:g:d:c:e:v:Z:"))!= -1)
   {
     switch(c){
       case 'b':
@@ -192,6 +196,9 @@ char **argv;
         break;                      /* run on root window */
       case 's':                     /* Toggle smoothing */
         smooth = 1 - smooth;
+        break;
+      case 'E':
+        e_events = 1 - e_events;
         break;
       case 'x':                     /* Toggle fractal Start */
         frac_start = 1 - frac_start;
@@ -226,6 +233,13 @@ char **argv;
          break;
       case 'R':                     /* set seed, read clock if 0 */
          seed = atoi( optarg );
+         break;
+      case 'Z':                     /* put sleep into wait events */
+         snooze_time = atoi( optarg );
+         if( snooze_time < 0 )
+         {
+           snooze_time = 0;
+         }
          break;
       case 'f':                     /* set fractal dimension */
          fdim = atof( optarg );
@@ -307,10 +321,12 @@ char **argv;
     fprintf(stderr," -x       [%s] flat start \n",mesg[1-frac_start]);
     fprintf(stderr," -m       [%s] print map \n",mesg[map]);
     fprintf(stderr," -s       [%s] toggle smoothing \n",mesg[smooth]);
+    fprintf(stderr," -E       [%s] toggle explicit expose events \n",mesg[smooth]);
     fprintf(stderr," -l int   [%d] # levels of recursion \n",levels);
     fprintf(stderr," -t int   [%d] # non fractal iterations \n",stop);
     fprintf(stderr," -r int   [%d] # columns before scrolling \n",repeat);
     fprintf(stderr," -R int   [%d] rng seed, read clock if 0 \n",seed);
+    fprintf(stderr," -Z int   [%d] time to sleep between columns\n",snooze_time);
     fprintf(stderr," -f float [%f] fractal dimension \n",fdim);
     fprintf(stderr," -I float [%f] angle of light \n",(phi*180.0)/PI);
     fprintf(stderr," -S float [%f] vertical stretch \n",stretch);
@@ -327,7 +343,7 @@ char **argv;
   }
   /*}}}*/
   set_clut(red, green, blue);
-  init_graphics(root,&s_width,&s_height,MAX_COL,red,green,blue);
+  init_graphics(root,(! e_events),&s_width,&s_height,MAX_COL,red,green,blue);
 
   height = s_height;
     
@@ -363,7 +379,7 @@ char **argv;
   }
   for(p=0 ; p < s_width ; p++)
   {
-    plot_column(p,map);
+    plot_column(p,map,0);
   }
   while( TRUE )
   {
@@ -371,7 +387,7 @@ char **argv;
       scroll_screen(repeat);
       for( p = s_width - repeat ; p < s_width ; p++ )
       {
-        plot_column(p,map);
+        plot_column(p,map,snooze_time);
       }
   }
 }

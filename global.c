@@ -7,6 +7,12 @@ int stop = 2;
 int smooth = TRUE;
 int frac_start = TRUE;
 int slope = TRUE;
+int snooze_time = 0;
+#ifdef USE_E_EVENTS
+int e_events = FALSE;
+#else
+int e_events = FALSE;
+#endif
 float fdim = 0.65;
 Height start;      /* starting value for the surface */
 Height mean=0.0;   /* mean value of surface */

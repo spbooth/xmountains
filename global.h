@@ -7,6 +7,8 @@ extern int stop;
 extern int smooth;
 extern int frac_start;
 extern int slope;
+extern int snooze_time;
+extern int e_events;
 extern float fdim;
 extern float start;
 extern float mean;
