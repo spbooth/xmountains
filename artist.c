@@ -7,7 +7,7 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.21 1994/02/04 20:33:54 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.22 1994/02/07 11:34:39 spb Exp $";
 #define SIDE 1.0
 #ifndef PI
 #define PI 3.14159265
@@ -194,9 +194,15 @@ void init_artist_variables()
   dh = viewheight;
   dd = (width / 2.0) - viewpos;
   focal = sqrt( (dd*dd) + (dh*dh) );
+#ifndef SLOPPY
   tan_vangle = (double) ((double)(viewheight-sealevel)/(double) - viewpos);
   vangle = atan ( tan_vangle );
   vangle -= atan( (double) (height/2) / focal ); 
+#else
+  /* we are making some horrible approximations to avoid trig funtions */
+  tan_vangle = (double) ((double)(viewheight-sealevel)/(double) - viewpos);
+  tan_vangle = tan_vangle - ( (double) (height/2) / focal );
+#endif
 
   top=make_fold(levels,stop,frac_start,slope,smooth,(SIDE / pwidth),start,mean,fdim);
 
@@ -270,7 +276,7 @@ Height shadow;
           (1.0/ ( 1.0 + hypot_sqr))));
   /*}}}*/
   /*{{{  calculate colour band. */
-  band = ( effective * N_BANDS ) / varience ;
+  band = ( effective / varience) * N_BANDS;
   if ( band < 0 )
   {
     band = 0;
