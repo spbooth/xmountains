@@ -7,9 +7,11 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.11 1993/03/18 21:26:35 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.12 1993/04/28 20:50:22 spb Exp $";
 #define SIDE 1.0
+#ifndef PI
 #define PI 3.14159265
+#endif
 
 /*{{{  void set_clut() */
 /*
