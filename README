@@ -55,6 +55,7 @@ PROBLEMS
 CHANGES from V1.2
 1) program now sleeps after a scroll rather than once per column.
 2) added a -B flag to control the number of colours needed.
+3) added a -q flag that clears the root window when the program exits.
 
 CHANGES from V1.1
 Several changes including:
