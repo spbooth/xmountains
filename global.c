@@ -4,8 +4,8 @@
 Fold *top;
 int levels = 10;
 int stop = 2;
-int smooth = 3;
-int cross = FALSE;
+int smooth = 1;
+int cross = TRUE;
 int slope = TRUE;
 int snooze_time = 10;
 int n_col=MAX_COL;
