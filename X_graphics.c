@@ -4,7 +4,7 @@
 #include<X11/Xatom.h>
 #include "paint.h"
 
-char X_graphics_Id[]="$Id: X_graphics.c,v 1.8 1994/01/19 13:12:08 spb Exp $";
+char X_graphics_Id[]="$Id: X_graphics.c,v 1.9 1994/01/19 13:33:48 spb Exp $";
 
 char *display=NULL;       /* name of display to open, NULL for default */
 char *geom=NULL;          /* geometry of window, NULL for default */
@@ -18,8 +18,8 @@ Atom wm_delete_window;
 #endif
   Display *dpy;
   int screen;
-  int graph_width;
-  int graph_height;
+  unsigned int graph_width;
+  unsigned int graph_height;
   Window parent, win, root;
   int use_root=FALSE;
   
@@ -93,7 +93,8 @@ void finish_graphics()
 {
   unsigned long attmask;
   XSetWindowAttributes attributes;
-  int x,y,border,depth;
+  int x,y
+  unsigned int border,depth;
   int count;
   
   XFreePixmap(dpy,pix);
@@ -124,7 +125,7 @@ void finish_graphics()
 void init_graphics( int want_use_root, int *s_graph_width, int *s_graph_height,int ncol, Gun *red, Gun *green, Gun *blue )
 {
 /*{{{defs*/
-  int depth=0;              /* positive value requires this many planes */
+  unsigned int depth=0;
   Visual *vis;
   int mask;
   int count;
@@ -136,7 +137,7 @@ void init_graphics( int want_use_root, int *s_graph_width, int *s_graph_height,i
   char * winname="Mountains";
   XTextProperty textprop;
 
-  int border;
+  unsigned int border;
   unsigned long gcvmask;
   XGCValues gcv;
   int i;
