@@ -6,7 +6,7 @@
 #include"vroot.h"
 #endif
 #include "paint.h"
-char X_graphics_Id[]="$Id: X_graphics.c,v 1.21 1995/06/16 12:18:33 spb Exp $";
+char X_graphics_Id[]="$Id: X_graphics.c,v 1.22 1995/06/19 10:35:12 spb Exp $";
 
 char *display=NULL;       /* name of display to open, NULL for default */
 char *geom=NULL;          /* geometry of window, NULL for default */
@@ -410,6 +410,7 @@ int dist;
      * may make a copy of a background pixmap
      * so in principle we should re-install.
      */
+    XSetWindowBackgroundPixmap(dpy,win,None);
     XSetWindowBackgroundPixmap(dpy,win,pix);
     XClearWindow(dpy,win);
   }else{
