@@ -20,7 +20,7 @@
 #include <math.h>
 #include "crinkle.h"
 
-char calcalt_Id[] = "$Id: calcalt.c,v 2.12 1996/09/13 10:07:46 spb Exp $";
+char calcalt_Id[] = "$Id: calcalt.c,v 2.13 1997/10/22 15:27:26 spb Exp $";
 
 #ifdef DEBUG
 #define DB(A,B) dump_pipeline(A,B)
@@ -29,7 +29,7 @@ char calcalt_Id[] = "$Id: calcalt.c,v 2.12 1996/09/13 10:07:46 spb Exp $";
 #endif
 
 
-/*{{{  Strip *make_strip(Fold *f) */
+/* {{{   Strip *make_strip(Fold *f) */
 Strip *make_strip (f)
 Fold *f;
 {
@@ -43,11 +43,7 @@ Fold *f;
     exit(1);
   }
   p->f = f;
-#ifdef MPI
-  n = f->size;
-#else
   n = f->count;
-#endif
   p->d = (Height *)malloc( n * sizeof(Height) );
   if( p->d == NULL )
   {
@@ -56,8 +52,8 @@ Fold *f;
   }
   return(p);
 }
-/*}}}*/
-/*{{{  void free_strip(Strip *p) */
+/* }}} */
+/* {{{   void free_strip(Strip *p) */
 void free_strip (p)
 Strip *p;
 {
@@ -68,8 +64,8 @@ Strip *p;
   }
   free(p);
 }
-/*}}}*/
-/*{{{  Strip *double_strip(Strip s) */
+/* }}} */
+/* {{{   Strip *double_strip(Strip s) */
 Strip *double_strip (s)
 Strip *s;
 {
@@ -79,9 +75,6 @@ Strip *s;
   int count;
 
   p = make_strip(s->f->parent);
-#ifdef MPI
-  redistribude data
-#else
   a = s->d;
   b = p->d;
   count = s->f->count;
@@ -94,11 +87,10 @@ Strip *s;
     b++;
   }
   *b = *a;
-#endif
   return(p);
 }
-/*}}}*/
-/*{{{  Strip *set_strip(Fold *f, Height value)*/
+/* }}} */
+/* {{{   Strip *set_strip(Fold *f, Height value)*/
 Strip *set_strip (f,value)
 Fold *f;
 Height value;
@@ -110,11 +102,7 @@ Height value;
   
   s = make_strip(f);
   h = s->d;
-#ifdef MPI
-  count = f->size;
-#else
   count = f->count;
-#endif
   for( i=0 ; i < count ; i++)
   {
     *h = value;
@@ -122,8 +110,8 @@ Height value;
   }
   return(s);
 }
-/*}}}*/
-/*{{{  Strip *random_strip(Fold *f)*/
+/* }}} */
+/* {{{   Strip *random_strip(Fold *f)*/
 Strip *random_strip(f)
 Fold *f;
 {
@@ -131,20 +119,16 @@ Fold *f;
   int i, count;
   
   result=make_strip(f);
-#ifdef MPI
-  count=f->size;  /* this is a little wasteful as it also sets the halo */
-#else
   count = f->count;
-#endif
   for( i=0 ; i < count ; i++)
   {
     result->d[i] = f->p->mean + (f->scale * gaussian());
   }
   return(result);
 }
-/*}}}*/
+/* }}} */
 
-/*{{{  Fold *make_fold(Fold *parent,Parm *param, int levels, int stop, Length len) */
+/* {{{   Fold *make_fold(Fold *parent,Parm *param, int levels, int stop, Length len) */
 /*
  * Initialise the fold structures.
  * As everything else reads the parameters from their fold
@@ -201,10 +185,6 @@ Length length;
     p->s[i] = NULL;
   }
   p->parent=parent;
-#ifdef MPI
-  /* work out the distribution at this level */
-  p->first = ( p->p-me == 0 );
-#endif
   if( levels > stop )
   {
     p->next = make_fold(p,param,(levels-1),stop,(2.0*length));
@@ -213,12 +193,16 @@ Length length;
   }
   return( p );
 }
-/*}}}*/
-/*{{{  void free_fold(Fold *f) */
+/* }}} */
+/* {{{   void free_fold(Fold *f) */
 void free_fold (f)
 Fold *f;
 {
   int i;
+  if( f->next ){
+    free_fold(f->next);
+    f->next=NULL;
+  }
   for(i=0;i<NSTRIP;i++)
   {
     if( f->s[i] != NULL )
@@ -230,9 +214,9 @@ Fold *f;
   free(f);
   return;
 }
-/*}}}*/
+/* }}} */
 
-/*{{{  Strip *next_strip(Fold *fold) */
+/* {{{   Strip *next_strip(Fold *fold) */
 Strip *next_strip (fold)
 Fold *fold;
 {
@@ -244,9 +228,9 @@ Fold *fold;
 
   if( fold->level == fold->stop)
   {
-    /*{{{  generate values from scratch */
+    /* {{{   generate values from scratch */
     result=random_strip(fold);
-    /*}}}*/
+    /* }}} */
   }else{
   /*
    * There are two types of strip,
@@ -260,11 +244,11 @@ Fold *fold;
    */
     while( result == NULL )
     {
-      /*{{{iterate*/
+      /* {{{ iterate*/
       switch(fold->state)
       {
         case START:
-          /*{{{  perform an update. return first result*/
+          /* {{{   perform an update. return first result*/
           DB("S1",fold);
           t=fold->s;
           /* read in a new A strip at the start of the pipeline */
@@ -387,9 +371,9 @@ Fold *fold;
           t[0]=t[1]=NULL;
           fold->state = STORE;
           break;
-          /*}}}*/
+          /* }}} */
         case STORE:
-          /*{{{  return second value from previous update. */
+          /* {{{   return second value from previous update. */
           result = fold->save;
           fold->save=NULL;
           for(i=NSTRIP-1;i>1;i--)
@@ -399,13 +383,13 @@ Fold *fold;
           fold->s[0] = fold->s[1]=NULL;
           fold->state = START;
           break;
-          /*}}}*/
+          /* }}} */
         default:
           fprintf(stderr,"next_strip: invalid state level %d state %d\n",
                fold->level,fold->state);
           exit(3);
       }
-      /*}}}*/
+      /* }}} */
     }
   }
   iter = fold->level - fold->stop;
@@ -417,9 +401,9 @@ Fold *fold;
   }
   return(result);
 }
-/*}}}*/
+/* }}} */
 
-/*{{{void x_update(Fold *fold,float scale, float mix, Strip *a, Strip *b, Strip *c)*/
+/* {{{ void x_update(Fold *fold,float scale, float mix, Strip *a, Strip *b, Strip *c)*/
 void x_update(fold, scale, mix, a, b, c)
 Fold *fold;
 float scale;
@@ -447,7 +431,7 @@ Strip *c;
   rp=c->d;
 
   if( mix <= 0.0 ){
-    /*{{{random offset to average of new points*/
+    /* {{{ random offset to average of new points*/
     for(i=0; i<count-2; i+=2)
     {
       mp[1] = 0.25 * ( lp[0] + rp[0] + lp[2] + rp[2])
@@ -456,9 +440,9 @@ Strip *c;
       lp+=2;
       rp+=2;
     }
-    /*}}}*/
+    /* }}} */
   }else if( mix >= 1.0 ){
-    /*{{{random offset to old value*/
+    /* {{{ random offset to old value*/
     for(i=0; i<count-2; i+=2)
     {
       mp[1] = mp[1]
@@ -467,9 +451,9 @@ Strip *c;
       lp+=2;
       rp+=2;
     }
-    /*}}}*/
+    /* }}} */
   }else{
-    /*{{{mixed update*/
+    /* {{{ mixed update*/
     for(i=0; i<count-2; i+=2)
     {
       mp[1] = (mix * mp[1]) + w * ( lp[0] + rp[0] + lp[2] + rp[2])
@@ -478,11 +462,11 @@ Strip *c;
       lp+=2;
       rp+=2;
     }
-    /*}}}*/
+    /* }}} */
   }
 }    
-/*}}}*/
-/*{{{void p_update(Fold *fold,float scale, float mix, Strip *a, Strip *b, Strip *c)*/
+/* }}} */
+/* {{{ void p_update(Fold *fold,float scale, float mix, Strip *a, Strip *b, Strip *c)*/
 void p_update(fold, scale, mix, a, b, c)
 Fold *fold;
 float scale;
@@ -515,7 +499,7 @@ Strip *c;
   rp=c->d;
 
   if( mix <= 0.0 ){
-    /*{{{random offset to average of new points*/
+    /* {{{ random offset to average of new points*/
     for(i=0; i<count-2; i+=2)
     {
       mp[1] = 0.25 * ( lp[1] + rp[1] + mp[0] + mp[2] )
@@ -524,9 +508,9 @@ Strip *c;
       lp+=2;
       rp+=2;
     }
-    /*}}}*/
+    /* }}} */
   }else if(mix >= 1.0){
-    /*{{{random offset to old values*/
+    /* {{{ random offset to old values*/
     for(i=0; i<count-2; i+=2)
     {
       mp[1] = mp[1]
@@ -535,9 +519,9 @@ Strip *c;
       lp+=2;
       rp+=2;
     }
-    /*}}}*/
+    /* }}} */
   }else{
-    /*{{{mixed update*/
+    /* {{{ mixed update*/
     for(i=0; i<count-2; i+=2)
     {
       mp[1] = (mix * mp[1]) + w * ( lp[1] + rp[1] + mp[0] + mp[2] )
@@ -546,12 +530,12 @@ Strip *c;
       lp+=2;
       rp+=2;
     }
-    /*}}}*/
+    /* }}} */
   }
 }    
 
-/*}}}*/
-/*{{{void t_update(Fold *fold,float scale, float mix, Strip *a, Strip *b, Strip *c)*/
+/* }}} */
+/* {{{ void t_update(Fold *fold,float scale, float mix, Strip *a, Strip *b, Strip *c)*/
 void t_update(fold, scale, mix, a, b, c)
 Fold *fold;
 float scale;
@@ -581,7 +565,7 @@ Strip *c;
   rp=c->d;
 
   if( mix <= 0.0){
-    /*{{{random offset to average of new points*/
+    /* {{{ random offset to average of new points*/
     mp[0] = third * ( lp[0] + rp[0] + mp[1] )
             + (scale * gaussian());
     mp++;
@@ -597,9 +581,9 @@ Strip *c;
     }
     mp[1] = third * ( lp[1] + rp[1] + mp[0] )
           + (scale * gaussian());
-    /*}}}*/
+    /* }}} */
   }else if(mix >= 1.0){
-    /*{{{random offset to old values*/
+    /* {{{ random offset to old values*/
     for(i=0; i<count; i+=2)
     {
       mp[0] = mp[0]
@@ -608,9 +592,9 @@ Strip *c;
       lp+=2;
       rp+=2;
     }
-    /*}}}*/
+    /* }}} */
   }else{
-    /*{{{mixed update*/
+    /* {{{ mixed update*/
     mp[0] = (mix * mp[0]) + we * ( lp[0] + rp[0] + mp[1] )
             + (scale * gaussian());
     mp++;
@@ -626,13 +610,13 @@ Strip *c;
     }
     mp[1] = (mix * mp[1]) + we * ( lp[1] + rp[1] + mp[0] )
           + (scale * gaussian());
-    /*}}}*/
+    /* }}} */
   }
 }    
 
 
-/*}}}*/
-/*{{{void v_update(Fold *fold,float scale, float mix, Strip *a, Strip *b, Strip *c)*/
+/* }}} */
+/* {{{ void v_update(Fold *fold,float scale, float mix, Strip *a, Strip *b, Strip *c)*/
 void v_update(fold, scale, mix, a, b, c)
 Fold *fold;
 float scale;
@@ -661,7 +645,7 @@ Strip *c;
   rp=c->d;
 
   if( mix <= 0.0){
-    /*{{{random offset of average of new points*/
+    /* {{{ random offset of average of new points*/
     mp[0] = 0.5 * ( lp[1] + rp[1] )
             + (scale * gaussian());
     mp++;
@@ -677,9 +661,9 @@ Strip *c;
     }
     mp[1] = 0.5 * ( lp[0] + rp[0] )
             + (scale * gaussian());
-    /*}}}*/
+    /* }}} */
   }else if(mix >= 1.0){
-    /*{{{random offset to old values*/
+    /* {{{ random offset to old values*/
     for(i=0; i<count; i+=2)
     {
       mp[0] = mp[0]
@@ -688,9 +672,9 @@ Strip *c;
       lp+=2;
       rp+=2;
     }
-    /*}}}*/
+    /* }}} */
   }else{
-    /*{{{mixed update*/
+    /* {{{ mixed update*/
     mp[0] = (mix * mp[0]) + we * ( lp[1] + rp[1] )
             + (scale * gaussian());
     mp++;
@@ -706,12 +690,12 @@ Strip *c;
     }
     mp[1] = (mix * mp[1]) + we * ( lp[0] + rp[0] )
             + (scale * gaussian());
-    /*}}}*/
+    /* }}} */
   }
 }    
 
-/*}}}*/
-/*{{{void vside_update(Fold *fold,float scale, float mix, Strip *a)*/
+/* }}} */
+/* {{{ void vside_update(Fold *fold,float scale, float mix, Strip *a)*/
 void vside_update(fold, scale, mix, a)
 Fold *fold;
 float scale;
@@ -731,38 +715,38 @@ Strip *a;
   mp=a->d;
 
   if( mix <= 0.0){
-    /*{{{random offset to average of new points*/
+    /* {{{ random offset to average of new points*/
     for(i=0; i<count-2; i+=2)
     {
       mp[1] = 0.5 * ( mp[0] + mp[2] )
             + (scale * gaussian());
       mp+=2;
     }
-    /*}}}*/
+    /* }}} */
   }else if(mix >= 1.0){
-    /*{{{random offset to old values*/
+    /* {{{ random offset to old values*/
     for(i=0; i<count-2; i+=2)
     {
       mp[1] = mp[1]
             + (scale * gaussian());
       mp+=2;
     }
-    /*}}}*/
+    /* }}} */
   }else{
-    /*{{{mixed update*/
+    /* {{{ mixed update*/
     for(i=0; i<count-2; i+=2)
     {
       mp[1] = (mix * mp[1]) + w * ( mp[0] + mp[2] )
             + (scale * gaussian());
       mp+=2;
     }
-    /*}}}*/
+    /* }}} */
   }
 }    
 
 
-/*}}}*/
-/*{{{void hside_update(Fold *fold,float scale, float mix, Strip *a, Strip *b, Strip *c)*/
+/* }}} */
+/* {{{ void hside_update(Fold *fold,float scale, float mix, Strip *a, Strip *b, Strip *c)*/
 void hside_update(fold, scale, mix, a, b, c)
 Fold *fold;
 float scale;
@@ -790,7 +774,7 @@ Strip *c;
   rp=c->d;
 
   if( mix <= 0.0 ){
-    /*{{{random offset to average of new points*/
+    /* {{{ random offset to average of new points*/
     for(i=0; i<count; i+=2)
     {
       mp[0] = 0.5 * ( lp[0] + rp[0] )
@@ -799,9 +783,9 @@ Strip *c;
       lp+=2;
       rp+=2;
     }
-    /*}}}*/
+    /* }}} */
   }else if(mix >= 1.0){
-    /*{{{random offset to old points*/
+    /* {{{ random offset to old points*/
     for(i=0; i<count; i+=2)
     {
       mp[0] = mp[0]
@@ -810,9 +794,9 @@ Strip *c;
       lp+=2;
       rp+=2;
     }
-    /*}}}*/
+    /* }}} */
   }else{
-    /*{{{mixed update*/
+    /* {{{ mixed update*/
     for(i=0; i<count; i+=2)
     {
       mp[0] = (mix * mp[0]) + w * ( lp[0] + rp[0] )
@@ -821,13 +805,13 @@ Strip *c;
       lp+=2;
       rp+=2;
     }
-    /*}}}*/
+    /* }}} */
   }
 }    
 
 
 
-/*}}}*/
+/* }}} */
 
 
 #ifdef DEBUG
