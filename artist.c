@@ -7,7 +7,7 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.17 1994/01/21 11:53:47 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.18 1994/01/21 12:33:05 spb Exp $";
 #define SIDE 1.0
 #ifndef PI
 #define PI 3.14159265
@@ -274,7 +274,6 @@ Height shadow;
   /*{{{  if cos_theta is negative then point is really in shadow */
   if( shade < 0 )
   {
-    fprintf(stderr,"warning bad angle\n");
     shade = 0;
   }
   /*}}}*/
