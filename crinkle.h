@@ -1,4 +1,4 @@
-/* $Id: crinkle.h,v 2.3 1994/12/06 19:40:56 spb Exp $ */
+/* $Id: crinkle.h,v 2.4 1995/10/04 10:02:45 spb Exp $ */
 #ifndef CRINKLE
 #define CRINKLE
 /*{{{  typedefs */
@@ -44,6 +44,7 @@ typedef struct parm{
 /* The parameter struct for the recursive procedure */
 typedef struct fold{
   int level;                /* levels of recursion below us */
+  int count;                /* number of points at this level */
   Length scale;             /* scale factor for perturbations */
   Length midscale;          /* as above but for diagonal offsets */
   struct parm *p;           /* update parameters */
@@ -64,12 +65,12 @@ Strip *next_strip (Fold *);
 Fold *make_fold (Parm *,int, int, Length)
 void free_fold (Fold *);
 Length gaussian ();
-void x_update(int, float, float, Strip *, Strip *, Strip *);
-void p_update(int, float, float, Strip *, Strip *, Strip *);
-void t_update(int, float, float, Strip *, Strip *, Strip *);
-void v_update(int, float, float, Strip *, Strip *, Strip *);
-void vside_update(int, float, float, Strip *);
-void hside_update(int, float, float, Strip *, Strip *, Strip *);
+void x_update(Fold *, float, float, Strip *, Strip *, Strip *);
+void p_update(Fold *, float, float, Strip *, Strip *, Strip *);
+void t_update(Fold *, float, float, Strip *, Strip *, Strip *);
+void v_update(Fold *, float, float, Strip *, Strip *, Strip *);
+void vside_update(Fold *, float, float, Strip *);
+void hside_update(Fold *, float, float, Strip *, Strip *, Strip *);
 #else
 Strip *make_strip ();
 void free_strip ();

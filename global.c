@@ -12,14 +12,14 @@ int n_col=DEF_COL;
 int band_size=BAND_SIZE;
 int request_clear = FALSE;
 #ifdef USE_E_EVENTS
-int e_events = FALSE;
+int e_events = TRUE;
 #else
 int e_events = FALSE;
 #endif
 float fdim = 0.65;
 float mix   =0.0;
 float midmix=0.0;
-Height start;      /* starting value for the surface */
+Height start=0.0;      /* starting value for the surface */
 Height mean=0.0;   /* mean value of surface */
 Height varience;   /* rough estimate of the height of the range */
 Height shift=0.5;    /* offset from calcalt to artist coordinates */
