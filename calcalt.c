@@ -20,7 +20,7 @@
 #include <math.h>
 #include "crinkle.h"
 
-char calcalt_Id[] = "$Id: calcalt.c,v 2.16 1997/10/24 14:52:10 spb Exp $";
+char calcalt_Id[] = "$Id: calcalt.c,v 2.17 2001/03/30 12:35:32 spb Exp $";
 
 #ifdef DEBUG
 #define DB(A,B) dump_pipeline(A,B)
@@ -257,6 +257,10 @@ Fold *f;
   if( f->next ){
     free_fold(f->next);
     f->next=NULL;
+  }
+  if( f->save ){
+    free_strip(f->save);
+    f->save=NULL;
   }
   for(i=0;i<NSTRIP;i++)
   {
