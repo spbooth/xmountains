@@ -9,7 +9,7 @@
 #define VERSION 1
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.24 1994/04/04 19:27:55 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.25 1994/04/05 14:01:35 spb Exp $";
 
 extern char *display;
 extern char *geom;
@@ -79,7 +79,7 @@ Col *next_col (paint)
 int paint;
 {
   Col *res;
-  int i;
+  int i,offset=0;
   
   /*{{{  update strips */
   if(paint)
@@ -93,14 +93,28 @@ int paint;
   b_strip = extract( next_strip(top) );
   /*}}}*/
 
-  /*{{{update the shadow*/
+  /*{{{update the shadows*/
+  /* shadow_slip is the Y component of the light vector.
+   * The shadows can only step an integer number of points in the Y
+   * direction so we maintain shadow_register as the deviation between
+   * where the shadows are and where they should be. When the magnitude of
+   * this gets larger then 1 the shadows are slipped by the required number of
+   * points.
+   * This will not work for very oblique angles so the horizontal angle
+   * of illumination should be constrained.
+   */
   shadow_register += shadow_slip;
   if( shadow_register >= 1.0 )
   {
-    shadow_register -= 1.0;
-    for(i=width-1 ; i>0 ; i--)
+    /*{{{negative offset*/
+    while( shadow_register >= 1.0 )
     {
-      shadow[i] = shadow[i-1]-delta_shadow;
+      shadow_register -= 1.0;
+      offset++;
+    }
+    for(i=width-1 ; i>=offset ; i--)
+    {
+      shadow[i] = shadow[i-offset]-delta_shadow;
       if( shadow[i] < b_strip[i] )
       {
         shadow[i] = b_strip[i];
@@ -112,18 +126,27 @@ int paint;
       }
       /*}}}*/
     }
-    shadow[0] = b_strip[0];
-    /*{{{  stop shadow at sea level */
-    if( shadow[0] < sealevel )
+    for(i=0;i<offset;i++)
     {
-      shadow[0] = sealevel;
+      shadow[i] = b_strip[i];
+      /*{{{  stop shadow at sea level*/
+      if( shadow[i] < sealevel )
+      {
+        shadow[i] = sealevel;
+      }
+      /*}}}*/
     }
     /*}}}*/
   }else if( shadow_register <= -1.0 ){
-    shadow_register += 1.0;
-    for(i=0 ; i<width-1 ; i++)
+    /*{{{positive offset*/
+    while( shadow_register <= -1.0 )
     {
-      shadow[i] = shadow[i+1]-delta_shadow;
+      shadow_register += 1.0;
+      offset++;
+    }
+    for(i=0 ; i<width-offset ; i++)
+    {
+      shadow[i] = shadow[i+offset]-delta_shadow;
       if( shadow[i] < b_strip[i] )
       {
         shadow[i] = b_strip[i];
@@ -135,14 +158,19 @@ int paint;
       }
       /*}}}*/
     }
-    shadow[width-1] = b_strip[width-1];
-    /*{{{  stop shadow at sea level */
-    if( shadow[width-1] < sealevel )
+    for(;i<width;i++)
     {
-      shadow[width-1] = sealevel;
+      shadow[i] = b_strip[i];
+      /*{{{  stop shadow at sea level*/
+      if( shadow[i] < sealevel )
+      {
+        shadow[i] = sealevel;
+      }
+      /*}}}*/
     }
     /*}}}*/
   }else{
+    /*{{{no offset*/
     for(i=0 ; i<width ; i++)
     {
       shadow[i] -= delta_shadow;
@@ -157,6 +185,7 @@ int paint;
       }
       /*}}}*/
     }
+    /*}}}*/
   }
   /*}}}*/
   
@@ -279,6 +308,13 @@ char **argv;
          break;
       case 'r':
          repeat = atoi( optarg );
+         if( repeat < 0 )
+         {
+           repeat = -repeat;
+           i=-1;
+         }else{
+           i=1;
+         }
          if( repeat < 1 )
          {
            repeat = 1;
@@ -286,7 +322,7 @@ char **argv;
          /* we want repeat to be a multiple of 2 as we are using
           * a textured field for the sky.
           */
-         repeat = (2 * ((repeat +1)/2));
+         repeat = i*(2 * ((repeat +1)/2));
          break;
       case 'B':                     /* set band_size */
          band_size = atoi( optarg );
@@ -329,13 +365,13 @@ char **argv;
          break;
       case 'A':                     /* set Illumination angle (horizontal)*/
          alpha = ((PI * atof( optarg ))/180.0);
-         if( alpha < -PI/4.0 )
+         if( alpha < -PI/3.0 )
          {
-           alpha = -PI/4.0;
+           alpha = -PI/3.0;
          }
-         if( alpha > PI/4.0 )
+         if( alpha > PI/3.0 )
          {
-           alpha = PI/4.0;
+           alpha = PI/3.0;
          }
          break;
       case 'S':                     /* set stretch */
@@ -469,17 +505,33 @@ char **argv;
   }else{
     mapwid=s_height;
   }
-  for(p=0 ; p < s_width ; p++)
+  if( repeat > 0 )
   {
-    plot_column(p,map,0);
+    for(p=0 ; p < s_width ; p++)
+    {
+      plot_column(p,map,0);
+    }
+  }else{
+    for(p=s_width-1 ; p >=0 ; p--)
+    {
+      plot_column(p,map,0);
+    }
   }
   while( TRUE )
   {
       /* do the scroll */
       scroll_screen(repeat);
-      for( p = s_width - repeat ; p < (s_width-1) ; p++ )
+      if(repeat > 0)
       {
-        plot_column(p,map,0);
+        for( p = s_width - repeat ; p < (s_width-1) ; p++ )
+        {
+          plot_column(p,map,0);
+        }
+      }else{
+        for( p = -1 - repeat ; p >=0 ; p-- )
+        {
+          plot_column(p,map,0);
+        }
       }
       plot_column(p,map,snooze_time);
   }

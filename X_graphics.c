@@ -3,7 +3,7 @@
 #include<X11/Xutil.h>
 #include<X11/Xatom.h>
 #include "paint.h"
-char X_graphics_Id[]="$Id: X_graphics.c,v 1.18 1994/02/24 11:08:03 spb Exp $";
+char X_graphics_Id[]="$Id: X_graphics.c,v 1.19 1994/04/05 14:01:35 spb Exp $";
 
 char *display=NULL;       /* name of display to open, NULL for default */
 char *geom=NULL;          /* geometry of window, NULL for default */
@@ -25,6 +25,11 @@ Atom wm_delete_window;
   int use_root=FALSE;
   int do_clear=FALSE;
   int pixmap_installed=FALSE;
+
+  /* plot history */
+  int plot_x, plot_y1, plot_y2;
+  unsigned long plot_col;
+  int plot_saved=FALSE;
   
 #include <X11/bitmaps/gray>
 
@@ -363,15 +368,30 @@ Gun *blue;
 void scroll_screen( dist )
 int dist;
 {
+  int reverse=FALSE;
+
+  if( dist < 0 )
+  {
+    dist = -dist;
+    reverse=TRUE;
+  }
   /* scroll the pixmap */
   if( dist > graph_width )
   {
     dist = graph_width;
   }
-  /* copy the data */
-  XCopyArea(dpy,pix,pix,gc,dist,0,graph_width-dist,graph_height,0,0);
-  /* blank new region */
-  blank_region(graph_width-dist,0,dist,graph_height);
+  if( reverse )
+  {
+    /* copy the data */
+    XCopyArea(dpy,pix,pix,gc,0,0,graph_width-dist,graph_height,dist,0);
+    /* blank new region */
+    blank_region(0,0,dist,graph_height);
+  }else{
+    /* copy the data */
+    XCopyArea(dpy,pix,pix,gc,dist,0,graph_width-dist,graph_height,0,0);
+    /* blank new region */
+    blank_region(graph_width-dist,0,dist,graph_height);
+  }
   /* update the window to match */
   if( pixmap_installed )
   {
@@ -389,8 +409,54 @@ int x;
 int y;
 Gun value;
 {
-  XSetForeground(dpy,gc,table[value].pixel);
-  XDrawPoint(dpy,pix,gc,x,y);
+  int do_draw, draw_x, draw_y1, draw_y2;
+  unsigned long draw_colour;
+  
+  /* if x is negative this means flush the stored request */
+  if(! plot_saved) /* no stored values */
+  {
+    plot_x = x;
+    plot_y1=plot_y2 = y;
+    plot_col=table[value].pixel;
+    do_draw=FALSE;
+    plot_saved = (x >=0);
+  }else{
+    if( x < 0 )  /* requesting a flush */
+    {
+      draw_x=plot_x;
+      draw_y1=plot_y1;
+      draw_y2=plot_y2;
+      draw_colour = plot_col;
+      plot_saved=FALSE;
+      do_draw=TRUE;
+    }else{      /* plot request with saved value */
+      if( (x==plot_x) && (plot_col == table[value].pixel)) /* add to line */
+      {
+        if(y<plot_y1) plot_y1=y;
+        if(y>plot_y2) plot_y2=y;
+        do_draw=FALSE;
+      }else{
+        draw_x=plot_x;
+        draw_y1=plot_y1;
+        draw_y2=plot_y2;
+        draw_colour=plot_col;
+        do_draw=TRUE;
+        plot_x=x;
+        plot_y1=plot_y2=y;
+        plot_col=table[value].pixel;
+      }
+    }
+  }
+  if( do_draw )
+  {
+    XSetForeground(dpy,gc,draw_colour);
+    if( draw_y1 == draw_y2 )
+    {
+      XDrawPoint(dpy,pix,gc,draw_x,draw_y1);
+    }else{
+      XDrawLine(dpy,pix,gc,draw_x,draw_y1,draw_x,draw_y2);
+    }
+  }
 }
 /*}}}*/
 
@@ -401,6 +467,8 @@ int y;
 int w;
 int h;
 {
+  /* flush outstanding plots */
+  plot_pixel(-1,0,0);
   XCopyArea(dpy,pix,win,gc,x,y,w,h,x,y);
 }
 /*}}}*/
