@@ -1,4 +1,4 @@
-/* $Id: paint.h,v 1.4 1993/03/15 11:32:35 spb Exp $ */
+/* $Id: paint.h,v 1.5 1994/01/10 17:38:39 spb Exp $ */
 #ifndef PAINT
 #define PAINT
 
@@ -9,10 +9,11 @@ typedef unsigned char Col;
 typedef unsigned char Col_24[3];
 
 #define BLACK       0
-#define SEA_LIT     1
-#define SEA_UNLIT   2
-#define SKY         3
-#define BAND_BASE   4
+#define WHITE       1
+#define SEA_LIT     2
+#define SEA_UNLIT   3
+#define SKY         4
+#define BAND_BASE   5
 #define BAND_SIZE   40
 #define N_BANDS     6
 #define MAX_COL     (BAND_BASE + (N_BANDS * BAND_SIZE))

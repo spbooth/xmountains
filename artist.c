@@ -7,7 +7,7 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.12 1993/04/28 20:50:22 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.13 1994/01/10 17:38:39 spb Exp $";
 #define SIDE 1.0
 #ifndef PI
 #define PI 3.14159265
@@ -35,6 +35,11 @@ Error Error Error max_col too large
   red[BLACK]       = 0;
   green[BLACK]     = 0;
   blue[BLACK]      = 0;
+  /*}}}*/
+  /*{{{  white */
+  red[WHITE]       = 255;
+  green[WHITE]     = 255;
+  blue[WHITE]      = 255;
   /*}}}*/
   /*{{{  sky */
   red[SKY]         = 103;
