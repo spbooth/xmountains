@@ -1,4 +1,4 @@
-LOCAL_LIBRARIES = $(XLIB)
+LOCAL_LIBRARIES = -lX11
   SYS_LIBRARIES = -lm
            SRCS = calcalt.c random.c  artist.c global.c xmountains.c X_graphics.c
            OBJS = calcalt.o random.o  artist.o global.o xmountains.o X_graphics.o
