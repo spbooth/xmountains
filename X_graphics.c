@@ -3,7 +3,7 @@
 #include<X11/Xutil.h>
 #include<X11/Xatom.h>
 
-char X_graphics_Id[]="$Id: X_graphics.c,v 1.1 1994/01/07 18:31:05 spb Exp $";
+char X_graphics_Id[]="$Id: X_graphics.c,v 1.2 1994/01/07 19:37:50 spb Exp $";
 
 Atom wm_protocols;
 Atom wm_delete_window;
@@ -40,48 +40,45 @@ void zap_events()
   XEvent event;
   XExposeEvent *expose = (XExposeEvent *)&event;
   int exw, exh;
-  if( ! use_root ) /* no events if on root window */
-  {
-    while( XPending(dpy) ){
-      XNextEvent(dpy, &event);
-      switch(event.type) {
-        case ClientMessage:
-          if (event.xclient.message_type == wm_protocols &&
-            event.xclient.data.l[0] == wm_delete_window)  {
+  while( XPending(dpy) ){
+    XNextEvent(dpy, &event);
+    switch(event.type) {
+      case ClientMessage:
+        if (event.xclient.message_type == wm_protocols &&
+          event.xclient.data.l[0] == wm_delete_window)  {
+            finish_prog();
+          }
+            break;
+        case ButtonPress:
+            break;
+        case ButtonRelease:
               finish_prog();
-            }
-              break;
-          case ButtonPress:
-              break;
-          case ButtonRelease:
-                finish_prog();
-              break;
-          case Expose:
-            if( (expose->x < graph_width) && (expose->y < graph_height))
+            break;
+        case Expose:
+          if( (expose->x < graph_width) && (expose->y < graph_height))
+          {
+            if( (expose->x + expose->width) > graph_width)
             {
-              if( (expose->x + expose->width) > graph_width)
-              {
-                exw=graph_width - expose->x;
-              }else{
-                exw = expose->width;
-              }
-              if( (expose->y + expose->height) > graph_height)
-              {
-                exh=graph_height - expose->y;
-              }else{
-                exh = expose->height;
-              }
-              XCopyArea(dpy,pix,win,gc,expose->x,expose->y,
-                            exw,exh,
-                            expose->x,expose->y);
-  	  }
-  	  break;
-          default:
-              fprintf(stderr,"unrecognized event %d\n",event.type);
-              XCloseDisplay(dpy);
-              exit(1);
-              break;
-      }
+              exw=graph_width - expose->x;
+            }else{
+              exw = expose->width;
+            }
+            if( (expose->y + expose->height) > graph_height)
+            {
+              exh=graph_height - expose->y;
+            }else{
+              exh = expose->height;
+            }
+            XCopyArea(dpy,pix,win,gc,expose->x,expose->y,
+                          exw,exh,
+                          expose->x,expose->y);
+	  }
+	  break;
+        default:
+            fprintf(stderr,"unrecognized event %d\n",event.type);
+            XCloseDisplay(dpy);
+            exit(1);
+            break;
     }
   }
 }
@@ -130,11 +127,14 @@ void init_graphics( int want_use_root, int *s_graph_width, int *s_graph_height)
   depth = DefaultDepth(dpy,screen);
 /*}}}*/
 /*{{{create window*/
+    attmask = 0;
   if( use_root )
   {
     win = parent;
+    attmask |= CWEventMask;
+    attributes.event_mask = ExposureMask; /* catch expose events */
+    XChangeWindowAttributes(dpy,win,attmask,&attributes);
   }else{
-    attmask = 0;
     attmask |= CWEventMask;
     attributes.event_mask = ButtonPressMask|ButtonReleaseMask|ExposureMask;
     attmask |= CWBackPixel;
@@ -207,7 +207,6 @@ void install_clut( int ncol, unsigned char *red, unsigned char *green, unsigned 
 /*{{{void scroll_screen( int dist )*/
 void scroll_screen( int dist )
 {
-  zap_events();
   /* scroll the pixmap */
   if( dist > graph_width )
   {
@@ -221,14 +220,12 @@ void scroll_screen( int dist )
   /* update the window to match */
   XCopyArea(dpy,pix,win,gc,0,0,graph_width,graph_height,0,0);
 
-  zap_events();
 }
 /*}}}*/
 
 /*{{{void plot_pixel( int x, int y, unsigned char value )*/
 void plot_pixel( int x, int y, unsigned char value )
 {
-  zap_events();
   XSetForeground(dpy,gc,table[value].pixel);
   XDrawPoint(dpy,pix,gc,x,y);
 }
