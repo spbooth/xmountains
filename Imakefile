@@ -8,7 +8,8 @@ ComplexProgramTarget(xmountains)
 
 
 xmountains.shar: $(SHARS)
-	shar -o xmountains.shar $(SHARS)
+	shar -n1 -e2 -o xmountains.shar1 README $(HDRS) Imakefile xmountains.man
+	shar -n2 -e2 -o xmountains.shar2 $(SRCS)
 
 xmountains.tar: $(SHARS)
 	tar cvf xmountains.tar $(SHARS)
