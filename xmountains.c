@@ -9,7 +9,7 @@
 #define VERSION 2
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.30 1995/06/08 09:07:51 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.31 1995/06/09 10:52:53 spb Exp $";
 
 extern char *display;
 extern char *geom;
@@ -280,7 +280,7 @@ char **argv;
   /*{{{handle command line flags*/
   mesg[0]="false";
   mesg[1]="true";
-  while((c = getopt(argc,argv,"bxmqMEHl:r:f:t:I:A:S:T:W:C:a:p:B:R:g:d:c:e:v:Z:s:X:Y:P:F:G:"))!= -1)
+  while((c = getopt(argc,argv,"bxmqMEHl:r:f:t:I:A:S:T:W:C:a:p:B:n:R:g:d:c:e:v:Z:s:X:Y:P:F:G:"))!= -1)
   {
     switch(c){
       case 'b':
@@ -345,6 +345,19 @@ char **argv;
          {
            band_size=2;
          }
+         n_col = (BAND_BASE + (N_BANDS * band_size));
+         break;
+      case 'n':                     /* set max number of colours */
+         n_col = atoi( optarg );
+         if( n_col < MIN_COL )
+         {
+           n_col = MIN_COL;
+         }
+         while( (BAND_BASE + band_size*N_BANDS) > n_col )
+         {
+           band_size--;
+         }
+         n_col = (BAND_BASE + (N_BANDS * band_size));
          break;
       case 'R':                     /* set seed, read clock if 0 */
          seed = atoi( optarg );
@@ -399,9 +412,6 @@ char **argv;
            alpha = PI/3.0;
          }
          break;
-      case 'G':                     /* set forceheight */
-         forceheight = atof( optarg );
-         break;
       case 'X':                     /* set mix */
          mix = atof( optarg );
          break;
@@ -414,7 +424,7 @@ char **argv;
       case 'W':                     /* set sealevel */
          sealevel = atof( optarg );
          break;
-      case 'w':                     /* set forceheight */
+      case 'G':                     /* set forceheight */
          forceheight = atof( optarg );
          break;
       case 'T':                     /* set shift */
@@ -482,6 +492,7 @@ char **argv;
     fprintf(stderr," -M       [%s] implement reflections \n",mesg[reflec]);
     fprintf(stderr," -r int   [%d] # columns before scrolling \n",repeat);
     fprintf(stderr," -B int   [%d] # shades in a colour band\n",band_size);
+    fprintf(stderr," -n int   [%d] # number of colours\n",n_col);
     fprintf(stderr," -Z int   [%d] time to sleep before scrolling\n",snooze_time);
     fprintf(stderr," -I float [%f] vertical angle of light \n",(phi*180.0)/PI);
     fprintf(stderr," -A float [%f] horizontal angle of light \n",(alpha*180.0)/PI);
@@ -489,7 +500,6 @@ char **argv;
     fprintf(stderr," -T float [%f] vertical shift \n",shift);
     fprintf(stderr," -W float [%f] sealevel \n",sealevel);
     fprintf(stderr," -F int   [%d] reduce variation in the foreground \n",slope);
-    fprintf(stderr," -w float [%f] mean foreground height \n",forceheight);
     fprintf(stderr," -G float [%f] average foreground height \n",forceheight);
     fprintf(stderr," -C float [%f] contour parameter \n",contour);
     fprintf(stderr," -a float [%f] altitude of viewpoint \n",altitude);
@@ -510,7 +520,6 @@ char **argv;
     exit(1);
   }
   /*}}}*/
-  n_col = (BAND_BASE + (N_BANDS * band_size));
   for(i=0 ;i<3 ;i++)
   {
     clut[i] = (Gun *) malloc(n_col * sizeof(Gun));
