@@ -7,7 +7,7 @@ generated area.
 
 
 ./xmountains: version 1.2
-usage: ./xmountains -[bxmslrftISTRapcegd]
+usage: ./xmountains -[bxmslrftISTCRapcevgd]
  -b       [false] use root window 
  -x       [false] flat start 
  -m       [false] print map 
@@ -20,6 +20,7 @@ usage: ./xmountains -[bxmslrftISTRapcegd]
  -I float [0.4500000] angle of light 
  -S float [0.600000] vertical stretch 
  -T float [0.500000] vertical shift 
+ -C float [0.300000] contour parameter 
  -a float [2.500000] altitude of viewpoint 
  -p float [4.000000] distance of viewpoint 
  -c float [1.000000] contrast

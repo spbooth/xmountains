@@ -2,7 +2,7 @@
 .ds Rv \\$3
 .ds Dt \\$4
 ..
-.Id $Id: xmountains.man,v 1.4 1994/02/04 20:17:32 spb Exp $
+.Id $Id: xmountains.man,v 1.5 1994/02/07 14:24:42 spb Exp $
 .ds r \s-1RCS\s0
 .if n .ds - \%--
 .if t .ds - \(em
@@ -12,7 +12,7 @@ xmountains \- A fractal landscape generator.
 .SH SYNOPSIS
 .B xmountains
 [
-.B bxmslrftISTRapcegd
+.B bxmslrftISCTRapcevgd
 ]
 
 .SH DESCRIPTION
@@ -83,6 +83,13 @@ Set the vertical stretch of the surface.
 .B \-T [0.5] 
 .RS
 Set the vertical shift of the surface.
+.RE
+.br
+.B \-C [0.3] 
+.RS
+Set the contour parameter. The base coulour of a point depends on its
+height and how flat the surface is. This parameter controls the relative
+importance of these factors.
 .RE
 .br
 .B \-a [2.5] 

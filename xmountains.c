@@ -9,7 +9,7 @@
 #define SIDE 1.0
 #define VERSION 1
 
-char scroll_Id[]="$Id: xmountains.c,v 1.17 1994/02/07 14:08:15 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.18 1994/02/07 14:24:42 spb Exp $";
 
 extern char *display;
 extern char *geom;
@@ -302,7 +302,7 @@ char **argv;
   if( errflg )
   {
     fprintf(stderr,"%s: version %d.%d\n",argv[0],VERSION,PATCHLEVEL);
-    fprintf(stderr,"usage: %s -[bxmslrftISTRapcegd]\n",argv[0]);
+    fprintf(stderr,"usage: %s -[bxmslrftISTCRapcevgd]\n",argv[0]);
     fprintf(stderr," -b       [%s] use root window \n",mesg[root]);
     fprintf(stderr," -x       [%s] flat start \n",mesg[1-frac_start]);
     fprintf(stderr," -m       [%s] print map \n",mesg[map]);
