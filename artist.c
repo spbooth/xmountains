@@ -7,7 +7,7 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.13 1994/01/10 17:38:39 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.14 1994/01/11 12:04:01 spb Exp $";
 #define SIDE 1.0
 #ifndef PI
 #define PI 3.14159265
@@ -17,7 +17,7 @@ char artist_Id[] = "$Id: artist.c,v 1.13 1994/01/10 17:38:39 spb Exp $";
 /*
  * setup the colour lookup table
  */
-void set_clut()
+void set_clut(Gun *red, Gun *green, Gun *blue)
 {
   int band,shade;
   float ambient = 0.5;  
@@ -25,54 +25,61 @@ void set_clut()
   float intensity;
   int tmp;
   int i;
-  float rb[N_BANDS] = { 0.167,0.200,0.333,0.450,0.600,1.000 };
-  float gb[N_BANDS] = { 0.667,0.667,0.500,0.500,0.600,1.000 };
-  float bb[N_BANDS] = { 0.500,0.450,0.333,0.200,0.000,1.000 };
-#if MAX_COL > 255
-Error Error Error max_col too large
-#endif
+/*
+*  float rb[N_BANDS] = { 0.167,0.200,0.333,0.450,0.600,1.000 };
+*  float gb[N_BANDS] = { 0.667,0.667,0.500,0.500,0.600,1.000 };
+*  float bb[N_BANDS] = { 0.500,0.450,0.333,0.200,0.000,1.000 };
+*/
+  float rb[N_BANDS] = { 0.450,0.600,1.000 };
+  float gb[N_BANDS] = { 0.500,0.600,1.000 };
+  float bb[N_BANDS] = { 0.333,0.000,1.000 };
   /*{{{  black */
   red[BLACK]       = 0;
   green[BLACK]     = 0;
   blue[BLACK]      = 0;
   /*}}}*/
   /*{{{  white */
-  red[WHITE]       = 255;
-  green[WHITE]     = 255;
-  blue[WHITE]      = 255;
+  red[WHITE]       = COL_RANGE;
+  green[WHITE]     = COL_RANGE;
+  blue[WHITE]      = COL_RANGE;
   /*}}}*/
   /*{{{  sky */
-  red[SKY]         = 103;
-  green[SKY]       = 150;
-  blue[SKY]        = 255;
+  red[SKY]         = 0.404*COL_RANGE;
+  green[SKY]       = 0.588*COL_RANGE;
+  blue[SKY]        = COL_RANGE;
   /*}}}*/
   /*{{{  sea (lit) */
   red[SEA_LIT]     = 0;
-  green[SEA_LIT]   = 106;
-  blue[SEA_LIT]    = 240;
+  green[SEA_LIT]   = 0.416*COL_RANGE;
+  blue[SEA_LIT]    = 0.941*COL_RANGE;
   /*}}}*/
   /*{{{  sea (unlit) */
   red[SEA_UNLIT]   = 0;
-  green[SEA_UNLIT] = 53;
-  blue[SEA_UNLIT]  = 120;
+  green[SEA_UNLIT] = (ambient*0.416)*COL_RANGE;
+  blue[SEA_UNLIT]  = (ambient*0.941)*COL_RANGE;
   /*}}}*/
   for( band=0 ; band<N_BANDS; band++)
   {
     for(shade=0 ; shade < BAND_SIZE ; shade++)
     {
+      if( (BAND_BASE + (band*BAND_SIZE) + shade) >= MAX_COL )
+      {
+        fprintf(stderr,"INTERNAL ERROR, overflowed clut\n");
+        exit(1);
+      }
       /*{{{  set red */
       top = rb[band];
       bot = ambient * top;
       intensity = bot + ((shade * (top - bot))/BAND_SIZE);
-      tmp = 255 * intensity;
+      tmp = COL_RANGE * intensity;
       if (tmp < 0)
       {
         fprintf(stderr,"set_clut: internal error: invalid code %d\n",tmp);
         exit(2);
       }
-      if( tmp > 255 )
+      if( tmp > COL_RANGE )
       {
-        tmp = 255;
+        tmp = COL_RANGE;
       }
       red[BAND_BASE + (band*BAND_SIZE) + shade] = tmp;
       /*}}}*/
@@ -80,15 +87,15 @@ Error Error Error max_col too large
       top = gb[band];
       bot = ambient * top;
       intensity = bot + ((shade * (top - bot))/BAND_SIZE);
-      tmp = 255 * intensity;
+      tmp = COL_RANGE * intensity;
       if (tmp < 0)
       {
         fprintf(stderr,"set_clut: internal error: invalid code %d\n",tmp);
         exit(2);
       }
-      if( tmp > 255 )
+      if( tmp > COL_RANGE )
       {
-        tmp = 255;
+        tmp = COL_RANGE;
       }
       green[BAND_BASE + (band*BAND_SIZE) + shade] = tmp;
       /*}}}*/
@@ -96,15 +103,15 @@ Error Error Error max_col too large
       top = bb[band];
       bot = ambient * top;
       intensity = bot + ((shade * (top - bot))/BAND_SIZE);
-      tmp = 255 * intensity;
+      tmp = COL_RANGE * intensity;
       if (tmp < 0)
       {
         fprintf(stderr,"set_clut: internal error: invalid code %d\n",tmp);
         exit(2);
       }
-      if( tmp > 255 )
+      if( tmp > COL_RANGE )
       {
-        tmp = 255;
+        tmp = COL_RANGE;
       }
       blue[BAND_BASE + (band*BAND_SIZE) + shade] = tmp;
       /*}}}*/
@@ -258,6 +265,11 @@ Col get_col(Height p, Height p_minus_x, Height p_plus_y, Height shadow)
   /*}}}*/
   /*}}}*/
   result += shade;
+  if( (result >= MAX_COL) || (result < 0) )
+  {
+    fprintf(stderr,"INTERNAL ERROR colour out of range %d\n",result);
+    exit(1);
+  }
   return(result);
 }
 /*}}}*/
