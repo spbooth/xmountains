@@ -2,7 +2,7 @@
 .ds Rv \\$3
 .ds Dt \\$4
 ..
-.Id $Id: xmountains.man,v 1.5 1994/02/07 14:24:42 spb Exp $
+.Id $Id: xmountains.man,v 1.6 1994/02/15 17:34:26 spb Exp $
 .ds r \s-1RCS\s0
 .if n .ds - \%--
 .if t .ds - \(em
@@ -45,12 +45,22 @@ Display a map of the surface rather than a perspective view.
 Toggle the smoothing algorithm. Without smoothing the program runs twice as fast but the surface is covered in creases.
 .RE
 .br
-.B \-l [9] 
+.B \-E
+.RS
+Toggle the way that window repainting is done. By default the image
+pixmap is installed as the background pixmap of the window and window
+repainting should be performed automatically by the X server. If this
+does not work on a particular system then this flag can be used to
+enable explicit expose event processing. In the default mode root window images
+will remain in place after the program exits.
+.RE
+.br
+.B \-l [10] 
 .RS
 Set the width of the surface. Increasing this value by one doubles the width of the surface.
 .RE
 .br
-.B \-t [1] 
+.B \-t [2] 
 .RS
 Set the number of non\-fractal iterations. Increasing this value by one doubles the average number of mountains across the width of the surface.
 .RE
@@ -63,6 +73,13 @@ To reduce the load on the X server the program generates several columns of pixe
 .B \-R [0] 
 .RS
 Set the seed for the random number generator. A value of 0 causes the seed to be set from the clock.
+.RE
+.br
+.B \-Z [1] 
+.RS
+Set the number of seconds that the program sleeps between drawing
+columns of pixels. This option has no effect until one full image has
+been generated.
 .RE
 .br
 .B \-f [0.65] 

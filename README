@@ -12,26 +12,27 @@ usage: ./xmountains -[bxmslrftISTCRapcevgd]
  -x       [false] flat start 
  -m       [false] print map 
  -s       [true] toggle smoothing 
- -l int   [9] # levels of recursion 
- -t int   [1] # non fractal iterations 
+ -E       [true] toggle explicit expose events 
+ -l int   [10] # levels of recursion 
+ -t int   [2] # non fractal iterations 
  -r int   [20] # columns before scrolling 
  -R int   [0] rng seed, read clock if 0 
+ -Z int   [1] time to sleep between columns
  -f float [0.650000] fractal dimension 
- -I float [0.4500000] angle of light 
+ -I float [40.000000] angle of light 
  -S float [0.600000] vertical stretch 
  -T float [0.500000] vertical shift 
  -C float [0.300000] contour parameter 
  -a float [2.500000] altitude of viewpoint 
  -p float [4.000000] distance of viewpoint 
  -c float [1.000000] contrast
- -e float [0.490000] ambient light level
- -v float [0.400000] vertical light level
+ -e float [0.300000] ambient light level
+ -v float [0.600000] vertical light level
  -g string     window geometry
  -d string     display
 
 This program works best on a colour display. It will work on monochrome
 displays but the default parameter values are not optimal for this.
-Try using [-e 0.1] it may help.
 
 
 The program breaks down into three sections
@@ -48,10 +49,21 @@ The program breaks down into three sections
 
 PROBLEMS
  All parameters are set on the command line.
- There is now way to control the speed of the program, it runs as fast
-as the CPU and the X server let it.
  The choice of colours looks strange on some hardware.
 
+CHANGES from V1.1
+Several changes including:
+1) There is now a secondary (vertical) light source to add some detail to 
+the shadows. 
+2) There is a -Z flag to reduce the CPU load, once the initial screen has
+been generated the program will call sleep once for each column of
+pixels. 
+3) Xmountains creates a pixmap containing the current state of the image.
+This is now installed as the background pixmap of the window. This means
+that root-window images will remain in place if the program is stopped.
+The -E flag disables this feature and explicitly traps expose events
+instead. There may be some delay in repainting the window if both the -E
+and -Z flags are used at the same time.
 
 If you have any comments/fixes etc for this program 
 Email me at
