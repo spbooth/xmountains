@@ -19,10 +19,11 @@
  * mean value passed as a parameter to make_fold. It will therefore take
  * a number of iterations for long length scale deformations to build up.
  */
+#include <stdio.h>
 #include <math.h>
 #include "crinkle.h"
 
-char calcalt_Id[] = "$Id: calcalt.c,v 1.6 1994/01/19 13:12:08 spb Exp $";
+char calcalt_Id[] = "$Id: calcalt.c,v 1.7 1994/01/19 13:13:09 spb Exp $";
 
 /*{{{  Strip *make_strip(int level) */
 Strip *make_strip(int level)
