@@ -9,7 +9,7 @@
 #define VERSION 2
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.29 1995/01/20 15:13:06 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.30 1995/06/08 09:07:51 spb Exp $";
 
 extern char *display;
 extern char *geom;
@@ -414,7 +414,7 @@ char **argv;
       case 'W':                     /* set sealevel */
          sealevel = atof( optarg );
          break;
-      case 'W':                     /* set sealevel */
+      case 'w':                     /* set forceheight */
          forceheight = atof( optarg );
          break;
       case 'T':                     /* set shift */
