@@ -7,11 +7,14 @@
 #include "crinkle.h"
 #include "global.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.5 1993/03/15 11:31:46 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.6 1993/03/15 12:00:00 spb Exp $";
 #define SIDE 1.0
 #define PI 3.14159265
 
 /*{{{  void set_clut() */
+/*
+ * setup the colour lookup table
+ */
 void set_clut()
 {
   int band,shade;
@@ -103,6 +106,10 @@ Error Error Error max_col too large
 }
 /*}}}*/
 /*{{{  Height *extract(Strip *s) */
+/*
+ * extract the table of heights from the Strip struct
+ * and discard the rest of the struct.
+ */
 Height *extract(Strip *s)
 {
   int i;
@@ -118,6 +125,9 @@ Height *extract(Strip *s)
 }
 /*}}}*/
 /*{{{  void init_artist_variables() */
+/*
+ * initialise the variables for the artist routines.
+ */
 void init_artist_variables()
 {
   int i;
@@ -127,6 +137,7 @@ void init_artist_variables()
   /* make the fractal SIDE wide, this makes it easy to predict the
    * average height returned by calcalt.
    */
+  /* height of the shadows */
   shadow = (Height *) malloc(width * sizeof(Height));
   if ( shadow == NULL )
   {
@@ -138,19 +149,24 @@ void init_artist_variables()
   sin_phi = sin( phi );
   tan_phi = tan( phi );
   vscale = 0.8 * width;  /* have approx same height as width */
+  /* guess the average height of the fractal */
   varience = pow( SIDE,(2.0 * fdim));
   varience = vscale * varience ;
   shift = 0.5 * varience;
   varience = varience + shift;
+
   start = (sealevel - shift) / vscale ; /* always start at sealevel */ 
   for(i=0 ; i<width ; i++)
   {
     shadow[i] = start;
   }
+  /* set the position of the view point */
   viewheight = 1.5 * varience;
   viewpos = -2.0 * width;
+  /* choose a point to look towards */
   dh = viewheight - (0.5 * varience);
   dd = (width / 2.0) - viewpos;
+  /* set viewing angle and focal length (vertical-magnification) */
   focal = sqrt( (dd*dd) + (dh*dh) );
   tan_vangle = (double) (dh/dd);
   vangle = atan ( tan_vangle );
@@ -161,6 +177,9 @@ void init_artist_variables()
 }
 /*}}}*/
 /*{{{  Col get_col(Height p, Height p_minus_x, Height p_plus_y, Height shadow) */
+/*
+ * calculate the colour of a point.
+ */
 Col get_col(Height p, Height p_minus_x, Height p_plus_y, Height shadow)
 {
   Height delta_x, delta_y;
@@ -262,6 +281,7 @@ Col *camera( Height *a, Col *c )
     exit(1);
   }
 #if FALSE
+  /* very simple painters algorithm */
   for(j=0 ; j<height ; j++)
   {
     res[j] = SKY;
@@ -279,6 +299,7 @@ Col *camera( Height *a, Col *c )
     }
   }
 #else
+  /* optimised painters algorithm */
   last = height;
   last_col = SKY;
   for( i=width-1 ; i >= 0 ; i-- )
@@ -315,6 +336,9 @@ Col *camera( Height *a, Col *c )
 }
 /*}}}*/
 /*{{{  int project( int x , Height y ) */
+/*
+ *  project a point onto the screen position */
+ */
 int project( int x , Height y )
 {
   int pos;
@@ -343,6 +367,9 @@ int project( int x , Height y )
 }
 /*}}}*/
 /*{{{  void finish_artist() */
+/*
+ * Tidy up and free everything.
+ */
 void finish_artist()
 {
   free(a_strip);
