@@ -2,7 +2,7 @@
 .ds Rv \\$3
 .ds Dt \\$4
 ..
-.Id $Id: xmountains.man,v 1.1 1994/01/24 11:52:59 spb Exp $
+.Id $Id: xmountains.man,v 1.2 1994/01/24 18:12:31 spb Exp $
 .ds r \s-1RCS\s0
 .if n .ds - \%--
 .if t .ds - \(em
@@ -77,7 +77,7 @@ Set the angle of illumination.
 .br
 .B \-S [0.6] 
 .RS
-Set the vertical streatch of the surface.
+Set the vertical stretch of the surface.
 .RE
 .br
 .B \-T [0.5] 
