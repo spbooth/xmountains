@@ -20,7 +20,7 @@
 #include <math.h>
 #include "crinkle.h"
 
-char calcalt_Id[] = "$Id: calcalt.c,v 2.13 1997/10/22 15:27:26 spb Exp $";
+char calcalt_Id[] = "$Id: calcalt.c,v 2.14 1997/10/23 08:28:14 spb Exp $";
 
 #ifdef DEBUG
 #define DB(A,B) dump_pipeline(A,B)
@@ -128,6 +128,30 @@ Fold *f;
 }
 /* }}} */
 
+/* {{{ void reset_fold(Fold *f) */
+
+void reset_fold(f)
+Fold *f;
+{
+  /*
+   * resets any cached values within the fold structure
+   * this should be called if the param struct is changed.
+   */
+  Length scale, midscale;
+  double root2;
+
+  root2=sqrt((double) 2.0 );
+  scale = pow((double) f->p->length, (double) (2.0 * f->p->fdim));
+  midscale = pow((((double) f->p->length)*root2), (double) (2.0 * f->p->fdim));
+  f->scale = scale;
+  f->midscale = midscale;
+
+  if( f->next ){
+    reset_fold(f->next);
+  }
+}
+
+/* }}} */
 /* {{{   Fold *make_fold(Fold *parent,Parm *param, int levels, int stop, Length len) */
 /*
  * Initialise the fold structures.
@@ -153,8 +177,6 @@ int stop;
 Length length;
 {
   Fold *p;
-  Length scale, midscale;
-  double root2;
   int i;
 
   if( (levels < stop) || (stop<0) )
@@ -169,17 +191,13 @@ Length length;
     fprintf(stderr,"make_fold: malloc failed\n");
     exit(1);
   }
-  root2=sqrt((double) 2.0 );
-  scale = pow((double) length, (double) (2.0 * param->fdim));
-  midscale = pow((((double) length)*root2), (double) (2.0 * param->fdim));
+  p->length=length;
   p->level = levels;
   p->count = (1 << levels) +1;
   p->stop = stop;
   p->state = START;
   p->save =NULL;
   p->p = param;
-  p->scale = scale;
-  p->midscale = midscale;
   for(i=0;i<NSTRIP;i++)
   {
     p->s[i] = NULL;

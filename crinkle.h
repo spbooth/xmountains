@@ -1,11 +1,11 @@
-/* $Id: crinkle.h,v 2.7 1997/10/22 15:28:46 spb Exp $ */
+/* $Id: crinkle.h,v 2.8 1997/10/23 08:28:14 spb Exp $ */
 #ifndef CRINKLE
 #define CRINKLE
-/*{{{  typedefs */
+/* {{{   typedefs */
 typedef float Height;
 typedef float Length;
-/*}}}*/
-/*{{{  defines */
+/* }}} */
+/* {{{   defines */
 #ifndef NULL
 #define NULL (void *) 0
 #endif
@@ -18,8 +18,8 @@ typedef float Length;
 #define STORE 1
 
 #define NSTRIP 8
-/*}}}*/
-/*{{{  structs */
+/* }}} */
+/* {{{   structs */
 
 /* parameters for the update */
 typedef struct parm{
@@ -40,6 +40,7 @@ typedef struct parm{
 typedef struct fold{
   int level;                /* levels of recursion below us */
   int count;                /* number of points at this level */
+  Length length;            /* width of the update square */
   Length scale;             /* scale factor for perturbations */
   Length midscale;          /* as above but for diagonal offsets */
   struct parm *p;           /* update parameters */
@@ -58,8 +59,8 @@ typedef struct strip{
 }Strip;
 
 
-/*}}}*/
-/*{{{  prototypes */
+/* }}} */
+/* {{{   prototypes */
 #ifdef ANSI
 Strip *make_strip (Fold *);
 void free_strip (Strip *);
@@ -67,7 +68,8 @@ Strip *double_strip (Strip *);
 Strip *set_strip (Fold *, Height );
 Strip *random_strip (Fold *, Height );
 Strip *next_strip (Fold *);
-Fold *make_fold (Fold *,Parm *,int, int, Length)
+void reset_fold(Fold *f);
+Fold *make_fold (Fold *,Parm *,int, int, Length);
 void free_fold (Fold *);
 Length gaussian ();
 void x_update(Fold *, float, float, Strip *, Strip *, Strip *);
@@ -83,6 +85,7 @@ Strip *double_strip ();
 Strip *set_strip ();
 Strip *random_strip ();
 Strip *next_strip ();
+void reset_fold();
 Fold *make_fold ();
 void free_fold ();
 Length gaussian ();
@@ -94,5 +97,5 @@ void vside_update();
 void hside_update();
 
 #endif
-/*}}}*/
+/* }}} */
 #endif
