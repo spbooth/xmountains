@@ -1,4 +1,4 @@
-/* $Id: crinkle.h,v 2.0 1994/07/01 09:34:20 spb Exp $ */
+/* $Id: crinkle.h,v 2.1 1994/07/01 12:03:27 spb Exp $ */
 #ifndef CRINKLE
 #define CRINKLE
 /*{{{  typedefs */
@@ -36,6 +36,7 @@ typedef struct parm{
   int force_front;          /* keep front edge low */
   int force_back;           /* keep back edge low */
   float mix;                /* fraction of old value to include in average */
+  float midmix;             /* same but for cross updates */
   float fdim;
 }Parm;
 
@@ -46,6 +47,7 @@ typedef struct fold{
   Length midscale;          /* as above but for diagonal offsets */
   struct parm *p;           /* update parameters */
   struct strip *s[NSTRIP];  /* pointers to the pipeline strips */
+  struct strip *save;       /* save position for STORE state */
   int stop;                 /* level to stop recursion */
   int state;                /* internal stat of algorithm */
   struct fold *next;        /* next iteration down */
@@ -55,27 +57,34 @@ typedef struct fold{
 #ifdef ANSI
 Strip *make_strip (int );
 void free_strip (Strip *);
-Strip *double_strip (Strip *);;
+Strip *double_strip (Strip *);
 Strip *set_strip (int , Height );
-void side_update (Strip *, Length );
-void mid_update (Strip *, Strip *, Strip *,Length , Length );
-void recalc (Strip *, Strip *, Strip *,Length );
 Strip *next_strip (Fold *);
-Fold *make_fold (int ,int ,int , int, int, Length , Height , Height , float );
+Fold *make_fold (int, int, Length)
 void free_fold (Fold *);
 Length gaussian ();
+void x_update(int, float, float, Strip *, Strip *, Strip *);
+void p_update(int, float, float, Strip *, Strip *, Strip *);
+void t_update(int, float, float, Strip *, Strip *, Strip *);
+void v_update(int, float, float, Strip *, Strip *, Strip *);
+void vside_update(int, float, float, Strip *);
+void hside_update(int, float, float, Strip *, Strip *, Strip *);
 #else
 Strip *make_strip ();
 void free_strip ();
 Strip *double_strip ();
 Strip *set_strip ();
-void side_update ();
-void mid_update ();
-void recalc ();
 Strip *next_strip ();
 Fold *make_fold ();
 void free_fold ();
 Length gaussian ();
+void x_update();
+void p_update();
+void t_update();
+void v_update();
+void vside_update();
+void hside_update();
+
 #endif
 /*}}}*/
 #endif
