@@ -2,7 +2,7 @@
 .ds Rv \\$3
 .ds Dt \\$4
 ..
-.Id $Id: xmountains.man,v 1.10 1994/04/06 11:45:19 spb Exp $
+.Id $Id: xmountains.man,v 1.11 1994/10/27 14:03:04 spb Exp $
 .ds r \s-1RCS\s0
 .if n .ds - \%--
 .if t .ds - \(em
@@ -12,7 +12,7 @@ xmountains \- A fractal landscape generator.
 .SH SYNOPSIS
 .B xmountains
 [
-.B bxmsElrftISTCBZRapcevgd
+.B bqgdEmMrBZIASTCapcevfRltxsXYH
 ]
 
 .SH DESCRIPTION
@@ -36,24 +36,14 @@ Reset the root window when the program exits. This option is ignored
 unless the program is using the root window.
 .RE
 .br
-.B \-x 
+.B \-g [string] 
 .RS
-Start the fractal from a flat start.
+Set the geometry of the window.
 .RE
 .br
-.B \-m 
+.B \-d [string] 
 .RS
-Display a map of the surface rather than a perspective view.
-.RE
-.br
-.B \-M
-.RS
-Produce reflections in the water. This may be a little slower.
-.RE
-.br
-.B \-s 
-.RS
-Toggle the smoothing algorithm. Without smoothing the program runs twice as fast but the surface is covered in creases.
+Set the display.
 .RE
 .br
 .B \-E
@@ -66,14 +56,14 @@ enable explicit expose event processing. In the default mode root window images
 will remain in place after the program exits.
 .RE
 .br
-.B \-l [10] 
+.B \-m 
 .RS
-Set the width of the surface. Increasing this value by one doubles the width of the surface.
+Display a map of the surface rather than a perspective view.
 .RE
 .br
-.B \-t [2] 
+.B \-M
 .RS
-Set the number of non\-fractal iterations. Increasing this value by one doubles the average number of mountains across the width of the surface.
+Produce reflections in the water. This may be a little slower.
 .RE
 .br
 .B \-r [20] 
@@ -87,27 +77,17 @@ A negative value reverses the direction of scrolling.
 Set the number of shades of each colour that the program allocates.
 .RE
 .br
-.B \-R [0] 
-.RS
-Set the seed for the random number generator. A value of 0 causes the seed to be set from the clock.
-.RE
-.br
 .B \-Z [10] 
 .RS
 Set the number of seconds that the program sleeps after scrolling the screen.
 .RE
 .br
-.B \-f [0.65] 
-.RS
-Set the fractal dimension of the surface. This should be in the range 0.5\-1.0.
-.RE
-.br
-.B \-I [45.0] 
+.B \-I [40.0] 
 .RS
 Set the vertical angle of illumination.
 .RE
 .br
-.B \-I [0.0] 
+.B \-A [0.0] 
 .RS
 Set the horizontal angle of illumination.
 .RE
@@ -155,17 +135,54 @@ bright shaded areas will be compared to fully illuminated ground.
 Set the vertical light level. The program also implements a secondary
 light source shining from directly above the surface. This flag sets how
 bright this light source is relative to the main light source.
-
 .RE
 .br
-.B \-g [string] 
+.B \-f [0.65] 
 .RS
-Set the geometry of the window.
+Set the fractal dimension of the surface. This should be in the range 0.5\-1.0.
 .RE
 .br
-.B \-d [string] 
+.B \-R [0] 
 .RS
-Set the display.
+Set the seed for the random number generator. A value of 0 causes the seed to be set from the clock.
+.RE
+.br
+.B \-l [10] 
+.RS
+Set the width of the surface. Increasing this value by one doubles the width of the surface.
+.RE
+.br
+.B \-t [2] 
+.RS
+Set the number of non\-fractal iterations. Increasing this value by one doubles the average number of mountains across the width of the surface.
+.RE
+.br
+.B \-x
+.RS
+Use cross updates (see under \-H)
+.RE
+.br
+.B \-s [1]
+.RS
+Control the regeneration steps used to reduce creasing. There are three
+possible regeneration steps contolled by the first 3 bits of this flag value.
+(see under \-H)
+.RE
+.br
+.B \-X [0.0]
+.RS
+regeneration step parameter (see under \-H)
+.RE
+.br
+.B \-Y [0.0]
+.RS
+regeneration step parameter (see under \-H)
+.RE
+.br
+.B \-H
+.RS
+Print a short description of the algorithm explaining the \-x \-s \-X
+and \-Y parameters.
 .RE
 
 .PP

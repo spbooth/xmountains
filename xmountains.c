@@ -9,7 +9,7 @@
 #define VERSION 2
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.27 1994/07/03 16:30:17 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.28 1994/10/27 14:03:04 spb Exp $";
 
 extern char *display;
 extern char *geom;
@@ -279,7 +279,7 @@ char **argv;
   /*{{{handle command line flags*/
   mesg[0]="false";
   mesg[1]="true";
-  while((c = getopt(argc,argv,"bxmqMEs:l:r:f:t:I:A:S:T:C:a:p:B:R:g:d:c:e:v:Z:X:Y:"))!= -1)
+  while((c = getopt(argc,argv,"bxmqMEHl:r:f:t:I:A:S:T:C:a:p:B:R:g:d:c:e:v:Z:s:X:Y:"))!= -1)
   {
     switch(c){
       case 'b':
@@ -437,6 +437,10 @@ char **argv;
       case 'd':
          display = optarg;
          break;
+      case 'H':
+         print_algorithm();
+         errflg++;
+         break;
       case '?':
          errflg++;
     }
@@ -444,21 +448,17 @@ char **argv;
   if( errflg )
   {
     fprintf(stderr,"%s: version %d.%d\n",argv[0],VERSION,PATCHLEVEL);
-    fprintf(stderr,"usage: %s -[bqmsElrftIASTCBZRXyapcevgd]\n",argv[0]);
+    fprintf(stderr,"usage: %s -[bqgdEmMrBZIASTCapcevfRltxsXYH]\n",argv[0]);
     fprintf(stderr," -b       [%s] use root window \n",mesg[root]);
     fprintf(stderr," -q       [%s] reset root window on exit\n",mesg[request_clear]);
-    fprintf(stderr," -x       [%s] cross update \n",mesg[cross]);
+    fprintf(stderr," -g string     window geometry\n");
+    fprintf(stderr," -d string     display\n");
+    fprintf(stderr," -E       [%s] toggle explicit expose events \n",mesg[e_events]);
     fprintf(stderr," -m       [%s] print map \n",mesg[map]);
     fprintf(stderr," -M       [%s] implement reflections \n",mesg[reflec]);
-    fprintf(stderr," -s       [%x] toggle smoothing \n",smooth);
-    fprintf(stderr," -E       [%s] toggle explicit expose events \n",mesg[smooth]);
-    fprintf(stderr," -l int   [%d] # levels of recursion \n",levels);
-    fprintf(stderr," -t int   [%d] # non fractal iterations \n",stop);
     fprintf(stderr," -r int   [%d] # columns before scrolling \n",repeat);
     fprintf(stderr," -B int   [%d] # shades in a colour band\n",band_size);
-    fprintf(stderr," -R int   [%d] rng seed, read clock if 0 \n",seed);
     fprintf(stderr," -Z int   [%d] time to sleep before scrolling\n",snooze_time);
-    fprintf(stderr," -f float [%f] fractal dimension \n",fdim);
     fprintf(stderr," -I float [%f] vertical angle of light \n",(phi*180.0)/PI);
     fprintf(stderr," -A float [%f] horizontal angle of light \n",(alpha*180.0)/PI);
     fprintf(stderr," -S float [%f] vertical stretch \n",stretch);
@@ -469,10 +469,16 @@ char **argv;
     fprintf(stderr," -c float [%f] contrast\n",contrast);
     fprintf(stderr," -e float [%f] ambient light level\n",ambient);
     fprintf(stderr," -v float [%f] vertical light level\n",vfract);
+    fprintf(stderr,"Fractal options:\n");
+    fprintf(stderr," -f float [%f] fractal dimension \n",fdim);
+    fprintf(stderr," -R int   [%d] rng seed, read clock if 0 \n",seed);
+    fprintf(stderr," -l int   [%d] # levels of recursion \n",levels);
+    fprintf(stderr," -t int   [%d] # non fractal iterations \n",stop);
+    fprintf(stderr," -x       [%s] cross update \n",mesg[cross]);
+    fprintf(stderr," -s       [%x] smoothing (0-7)\n",smooth);
     fprintf(stderr," -X float [%f] fraction of old value for rg2 & rg3\n",mix);
     fprintf(stderr," -Y float [%f] fraction of old value for rg1\n",midmix);
-    fprintf(stderr," -g string     window geometry\n");
-    fprintf(stderr," -d string     display\n");
+    fprintf(stderr," -H            print short description of algorithm.\n");
     exit(1);
   }
   /*}}}*/

@@ -9,22 +9,18 @@ been correctly installed a Makefile appropriate to your system can be
 generated from this using the command "xmkmf". Once this has been done
 the program is compiled with the command "make".
 
-./xmountains: version 1.4
-usage: ./xmountains -[bqxmsElrftIASTCBZRapcevgd]
+./xmountains: version 2.1
+usage: ./xmountains -[bqgdEmMrBZIASTCapcevfRltxsXYH]
  -b       [false] use root window 
  -q       [false] reset root window on exit
- -x       [false] flat start 
+ -g string     window geometry
+ -d string     display
+ -E       [false] toggle explicit expose events 
  -m       [false] print map 
  -M       [false] implement reflections 
- -s       [true] toggle smoothing 
- -E       [true] toggle explicit expose events 
- -l int   [10] # levels of recursion 
- -t int   [2] # non fractal iterations 
  -r int   [20] # columns before scrolling 
  -B int   [80] # shades in a colour band
- -R int   [0] rng seed, read clock if 0 
  -Z int   [10] time to sleep before scrolling
- -f float [0.650000] fractal dimension 
  -I float [40.000000] vertical angle of light 
  -A float [0.000000] horizontal angle of light 
  -S float [0.600000] vertical stretch 
@@ -35,8 +31,16 @@ usage: ./xmountains -[bqxmsElrftIASTCBZRapcevgd]
  -c float [1.000000] contrast
  -e float [0.300000] ambient light level
  -v float [0.600000] vertical light level
- -g string     window geometry
- -d string     display
+Fractal options:
+ -f float [0.650000] fractal dimension 
+ -R int   [0] rng seed, read clock if 0 
+ -l int   [10] # levels of recursion 
+ -t int   [2] # non fractal iterations 
+ -x       [true] cross update 
+ -s       [1] smoothing (0-7)
+ -X float [0.000000] fraction of old value for rg2 & rg3
+ -Y float [0.000000] fraction of old value for rg1
+ -H            print short description of algorithm.
 
 This program works best on a colour display. It will work on monochrome
 displays but the default parameter values are not optimal for this.
@@ -61,6 +65,10 @@ PROBLEMS
 managers. This can be fixed by including vroot.h in X_graphics.c but I
 was a little wary of putting this in by default.
 
+CHANGES from V1.4 
+The fractal generation code has been reworked. There algorithm has been
+extended significantly and should be able to generate much better
+looking surfaces. There may be a performance hit for some options though.
 
 CHANGES from V1.3
 1) There is now a flag to control the horizontal light angle.
@@ -91,7 +99,7 @@ and -Z flags are used at the same time.
 If you have any comments/fixes etc for this program 
 Email me at
  S.Booth@ed.ac.uk    or 
- spb@castle.ed.ac.uk
+ spb@epcc.ed.ac.uk
 
 Copyright 1994 Stephen Booth, see copyright.h
 

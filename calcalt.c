@@ -23,7 +23,7 @@
 #include <math.h>
 #include "crinkle.h"
 
-char calcalt_Id[] = "$Id: calcalt.c,v 2.3 1994/07/05 18:31:38 spb Exp $";
+char calcalt_Id[] = "$Id: calcalt.c,v 2.4 1994/10/27 14:03:04 spb Exp $";
 
 #ifdef DEBUG
 #define DB(A,B) dump_pipeline(A,B)
@@ -327,13 +327,10 @@ Fold *fold;
            * regenerate the corner points from the new edge values
            * this needs a B A B pattern
            * leave t pointing to the 2 new result strips
+           *
+           * this has to be a t_update
            */
-          if( fold->p->cross )
-          {
-            t_update(count,fold->scale,fold->p->mix,t[0],t[1],t[2]);
-          }else{
-            hside_update(count,fold->scale,fold->p->mix,t[0],t[1],t[2]);
-          }
+          t_update(count,fold->scale,fold->p->mix,t[0],t[1],t[2]);
           t++;
           DB("E6",fold);
         
