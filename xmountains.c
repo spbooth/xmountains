@@ -9,7 +9,7 @@
 #define VERSION 2
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.39 2004/05/05 08:29:48 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.40 2008/04/28 06:00:59 spb Exp $";
 extern Graph g;
 Parm fold_param;
 char *display;
@@ -137,7 +137,7 @@ char **argv;
   int i,p;
   int e_events=FALSE;
   int request_clear=FALSE;
-  int smooth;
+  int smooth=4;
   int snooze=10;
   int root= 0;
   unsigned long window_id = 0;
@@ -157,7 +157,7 @@ char **argv;
 
   mesg[0]="false";
   mesg[1]="true";
-  while((c = my_getopt(argc,argv,"bxmqMEHl:r:f:t:I:A:S:T:W:C:a:p:B:n:R:g:d:c:e:v:Z:s:X:Y:P:F:G:"))!= -1)
+  while((c = my_getopt(argc,argv,"hbxmqMEHl:r:f:t:I:A:S:T:W:C:a:p:B:n:R:g:d:c:e:v:Z:s:X:Y:P:F:G:"))!= -1)
   {
     switch(c){
       case 'b':
@@ -347,6 +347,7 @@ char **argv;
          print_algorithm();
          errflg++;
          break;
+      case 'h':
       case '?':
          errflg++;
     }
