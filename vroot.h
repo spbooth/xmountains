@@ -76,6 +76,8 @@ static const char vroot_rcsid[] =
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
 
+#include <stdlib.h>
+ 
 static Window
 #ifdef __STDC__ /* ANSIfication added by jwz, to avoid superfluous warnings. */
 VirtualRootWindowOfScreen(Screen *screen)

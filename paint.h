@@ -1,4 +1,4 @@
-/* $Id: paint.h,v 1.15 2001/03/30 12:12:13 spb Exp $ */
+/* $Id: paint.h,v 1.16 2009/08/28 09:09:17 spb Exp $ */
 #ifndef PAINT
 #define PAINT
 
@@ -11,6 +11,8 @@ typedef unsigned short Gun;
 typedef struct graph{
   int graph_height;     /* height of display */
   int graph_width ;     /* width of display */
+
+  int pixmap_width;     /* width of pixmap buffer */
 
   int width;            /* width of terrain strip */
 

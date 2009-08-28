@@ -10,7 +10,7 @@
 
 
 
-char uni_id[] = "$Id: random.c,v 1.6 1995/01/20 15:13:06 spb Exp $" ;
+char uni_id[] = "$Id: random.c,v 1.7 2009/08/28 09:09:17 spb Exp $" ;
 /*
  *	Global variables for rstart & uni
  */
@@ -22,6 +22,7 @@ char uni_id[] = "$Id: random.c,v 1.6 1995/01/20 15:13:06 spb Exp $" ;
  * #include <sys/time.h>
  */
 #include <stdio.h>
+#include <stdlib.h>
 #include <math.h>
 typedef struct
 {

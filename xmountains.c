@@ -1,6 +1,10 @@
 
 #include <stdio.h>
+#include <stdlib.h>
+#include <strings.h>
 #include <signal.h>
+#include <sys/types.h>
+#include <unistd.h>
 #include "crinkle.h"
 #include "paint.h"
 #include "patchlevel.h"
@@ -9,11 +13,13 @@
 #define VERSION 2
 #define SIDE 1.0
 
-char scroll_Id[]="$Id: xmountains.c,v 1.41 2008/04/28 06:17:51 spb Exp $";
+char scroll_Id[]="$Id: xmountains.c,v 1.42 2009/08/28 09:09:17 spb Exp $";
 extern Graph g;
 Parm fold_param;
 char *display;
 extern char *geom;
+
+extern int swosh;
 
 /* {{{ my version on getopt*/
 int optind=1;
@@ -77,7 +83,7 @@ char *pat;
 
 double atof();
 #ifdef ANSI
-void init_graphics (int, unsigned long, int, int *, int *, int, Gun *, Gun *, Gun *);
+void init_graphics (int, Window, int,int, Graph *, Gun *, Gun *, Gun *);
 void clear_col( int );
 void finish_graphics();
 void plot_pixel (int, int, unsigned char);
@@ -105,6 +111,7 @@ static unsigned long
 window_id_kludge (argcP, argv)
 int *argcP;
 char **argv;
+
 {
   unsigned long id = 0;
   int i;
@@ -130,11 +137,17 @@ char **argv;
   return id;
 }
 
+
+void init_parameters();
+void print_algorithm();
+void seed_uni(int ijkl);
+void plot_column(Graph *g);
+
 main (argc,argv)
 int argc;
 char **argv;
 {
-  int i,p;
+  int i;
   int e_events=FALSE;
   int request_clear=FALSE;
   int smooth=1;
@@ -149,6 +162,7 @@ char **argv;
   char *mesg[2];
   Gun *clut[3];
   FILE *pidfile;
+  swosh = 0;          /* default is ! -w */
 
   init_parameters();
   /* {{{ handle command line flags*/
@@ -157,9 +171,12 @@ char **argv;
 
   mesg[0]="false";
   mesg[1]="true";
-  while((c = my_getopt(argc,argv,"hbxmqMEHl:r:f:t:I:A:S:T:W:C:a:p:B:n:R:g:d:c:e:v:Z:s:X:Y:P:F:G:"))!= -1)
+  while((c = my_getopt(argc,argv,"whbxmqMEHl:r:f:t:I:A:S:T:W:C:a:p:B:n:R:g:d:c:e:v:Z:s:X:Y:P:F:G:"))!= -1)
   {
     switch(c){
+       case 'w':
+         swosh = TRUE;               /* update window only when pixmap is complete */
+         break;
       case 'b':
         root = 1- root;
         break;                      /* run on root window */
@@ -355,7 +372,9 @@ char **argv;
   if( errflg )
   {
     fprintf(stderr,"%s: version %d.%d\n",argv[0],VERSION,PATCHLEVEL);
-    fprintf(stderr,"usage: %s -[bqgdPEmMrBZIASFTCapcevfRltxsXYH]\n",argv[0]);
+    fprintf(stderr,"usage: %s -[hwbqgdPEmMrBZIASFTCapcevfRltxsXYH]\n",argv[0]);
+    fprintf(stderr," -h       Print this message\n");
+    fprintf(stderr," -w       [%s] update window with complete images only\n",mesg[swosh]);
     fprintf(stderr," -b       [%s] use root window \n",mesg[root]);
     fprintf(stderr," -q       [%s] reset root window on exit\n",mesg[request_clear]);
     fprintf(stderr," -g string     window geometry\n");
@@ -406,7 +425,8 @@ char **argv;
     }
   }
   set_clut(g.n_col,clut[0], clut[1], clut[2]);
-  init_graphics(root, window_id, (! e_events),request_clear,&g.graph_width,&g.graph_height,g.n_col,clut[0],clut[1],clut[2]);
+ init_graphics(root,window_id, !e_events, request_clear, &g, clut[0], clut[1], clut[2]);
+
   for(i=0;i<3;i++)
   {
     free(clut[i]);
@@ -416,22 +436,22 @@ char **argv;
   seed_uni(seed);
 
   init_artist_variables();
-  if( -1 == (int) signal(SIGINT, finish_prog ))
+  if( SIG_ERR == signal(SIGINT, finish_prog ))
   {
     perror(argv[0]);
     exit(1);
   }
-  if( -1 == (int) signal(SIGTERM, finish_prog ))
+  if( SIG_ERR == signal(SIGTERM, finish_prog ))
   {
     perror(argv[0]);
     exit(1);
   }
-  if( -1 == (int) signal(SIGHUP, finish_prog ))
+  if( SIG_ERR == signal(SIGHUP, finish_prog ))
   {
     perror(argv[0]);
     exit(1);
   }
-  if( -1 == (int) signal(SIGQUIT, finish_prog ))
+  if( SIG_ERR == signal(SIGQUIT, finish_prog ))
   {
     perror(argv[0]);
     exit(1);

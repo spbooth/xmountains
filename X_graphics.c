@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <string.h>
 #include<X11/Xlib.h>
 #include<X11/Xutil.h>
 #include<X11/Xatom.h>
@@ -7,7 +8,7 @@
 #include"vroot.h"
 #endif
 #include "paint.h"
-char X_graphics_Id[]="$Id: X_graphics.c,v 1.25 2004/05/05 08:29:48 spb Exp $";
+char X_graphics_Id[]="$Id: X_graphics.c,v 1.26 2009/08/28 09:09:17 spb Exp $";
 
 char *display=NULL;       /* name of display to open, NULL for default */
 char *geom=NULL;          /* geometry of window, NULL for default */
@@ -30,6 +31,8 @@ Atom wm_delete_window;
   int do_clear=FALSE;
   int pixmap_installed=FALSE;
 
+  int swosh=FALSE;
+
   /* plot history */
   int plot_x, plot_y1, plot_y2;
   unsigned long plot_col;
@@ -41,6 +44,7 @@ Atom wm_delete_window;
   unsigned int depth=0;
   GC gc;
   Pixmap pix;
+  Pixmap bg_pix;
   Colormap map, defaultmap;
   XColor *table=NULL;
 void zap_events();
@@ -49,6 +53,7 @@ void finish_graphics();
 Graph g={
 1024,
 768,
+0,
 0,
 0.3,
 1.0,
@@ -72,7 +77,7 @@ TRUE,
 0
 };
 
-
+void finish_artist();
 
 /*{{{void zap_events(int snooze)*/
 void zap_events(snooze)
@@ -80,7 +85,7 @@ int snooze;
 {
   XEvent event;
   XExposeEvent *expose = (XExposeEvent *)&event;
-  int exw, exh, i;
+  int exw, exh;
 
   while( XPending(dpy) ){
     XNextEvent(dpy, &event);
@@ -111,11 +116,20 @@ int snooze;
             }else{
               exh = expose->height;
             }
-            XCopyArea(dpy,pix,win,gc,expose->x,expose->y,
-                          exw,exh,
-                          expose->x,expose->y);
-	  }
-	  break;
+            if(g.repeat < 0)
+            {
+              XCopyArea(dpy, pix, win, gc, expose->x - g.repeat, expose->y,
+                            exw, exh,
+                            expose->x,expose->y);
+            }
+            else
+            {
+              XCopyArea(dpy,pix,win,gc,expose->x,expose->y,
+                            exw,exh,
+                            expose->x,expose->y);
+            }
+          }
+          break;
         default:
             fprintf(stderr,"xmountains: unrecognized event %d\n",event.type);
             /* XCloseDisplay(dpy);
@@ -170,7 +184,7 @@ void finish_graphics()
   {
     XFreeColormap(dpy, map );
   }
-  if( count = XPending(dpy) )
+  if((count = XPending(dpy)))
   {
     fprintf(stderr,"WARNING: %d events still pending\n",count);
   }
@@ -207,22 +221,22 @@ int pos;
 /*}}}*/
 
 /*{{{void init_graphics( ... )*/
-void init_graphics( want_use_root, use_window, use_background, want_clear, s_graph_width,s_graph_height,ncol,red,green,blue )
+void init_graphics( want_use_root, use_window, use_background, want_clear,gptr,red,green,blue )
+
 int want_use_root;    /* display on the root window */
 Window use_window;    /* display on external window */
 int  use_background;  /* install the pixmap as the background-pixmap */
 int want_clear;
-int *s_graph_width;
-int *s_graph_height;
-int ncol;
+Graph *gptr;
+
 Gun *red;
 Gun *green;
 Gun *blue;
 {
 /*{{{defs*/
   Visual *vis;
-  int mask;
-  int count;
+
+  
   int x=0;
   int y=0;
   int gbits=0;
@@ -246,8 +260,8 @@ Gun *blue;
   do_clear = want_clear;
   use_root = want_use_root;
   pixmap_installed = use_background;
-  graph_width = *s_graph_width;
-  graph_height = *s_graph_height;
+  graph_width = gptr->graph_width;
+  graph_height = gptr->graph_height;
 /*{{{open display*/
 
   dpy = XOpenDisplay(display);
@@ -268,13 +282,13 @@ Gun *blue;
   depth = DefaultDepth(dpy,screen);
 /*}}}*/
 /*{{{set colormap*/
-  table=(XColor *)malloc(ncol * sizeof(XColor));
+  table = (XColor *)malloc(gptr->n_col * sizeof(XColor));
   if( NULL == table )
   {
     fprintf(stderr,"malloc failed for colour table\n");
     exit(1);
   }
-  for(i=0; i<ncol ; i++)
+  for(i = 0; i < gptr->n_col; i++)
   {
     table[i].red   = red[i];
     table[i].green = green[i];
@@ -378,10 +392,31 @@ Gun *blue;
 /*    graph_width = DisplayWidth(dpy,screen); */
 /*    graph_height = DisplayHeight(dpy,screen); */
   }
-  pix = XCreatePixmap(dpy,win,graph_width,graph_height,depth);
+
+  if(swosh)
+  {
+    if(gptr->repeat < 0)
+    {
+      gptr->pixmap_width = graph_width - gptr->repeat;
+      bg_pix = XCreatePixmap(dpy, win, graph_width, graph_height, depth);
+    }
+    else
+    {
+      if(gptr->repeat == 0)
+      {
+        gptr->repeat = graph_width;
+      }
+      gptr->pixmap_width = graph_width + gptr->repeat;
+    }
+  }
+  else
+  {
+    gptr->pixmap_width = graph_width;
+  }
+  pix = XCreatePixmap(dpy, win, gptr->pixmap_width, graph_height, depth);
 
 /*}}}*/
-  blank_region(0,0,graph_width,graph_height); 
+  blank_region(0, 0, gptr->pixmap_width, graph_height); 
 
   if( use_background )
   {
@@ -394,8 +429,8 @@ Gun *blue;
   XClearWindow(dpy,win);
   zap_events(0);
   
-  *s_graph_width = graph_width;
-  *s_graph_height = graph_height;
+  gptr->graph_width = graph_width;
+  gptr->graph_height = graph_height;
 }
 /*}}}*/
 
@@ -411,21 +446,21 @@ int dist;
     reverse=TRUE;
   }
   /* scroll the pixmap */
-  if( dist > graph_width )
+  if( dist > g.pixmap_width )
   {
-    dist = graph_width;
+    dist = g.pixmap_width;
   }
   if( reverse )
   {
     /* copy the data */
-    XCopyArea(dpy,pix,pix,gc,0,0,graph_width-dist,graph_height,dist,0);
+    XCopyArea(dpy, pix, pix, gc, 0, 0, g.pixmap_width - dist, graph_height, dist, 0);
     /* blank new region */
     blank_region(0,0,dist,graph_height);
   }else{
     /* copy the data */
-    XCopyArea(dpy,pix,pix,gc,dist,0,graph_width-dist,graph_height,0,0);
+    XCopyArea(dpy, pix, pix, gc, dist, 0, g.pixmap_width - dist, graph_height, 0, 0);
     /* blank new region */
-    blank_region(graph_width-dist,0,dist,graph_height);
+    blank_region(g.pixmap_width - dist, 0, dist, graph_height);
   }
   /* update the window to match */
   if( pixmap_installed )
@@ -436,10 +471,26 @@ int dist;
      * so in principle we should re-install.
      */
     XSetWindowBackgroundPixmap(dpy,win,None);
-    XSetWindowBackgroundPixmap(dpy,win,pix);
+
+    if(swosh && reverse)
+    {
+      XCopyArea(dpy, pix, bg_pix, gc, dist, 0, graph_width, graph_height, 0, 0);
+      XSetWindowBackgroundPixmap(dpy, win, bg_pix);
+    }
+    else
+    {
+      XSetWindowBackgroundPixmap(dpy,win,pix);
+    }
     XClearWindow(dpy,win);
   }else{
-    XCopyArea(dpy,pix,win,gc,0,0,graph_width,graph_height,0,0);
+    if(reverse)
+    {
+      XCopyArea(dpy, pix, win, gc, dist, 0, graph_width, graph_height, 0, 0);
+    }
+    else
+    {
+      XCopyArea(dpy, pix, win, gc, 0, 0, graph_width, graph_height, 0, 0);
+    }
   }
 
 }
@@ -511,7 +562,10 @@ int h;
 {
   /* flush outstanding plots */
   plot_pixel(-1,0,0);
-  XCopyArea(dpy,pix,win,gc,x,y,w,h,x,y);
+  if(!swosh)
+  {
+    XCopyArea(dpy,pix,win,gc,x,y,w,h,x,y);
+  }
 }
 /*}}}*/
 

@@ -3,10 +3,11 @@
  */
 #include <math.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include "paint.h"
 #include "crinkle.h"
 
-char artist_Id[] = "$Id: artist.c,v 1.40 1997/12/03 17:21:10 spb Exp $";
+char artist_Id[] = "$Id: artist.c,v 1.41 2009/08/28 09:09:17 spb Exp $";
 #define SIDE 1.0
 #ifndef PI
 #define PI 3.14159265
@@ -18,6 +19,8 @@ int base=0;      /* parity flag for mirror routine */
 
 extern Parm fold_param;
 extern Graph g;
+
+extern int swosh;
 
 Fold *top;
 
@@ -266,7 +269,7 @@ void init_artist_variables()
   if( g.repeat >= 0 ){
     g.pos=0;
   }else{
-    g.pos=g.graph_width-1;
+    g.pos = g.pixmap_width - 1;
   }	
 }
 /* }}} */
@@ -424,7 +427,7 @@ Height *a;
 Height *b;
 Height *shadow;
 {
-  int i, j, coord, last;
+  int i, coord, last;
   Col *res, col;
 
   /* this routine returns a perspective view of the surface */
@@ -816,6 +819,11 @@ int reflec;
   return(res);
 }
 
+void blank_region(int lx, int ly, int ux, int uy);
+void flush_region(int x, int y, int w, int h);
+void scroll_screen(int dist);
+void plot_pixel(int x, int y, Gun value);
+
 /* }}} */
 /* {{{  void plot_column(g)*/
 void plot_column(g)
@@ -837,7 +845,7 @@ Graph *g;
       flush_region(0,0,g->graph_width,g->graph_height);
     }
   }
-  if( g->scroll ){
+  if( g->scroll && !swosh ){
     scroll_screen(g->scroll);
   }
 
@@ -876,10 +884,10 @@ Graph *g;
   /* now update pos ready for next time */
   if( g->repeat >=0 ){
     g->pos++;
-    if(g->pos >= g->graph_width)
+    if(g->pos >= g->pixmap_width)
     {
       g->pos -=  g->repeat;
-      if( g->pos < 0 || g->pos > g->graph_width-1 )
+      if( g->pos < 0 || g->pos > g->pixmap_width-1 )
       {
         g->pos=0; 
       }else{
@@ -890,14 +898,18 @@ Graph *g;
     g->pos--;
     if( g->pos < 0 ){
       g->pos -=   g->repeat;
-      if( g->pos < 0 || g->pos > (g->graph_width-1) ){
-	g->pos=g->graph_width-1;
+      if( g->pos < 0 || g->pos > (g->pixmap_width-1) ){
+	g->pos=g->pixmap_width-1;
       }else{
 	g->scroll = g->repeat;
       }
     }
   }
 
+  if(g->scroll && swosh)
+  {
+    scroll_screen(g->scroll);
+  }
 }
 /* }}} */
 
