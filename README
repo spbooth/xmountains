@@ -5,7 +5,7 @@ and the image is scrolled from right to left to expose the newly
 generated area.
 
 This is a very old piece of code but the algorithms
-https://github.com/spbooth/xmountains/about_xmountains
+https://spbooth.github.io/xmountains/about_xmountains.html
 are still quite interesting
 
 This distribution contains an Imakefile. If your X-window software has
