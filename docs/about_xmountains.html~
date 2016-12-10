@@ -1,0 +1,627 @@
+<!DOCTYPE html SYSTEM "html.dtd">
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8"><title>About xmountains</title></head>
+<body>
+<!-- BEGIN WAYBACK TOOLBAR INSERT -->
+
+<script type="text/javascript" src="about_xmountains_files/disclaim-element.js"></script>
+<script type="text/javascript" src="about_xmountains_files/graph-calc.js"></script>
+<script type="text/javascript" src="about_xmountains_files/jquery.js"></script>
+<script type="text/javascript">
+//<![CDATA[
+var firstDate = 820454400000;
+var lastDate = 1388534399999;
+var wbPrefix = "/web/";
+var wbCurrentUrl = "http:\/\/www.epcc.ed.ac.uk\/~spb\/xmountains\/about_xmountains.html";
+
+var curYear = -1;
+var curMonth = -1;
+var yearCount = 18;
+var firstYear = 1996;
+var imgWidth = 450;
+var yearImgWidth = 25;
+var monthImgWidth = 2;
+var trackerVal = "none";
+var displayDay = "7";
+var displayMonth = "Jan";
+var displayYear = "2006";
+var prettyMonths = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+
+function showTrackers(val) {
+	if(val == trackerVal) {
+		return;
+	}
+	if(val == "inline") {
+		document.getElementById("displayYearEl").style.color = "#ec008c";
+		document.getElementById("displayMonthEl").style.color = "#ec008c";
+		document.getElementById("displayDayEl").style.color = "#ec008c";		
+	} else {
+		document.getElementById("displayYearEl").innerHTML = displayYear;
+		document.getElementById("displayYearEl").style.color = "#ff0";
+		document.getElementById("displayMonthEl").innerHTML = displayMonth;
+		document.getElementById("displayMonthEl").style.color = "#ff0";
+		document.getElementById("displayDayEl").innerHTML = displayDay;
+		document.getElementById("displayDayEl").style.color = "#ff0";
+	}
+   document.getElementById("wbMouseTrackYearImg").style.display = val;
+   document.getElementById("wbMouseTrackMonthImg").style.display = val;
+   trackerVal = val;
+}
+function getElementX2(obj) {
+	var thing = jQuery(obj);
+	if((thing == undefined) 
+			|| (typeof thing == "undefined") 
+			|| (typeof thing.offset == "undefined")) {
+		return getElementX(obj);
+	}
+	return Math.round(thing.offset().left);
+}
+function trackMouseMove(event,element) {
+
+   var eventX = getEventX(event);
+   var elementX = getElementX2(element);
+   var xOff = eventX - elementX;
+	if(xOff < 0) {
+		xOff = 0;
+	} else if(xOff > imgWidth) {
+		xOff = imgWidth;
+	}
+   var monthOff = xOff % yearImgWidth;
+
+   var year = Math.floor(xOff / yearImgWidth);
+	var yearStart = year * yearImgWidth;
+   var monthOfYear = Math.floor(monthOff / monthImgWidth);
+   if(monthOfYear > 11) {
+       monthOfYear = 11;
+   }
+   // 1 extra border pixel at the left edge of the year:
+   var month = (year * 12) + monthOfYear;
+   var day = 1;
+	if(monthOff % 2 == 1) {
+		day = 15;
+	}
+	var dateString = 
+		zeroPad(year + firstYear) + 
+		zeroPad(monthOfYear+1,2) +
+		zeroPad(day,2) + "000000";
+
+	var monthString = prettyMonths[monthOfYear];
+	document.getElementById("displayYearEl").innerHTML = year + 1996;
+	document.getElementById("displayMonthEl").innerHTML = monthString;
+	// looks too jarring when it changes..
+	//document.getElementById("displayDayEl").innerHTML = zeroPad(day,2);
+
+	var url = wbPrefix + dateString + '/' +  wbCurrentUrl;
+	document.getElementById('wm-graph-anchor').href = url;
+
+   //document.getElementById("wmtbURL").value="evX("+eventX+") elX("+elementX+") xO("+xOff+") y("+year+") m("+month+") monthOff("+monthOff+") DS("+dateString+") Moy("+monthOfYear+") ms("+monthString+")";
+   if(curYear != year) {
+       var yrOff = year * yearImgWidth;
+       document.getElementById("wbMouseTrackYearImg").style.left = yrOff + "px";
+       curYear = year;
+   }
+   if(curMonth != month) {
+       var mtOff = year + (month * monthImgWidth) + 1;
+       document.getElementById("wbMouseTrackMonthImg").style.left = mtOff + "px";
+       curMonth = month;
+   }
+}
+//]]>
+</script>
+
+<style type="text/css">body{margin-top:0!important;padding-top:0!important;min-width:800px!important;}#wm-ipp a:hover{text-decoration:underline!important;}</style>
+<div id="wm-ipp" style="display:none; position:relative;padding:0 5px;min-height:70px;min-width:800px; z-index:9000;">
+<div id="wm-ipp-inside" style="position:fixed;padding:0!important;margin:0!important;width:97%;min-width:780px;border:5px solid #000;border-top:none;background-image:url(/static/images/toolbar/wm_tb_bk_trns.png);text-align:center;-moz-box-shadow:1px 1px 3px #333;-webkit-box-shadow:1px 1px 3px #333;box-shadow:1px 1px 3px #333;font-size:11px!important;font-family:'Lucida Grande','Arial',sans-serif!important;">
+   <table style="border-collapse:collapse;margin:0;padding:0;width:100%;"><tbody><tr>
+   <td style="padding:10px;vertical-align:top;min-width:110px;">
+   <a href="http://web.archive.org/web/" title="Wayback Machine home page" style="background-color:transparent;border:none;"><img src="about_xmountains_files/wayback-toolbar-logo.png" alt="Wayback Machine" border="0" height="39" width="110"></a>
+   </td>
+   <td style="padding:0!important;text-align:center;vertical-align:top;width:100%;">
+
+       <table style="border-collapse:collapse;margin:0 auto;padding:0;width:570px;"><tbody><tr>
+       <td style="padding:3px 0;" colspan="2">
+       <form target="_top" method="get" action="/web/form-submit.jsp" name="wmtb" id="wmtb" style="margin:0!important;padding:0!important;"><input name="url" id="wmtbURL" value="http://www.epcc.ed.ac.uk/~spb/xmountains/about_xmountains.html" style="width:400px;font-size:11px;font-family:'Lucida Grande','Arial',sans-serif;" onfocus="javascript:this.focus();this.select();" type="text"><input name="type" value="replay" type="hidden"><input name="date" value="20060107222444" type="hidden"><input value="Go" style="font-size:11px;font-family:'Lucida Grande','Arial',sans-serif;margin-left:5px;" type="submit"><span id="wm_tb_options" style="display:block;"></span></form>
+       </td>
+       <td style="vertical-align:bottom;padding:5px 0 0 0!important;" rowspan="2">
+           <table style="border-collapse:collapse;width:110px;color:#99a;font-family:'Helvetica','Lucida Grande','Arial',sans-serif;"><tbody>
+			
+           <!-- NEXT/PREV MONTH NAV AND MONTH INDICATOR -->
+           <tr style="width:110px;height:16px;font-size:10px!important;">
+           	<td style="padding-right:9px;font-size:11px!important;font-weight:bold;text-transform:uppercase;text-align:right;white-space:nowrap;overflow:visible;" nowrap="nowrap">
+               
+		                <a href="http://web.archive.org/web/20050311065830/http://www.epcc.ed.ac.uk/%7Espb/xmountains/about_xmountains.html" style="text-decoration:none;color:#33f;font-weight:bold;background-color:transparent;border:none;" title="11 Mar 2005"><strong>MAR</strong></a>
+		                
+               </td>
+               <td id="displayMonthEl" style="background:#000;color:#ff0;font-size:11px!important;font-weight:bold;text-transform:uppercase;width:34px;height:15px;padding-top:1px;text-align:center;" title="You are here: 22:24:44 Jan 7, 2006">JAN</td>
+				<td style="padding-left:9px;font-size:11px!important;font-weight:bold;text-transform:uppercase;white-space:nowrap;overflow:visible;" nowrap="nowrap">
+               
+		                <a href="http://web.archive.org/web/20090103115258/http://www.epcc.ed.ac.uk/%7Espb/xmountains/about_xmountains.html" style="text-decoration:none;color:#33f;font-weight:bold;background-color:transparent;border:none;" title="3 Jan 2009"><strong>JAN</strong></a>
+		                
+               </td>
+           </tr>
+
+           <!-- NEXT/PREV CAPTURE NAV AND DAY OF MONTH INDICATOR -->
+           <tr>
+               <td style="padding-right:9px;white-space:nowrap;overflow:visible;text-align:right!important;vertical-align:middle!important;" nowrap="nowrap">
+               
+		                <a href="http://web.archive.org/web/20060105203048/http://www.epcc.ed.ac.uk/%7Espb/xmountains/about_xmountains.html" title="20:30:48 Jan 5, 2006" style="background-color:transparent;border:none;"><img src="about_xmountains_files/wm_tb_prv_on.png" alt="Previous capture" border="0" height="16" width="14"></a>
+		                
+               </td>
+               <td id="displayDayEl" style="background:#000;color:#ff0;width:34px;height:24px;padding:2px 0 0 0;text-align:center;font-size:24px;font-weight: bold;" title="You are here: 22:24:44 Jan 7, 2006">7</td>
+				<td style="padding-left:9px;white-space:nowrap;overflow:visible;text-align:left!important;vertical-align:middle!important;" nowrap="nowrap">
+               
+		                <a href="http://web.archive.org/web/20090103115258/http://www.epcc.ed.ac.uk/%7Espb/xmountains/about_xmountains.html" title="11:52:58 Jan 3, 2009" style="background-color:transparent;border:none;"><img src="about_xmountains_files/wm_tb_nxt_on.png" alt="Next capture" border="0" height="16" width="14"></a>
+		                
+			    </td>
+           </tr>
+
+           <!-- NEXT/PREV YEAR NAV AND YEAR INDICATOR -->
+           <tr style="width:110px;height:13px;font-size:9px!important;">
+				<td style="padding-right:9px;font-size:11px!important;font-weight: bold;text-align:right;white-space:nowrap;overflow:visible;" nowrap="nowrap">
+               
+		                <a href="http://web.archive.org/web/20041205093602/http://www.epcc.ed.ac.uk/%7Espb/xmountains/about_xmountains.html" style="text-decoration:none;color:#33f;font-weight:bold;background-color:transparent;border:none;" title="5 Dec 2004"><strong>2004</strong></a>
+		                
+               </td>
+               <td id="displayYearEl" style="background:#000;color:#ff0;font-size:11px!important;font-weight: bold;padding-top:1px;width:34px;height:13px;text-align:center;" title="You are here: 22:24:44 Jan 7, 2006">2006</td>
+				<td style="padding-left:9px;font-size:11px!important;font-weight: bold;white-space:nowrap;overflow:visible;" nowrap="nowrap">
+               
+		                <a href="http://web.archive.org/web/20090103115258/http://www.epcc.ed.ac.uk/%7Espb/xmountains/about_xmountains.html" style="text-decoration:none;color:#33f;font-weight:bold;background-color:transparent;border:none;" title="3 Jan 2009"><strong>2009</strong></a>
+		                
+				</td>
+           </tr>
+           </tbody></table>
+       </td>
+
+       </tr>
+       <tr>
+       <td style="vertical-align:middle;padding:0!important;">
+           <a href="http://web.archive.org/web/20060107222444*/http://www.epcc.ed.ac.uk/%7Espb/xmountains/about_xmountains.html" style="color:#33f;font-size:11px;font-weight:bold;background-color:transparent;border:none;" title="See a list of every capture for this URL"><strong>41 captures</strong></a>
+           <div style="margin:0!important;padding:0!important;color:#666;font-size:9px;padding-top:2px!important;white-space:nowrap;" title="Timespan for captures of this URL">16 May 97 - 3 Jan 09</div>
+       </td>
+       <td style="padding:0!important;">
+       <a style="position:relative; white-space:nowrap; width:450px;height:27px;" href="" id="wm-graph-anchor">
+       <div id="wm-ipp-sparkline" style="position:relative; white-space:nowrap; width:450px;height:27px;background-color:#fff;cursor:pointer;border-right:1px solid #ccc;" title="Explore captures for this URL">
+			<img id="sparklineImgId" style="position:absolute; z-index:9012; top:0px; left:0px;" onmouseover="showTrackers('inline');" onmouseout="showTrackers('none');" onmousemove="trackMouseMove(event,this)" alt="sparklines" src="about_xmountains_files/graph.png" border="0" height="27" width="450">
+			<img id="wbMouseTrackYearImg" style="display:none; position:absolute; z-index:9010;" src="about_xmountains_files/transp-yellow-pixel.png" border="0" height="27" width="25">
+			<img id="wbMouseTrackMonthImg" style="display:none; position:absolute; z-index:9011; " src="about_xmountains_files/transp-red-pixel.png" border="0" height="27" width="2">
+       </div>
+		</a>
+
+       </td>
+       </tr></tbody></table>
+   </td>
+   <td style="text-align:right;padding:5px;width:65px;font-size:11px!important;">
+       <a href="javascript:;" onclick="document.getElementById('wm-ipp').style.display='none';" style="display:block;padding-right:18px;background:url(/static/images/toolbar/wm_tb_close.png) no-repeat 100% 0;color:#33f;font-family:'Lucida Grande','Arial',sans-serif;margin-bottom:23px;background-color:transparent;border:none;" title="Close the toolbar">Close</a>
+       <a href="http://faq.web.archive.org/" style="display:block;padding-right:18px;background:url(/static/images/toolbar/wm_tb_help.png) no-repeat 100% 0;color:#33f;font-family:'Lucida Grande','Arial',sans-serif;background-color:transparent;border:none;" title="Get some help using the Wayback Machine">Help</a>
+   </td>
+   </tr></tbody></table>
+
+</div>
+</div>
+<script type="text/javascript">
+ var wmDisclaimBanner = document.getElementById("wm-ipp");
+ if(wmDisclaimBanner != null) {
+   disclaimElement(wmDisclaimBanner);
+ }
+</script>
+<!-- END WAYBACK TOOLBAR INSERT -->
+
+<h1> All about xmountains</h1>
+
+<p>
+<a href="http://web.archive.org/web/20060107222444/http://www.epcc.ed.ac.uk/%7Espb/xmountains/index.html">
+Xmountains</a> is a fractal terrain generator written by
+<a href="http://web.archive.org/web/20060107222444/http://www.epcc.ed.ac.uk/%7Espb/bio.html"> Stephen Booth </a>
+This document describes what it does and how it works.
+The source code can be read <a href="http://web.archive.org/web/20060107222444/http://www.epcc.ed.ac.uk/%7Espb/xmountains/source.html">here</a>
+</p>
+
+<p>
+The basic idea behind a fractal landscape is to generate a continuous surface 
+which varies in height randomly but with the random variation obeying a
+particular statistical law.
+</p>
+
+<p>
+In the case of a fractal landscape the average difference in height
+between pairs of points separated by a distance <i>l</i> should go as 
+a power law in <i>l</i>. If you are only interested in random terrain
+generation rather than fractal self-similarity then you could use other
+functions of <i>l</i> that tend to zero as <i>l</i> tends to zero.
+If the function does not tend to zero then the result will not be
+continuous. I use the following definition:
+</p>
+<a name="fractal">
+<i>
+<pre>                      2H
+    &lt;|H1 - H2|&gt;  =  l
+</pre>
+</i>
+</a>
+<p>
+For values of H below 0.5 as <i>l</i> gets small the variation in height
+is greater than the 
+horizontal distance between the points (<i>l</i>) so the surface becomes
+space-filling. For values of H at 0.5 or above the surface becomes
+smoother as H increases. This is because the variation in height at
+short length scales is a smaller fraction of the variation at longer
+length scales. When displaying the surface you usually re-scale the whole
+lot by a constant factor so it is the relative variation that matters.
+</p>
+
+<p>
+This program uses a modified form the mid-point displacement algorithm
+</p>
+
+<p>
+The mid-point displacement algorithm is a recursive algorithm.
+Starting from a crude outline of the surface more and more detail is
+added at progressively smaller length scales.
+Each iteration doubles the resolution of a 2 dimensional grid of altitudes. 
+</p>
+<p>
+This is done in 2 stages:
+</p>
+<pre>A           B                  A           B
+                stage1
+               ---------&gt;            E
+
+C           D                  C           D
+
+
+
+A           B                  A     F     B
+                 stage2
+      E         --------&gt;      G     E     H
+
+C           D                  C     I     D
+</pre>
+<p>
+More detail can then be filled in by recursion:
+</p>
+<pre>
+A     F     B                  A     F     B
+                 stage1           *     *
+G     E     H   --------&gt;      G     E     H
+                                  *     *
+C     I     D                  C     I     D
+
+
+A     F     B                  A  +  F  +  B
+   *     *       stage2        +  *  +  *  +
+G     E     H   --------&gt;      G  +  E  +  H
+   *     *                     +  *  +  *  +
+C     I     D                  C  +  I  +  D
+
+</pre>
+
+<p>
+The new points are generated by taking an average of the surrounding points
+and adding a random offset. In order to generate the power law behaviour
+described <a href="http://web.archive.org/web/20060107222444/http://www.epcc.ed.ac.uk/%7Espb/xmountains/about_xmountains.html#fractal">above</a> the random offset is scaled by a factor
+proportional to a power (2H in my notation) of the distance between the new
+points and the
+surrounding points. The results seem to be a little better if the random
+offsets are taken from a gaussian distribution. The basic idea is very
+similar to that used by the Koch snowflake.
+</p>
+<p>
+The modifications to the standard algorithm are as follows:
+There are three optional <a href="http://web.archive.org/web/20060107222444/http://www.epcc.ed.ac.uk/%7Espb/xmountains/about_xmountains.html#regen">regeneration steps</a> to reduce
+<a href="http://web.archive.org/web/20060107222444/http://www.epcc.ed.ac.uk/%7Espb/xmountains/about_xmountains.html#crease">creasing</a>. These are controlled by the 
+<a href="http://web.archive.org/web/20060107222444/http://www.epcc.ed.ac.uk/%7Espb/xmountains/about_xmountains.html#smooth">-s flag</a>.
+</p>
+<p>
+The <a href="http://web.archive.org/web/20060107222444/http://www.epcc.ed.ac.uk/%7Espb/xmountains/about_xmountains.html#cross">-x flag (cross update)</a> controls whether the 
+midpoints (E) are included
+in the average when performing the stage2 update or if only the corner
+points are used.
+</p>
+
+<h2> <a name="crease">Creasing</a> </h2>
+<p>
+When I started in this game "creasing" was a big problem with square
+grid mid-point displacement surfaces 
+and explicit smoothing steps were introduced to get rid of these.
+You can make my program revert to these early algorithms by specifying
+"-s 0" Things are particularly bad if you calculate the middle of the sides
+independently of the middle of the square ("-x" in my program)
+This was not uncommon in the other programs I have seen.
+</p>
+<h3> <a name="cross">Cross updates</a></h3>
+<p>
+If you only use a pair of points to perform the average for the middle
+of the sides then for any point that lies on one of the sides of a
+large length scale square its value depends ONLY on the values of other
+points that lie along that side. This line then forms a crease. Because
+no information ever crosses this line it acts as a kind of "event
+horizon". The heights of points on the crease are calculated
+independently of everything else and then the surfaces on the 2 sides
+form to match this line but the 2 surfaces are independent of each
+other. The crease is a mis-match between the 2 independent surfaces that
+are only constrained to follow a common boundary that has been specified
+independently of each of them  
+(see <a href="http://web.archive.org/web/20060107222444/http://www.epcc.ed.ac.uk/%7Espb/xmountains/crease.gif">image</a>).
+</p>
+<p>
+When you split the update into 2 steps:
+</p><ol>
+<li> generate the middle of the square with an average of the 
+   4 corners and a random offset based on a length scale of L/sqrt(2). 
+</li>
+<li> generate the sides as an average over 4 points (2 corner points and
+   2 middle of square points) followed by a random offset based on a
+   length scale of L/2. 
+</li>
+</ol>
+the information flows sideways into the sides of the large squares.
+The problem does not go away but instead of creases along the sides of
+the squares you get conical deformations at the corners of the squares
+(see <a href="http://web.archive.org/web/20060107222444/http://www.epcc.ed.ac.uk/%7Espb/xmountains/cone.gif">image</a>).
+This is an improvement but not the whole story.
+<p></p>
+<h3><a name="regen">Regeneration steps</a></h3>
+<p>
+
+The root cause of <a href="http://web.archive.org/web/20060107222444/http://www.epcc.ed.ac.uk/%7Espb/xmountains/about_xmountains.html#crease">creasing</a> and the conical
+deformations is that the position 
+of some points are fixed by the early (long-distance) iterations of the
+fractal algorithm. We are trying to generate a surface where the average
+difference in height between points on the surface is a function of the
+distance between them. Ideally two points should have an equal effect on
+each other. Instead we have implemented a hierarchy of points where the
+information only flows in one direction.
+</p>
+<p>
+The solution I came up with was to use the early iteration to set the
+overall trend of the surface rather than setting the exact position of
+particular points. This is done by a 2 steps forward/1 step back method.
+In the original algorithm the results at the end of one iteration are
+used to generate a new set of points with each iteration adding detail at a
+length scale of half the previous iteration. I added a second stage to
+each iteration that consisted of discarding all of the points generated
+by previous iterations and regenerating them from the new points.
+I think this is a lot closer to the desired result because every point
+is the result of updates at all length scales. 
+(see <a href="http://web.archive.org/web/20060107222444/http://www.epcc.ed.ac.uk/%7Espb/xmountains/normal.gif">image</a>).
+However I have a
+suspicion that it may result in a slight shift in the fractal dimension.
+It would be nice to measure the fractal dimension produced as a function
+of the input parameter to the algorithm.
+</p>
+<p>
+A regeneration step recalculates the height of existing points using an
+average and offset from a newer generation of points. In xmountains the three
+regeneration steps are:
+</p>
+<dl>
+<dt> Step 1 </dt>
+<dd> recalculate corner points (A,B,C,D) from the midpoints (E)
+        after the stage1 update. </dd>
+<dt> Step 2 </dt>
+<dd>  recalculate midpoints (E) from the edge points (F,G,H,I)
+        after the stage2 update </dd>
+<dt> Step 3 </dt>
+<dd>  recalculate corner points (A,B,C,D) from the edge points (F,G,H,I)
+        after the stage2 update </dd>
+</dl>
+<p>
+The regeneration stages are turned on by the smoothing parameter 
+<a name="smooth">(-s flag)</a>
+</p>
+<pre>  flag	Step-3	Step-2	Step-1
+  0	off	off	off
+  1	on	off	off
+  2	off	on	off
+  3	on	on	off
+  4	off	off	on
+  5	on	off	on
+  6	off	on	on
+  7	on	on	on
+</pre>
+<p>
+The default is to just use step 3 (-s 1)
+</p><p>
+When performing the regeneration steps the random offset is added to an
+average of the new points.
+</p>
+<p>
+I came across a different solution in the xmnts program by 
+<em>
+ Paul Sharpe @ DEC, Reading, England. 
+</em>
+who also modified the old points at each iteration, but he only added an
+additional random offset to the old points.
+</p>
+<p>
+I added this capability to  my program. The -X and -Y parameters
+trade off the two methods if you leave them at 0.0 (the default) you get
+my algorithm. If you set them to 1.0 you get Paul's and values
+in-between give you a mixture of the two, i.e. a weighted average of the
+new points and the old value of the point.
+</p>
+<h3>How well does this all work</h3>
+The relative importance of the different algorithms can easily be seen
+if we remove the random element from the algorithm and replace the
+gaussian random number with a constant value. Without any random
+variation we should get a completely smooth surface. Without any
+regeneration steps or cross updates we get <a href="http://web.archive.org/web/20060107222444/http://www.epcc.ed.ac.uk/%7Espb/xmountains/quilt.gif"> surface
+consisting only of creases </a>. The addition of cross updates generate 
+<a href="http://web.archive.org/web/20060107222444/http://www.epcc.ed.ac.uk/%7Espb/xmountains/cushion.gif"> a very interesting surface</a>. This is an
+improvement as the surface has better rotational symmetry but it still
+has significant artifacts. These are completely missing when regeneration
+steps are used.
+
+<h2> Pipelining </h2>
+<p>
+The other trick I came up with was to pipeline the code. This is also
+responsible for much of the speed because it reduces swapping and
+improves cache use. I don't think that anyone else does this but 
+the idea is straightforward once you think of it. 
+</p>
+<p>
+If you think of the normal algorithm it is possible to add extra detail
+to a region of the surface without adding this level of detail to the
+entire surface.  Each iteration of the algorithm increases the number of
+squares by 4. You can then add further detail to a restricted region of
+the surface by only applying the next level of recursion to a subset of
+these squares. Obviously some squares you choose not to update 
+will end up partially updated because they share sides with updated
+squares. 
+</p>
+<p>
+As an aside this selective updating allows you to zoom-in on a surface
+efficiently. You don't bother updating squares outside of your field of
+view and you keep adding more detail to the squares you can see until
+the sides of the smallest level squares subtends less than a maximum
+angle at your point of view (i.e. the sides always look short).
+</p>
+<p>
+What I do in xmountains is slightly different. 
+I only perform updates necessary to fully update the left hand
+row of squares. These fully updated points are used to generate a column
+of pixels in the output and then discarded. The new left hand edge is
+not fully updated so additional updates are now required.
+Imagine I have a level-1 surface as follows:
+</p><pre>
+1   1   1
+
+1   1   1
+
+1   1   1
+
+</pre>
+And that I have some method of generating new points on the right hand
+side of this surface (I will show how I do this later but for the time
+being assume this is the top iteration level and we can generate new
+points by applying random offsets to a constant value).
+<p></p>
+<p>
+I can use these points to fill in part of the left hand squares
+</p><pre>
+1 2 1   1
+2 2
+1 2 1   1
+2 2
+1 2 1   1
+
+</pre>
+Now scroll everything to the left
+<pre>
+1   1
+
+1   1
+
+1   1
+
+</pre>
+and add in a new third column on the right hand side
+<pre>
+1   1   1
+
+1   1   1
+
+1   1   1
+
+</pre>
+This returns us to our original state. This process can be repeated
+indefinitely. For each column of points it inputs on the right it outputs
+2 columns on the left with level of detail doubled. If you want to
+perform N levels of update then you chain together N of these steps.
+If you want to use a more complicated update (For example the
+regeneration steps and the cross update) then the same basic approach 
+applies but the details get more complicated.
+In the xmountains the equivalent to the step described above is a
+routine called next_strip.
+
+<h2>xmountain command line flags</h2>
+<pre>xmountains: version 2.3
+usage: xmountains -[bqgdPEmMrBZIASFTCapcevfRltxsXYH]
+ -b       [false] use root window 
+ -q       [false] reset root window on exit
+ -g string     window geometry
+ -d string     display
+ -P filename   write PID to file
+ -E       [false] toggle explicit expose events 
+ -m       [false] print map 
+ -M       [false] implement reflections 
+ -r int   [20] # columns before scrolling 
+ -B int   [80] # shades in a colour band
+ -n int   [245] # number of colours
+ -Z int   [10] time to sleep before scrolling
+ -I float [40.000000] vertical angle of light 
+ -A float [0.000000] horizontal angle of light 
+ -S float [0.600000] vertical stretch 
+ -T float [0.500000] vertical shift 
+ -W float [0.000000] sealevel 
+ -F int   [1] reduce variation in the foreground 
+ -G float [-1.000000] average foreground height 
+ -C float [0.300000] contour parameter 
+ -a float [2.500000] altitude of viewpoint 
+ -p float [4.000000] distance of viewpoint 
+ -c float [1.000000] contrast
+ -e float [0.300000] ambient light level
+ -v float [0.600000] vertical light level
+Fractal options:
+ -f float [0.650000] fractal dimension 
+ -R int   [0] rng seed, read clock if 0 
+ -l int   [10] # levels of recursion 
+ -t int   [2] # non fractal iterations 
+ -x       [true] cross update 
+ -s       [1] smoothing (0-7)
+ -X float [0.000000] fraction of old value for rg2 &amp; rg3
+ -Y float [0.000000] fraction of old value for rg1
+ -H            print short description of algorithm.
+</pre>
+
+<h2>X window graphics</h2>
+The algorithms and code for xmountains were originally developed for to
+drive particular graphics hardware and then ported to the X-window
+system. This history can still be seen in the following ways
+
+<ul>
+<li> All the options are given as command line flags.
+</li><li> The code assume a CLUT based colour model rather than direct RGB values.
+</li></ul>
+
+Most of the suggestions I get for changes to xmountains involve either
+adding a X control panel to set parameters or implementing 24-bit
+graphics. Actually neither of these makes a great deal of sense. 
+<p>
+To save memory the program does not retain any knowledge of currently
+displayed surface. The only information that is retained is the final bitmap
+image. This makes it very difficult to change the viewpoint while the
+program is running (though you could probably get away with slow gradual
+changes). 
+</p><p>
+The program can already utilise 24-bit colour displays the default parameters
+are set to use less than 256 colours but the -B or -n flags can be used
+to increase the number of colours. The quality of the final image
+remains pretty much the same though because there are already 80 shades
+of each base colour. If you only ever run on a 24-bit display you may
+want to try increasing the number of base colours by increasing N_BANDS
+in paint.h and modifying the set_clut routine in artist.c
+
+</p><p>
+
+<i>$Id: about_xmountains.html,v 1.9 1997/10/17 09:19:18 spb Exp spb $</i>
+
+
+
+
+
+
+
+
+
+
+
+</p></body></html>
+<!--
+     FILE ARCHIVED ON 22:24:44 Jan 7, 2006 AND RETRIEVED FROM THE
+     INTERNET ARCHIVE ON 12:33:13 May 1, 2013.
+     JAVASCRIPT APPENDED BY WAYBACK MACHINE, COPYRIGHT INTERNET ARCHIVE.
+
+     ALL OTHER CONTENT MAY ALSO BE PROTECTED BY COPYRIGHT (17 U.S.C.
+     SECTION 108(a)(3)).
+-->
