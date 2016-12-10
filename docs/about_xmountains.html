@@ -137,7 +137,8 @@ form to match this line but the 2 surfaces are independent of each
 other. The crease is a mis-match between the 2 independent surfaces that
 are only constrained to follow a common boundary that has been specified
 independently of each of them  
-(see <a href="crease.gif">image</a>).
+<br>
+<img src="crease.gif" alt="A fractal landscape with creases"/>
 </p>
 <p>
 When you split the update into 2 steps:
@@ -179,7 +180,9 @@ each iteration that consisted of discarding all of the points generated
 by previous iterations and regenerating them from the new points.
 I think this is a lot closer to the desired result because every point
 is the result of updates at all length scales. 
-(see <a href="normal.gif">image</a>).
+<br>
+<img src="normal.gif" alt="a fractal landscape"/>
+<br>
 However I have a
 suspicion that it may result in a slight shift in the fractal dimension.
 It would be nice to measure the fractal dimension produced as a function
@@ -241,9 +244,19 @@ The relative importance of the different algorithms can easily be seen
 if we remove the random element from the algorithm and replace the
 gaussian random number with a constant value. Without any random
 variation we should get a completely smooth surface. Without any
-regeneration steps or cross updates we get <a href="quilt.gif"> surface
-consisting only of creases </a>. The addition of cross updates generate 
-<a href="cushion.gif"> a very interesting surface</a>. This is an
+regeneration steps or cross updates we get a surface
+consisting only of creases.
+<br>
+<img src="quilt.gif" alt="A surface that looks like a quilt"/>
+<br>
+
+ The addition of cross updates generate 
+a very interesting surface.
+<br>
+<img src="cushion.gif" alt="a surface that looks like a cushion"/>
+<br>
+
+ This is an
 improvement as the surface has better rotational symmetry but it still
 has significant artifacts. These are completely missing when regeneration
 steps are used.
