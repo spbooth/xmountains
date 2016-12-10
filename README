@@ -4,6 +4,10 @@ program is running the fractal is continuously extended on the right
 and the image is scrolled from right to left to expose the newly
 generated area.
 
+This is a very old piece of code but the algorithms
+https://github.com/spbooth/xmountains/about_xmountains
+are still quite interesting
+
 This distribution contains an Imakefile. If your X-window software has
 been correctly installed a Makefile appropriate to your system can be
 generated from this using the command "xmkmf". Once this has been done
@@ -107,8 +111,7 @@ and -Z flags are used at the same time.
 
 If you have any comments/fixes etc for this program 
 Email me at
- S.Booth@ed.ac.uk    or 
- spb@epcc.ed.ac.uk
+ S.Booth@epcc.ed.ac.uk 
 
 Copyright 1994 Stephen Booth, see copyright.h
 
