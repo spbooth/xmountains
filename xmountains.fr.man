@@ -1,0 +1,230 @@
+.de Id
+.ds Rv \\$3
+.ds Dt \\$4
+..
+.Id $Id: xmountains.man,v 1.14 1999/03/30 08:07:08 spb Exp $
+.ds r \s-1RCS\s0
+.if n .ds - \%--
+.if t .ds - \(em
+.TH XMOUNTAINS 1 
+.SH NOM
+xmountains \- générateur de paysage fractal.
+.SH SYNOPSIS
+.B xmountains
+[
+.B wbqgPdEmMrBnZIASTWFGCapcevfRltxsXYH
+]
+
+.SH DESCRIPTION
+.B xmountains
+est un générateur de paysage fractal basé sur X11.
+Il produit des surfaces fractal aléatoires et les affiche dans une fenêtre.
+Tant que le programme est exécuté l'image fractal est sans interruption prolongée vers la droite 
+et défile de droite à gauche pour afficher la zone nouvellement calculée.
+
+.SH OPTIONS
+.br
+.B \-w
+.RS
+Utilise le mode "swosh" pour les mises à jours - la fenêtre est mise à jour seulement lorsqu'une nouvelle image est prête. 
+Ceci empèche les mises à jour par saut. Remarque : si vous utilisez le défilement de gauche à droite, l'utilisation de 
+mémoire sera plus grande.
+.RE
+.br
+.B \-b 
+.RS
+Affiche sur la fenêtre principale (root).
+.RE
+.br
+.B \-q 
+.RS
+Réinitialise la fenêtre principale à la sortie du programme. Cette option
+est ignoré si le programme n'est pas affiché dans la fenêtre principale.
+.RE
+.br
+.B \-g [string] 
+.RS
+Configure la taille de la fenêtre (p.ex 800x600).
+.RE
+.br
+.B \-P [filename] 
+.RS
+Ecrit dans le fichier spécifié le numéro de PID.
+.RE
+.br
+.B \-d [string] 
+.RS
+Configure l'écran d'affichage.
+.RE
+.br
+.B \-E
+.RS
+Change la manière de dessiner l'image dans la fenêtre. Par défaut l'image est installée comme une image 
+d'arrière plan et c'est le serveur X qui redessine automatiquement l'image dans la fenêtre. Si ceci ne 
+fonctionne pas correctement sur un système particulier, alors cette option peut être employée pour activer
+explicitement le traitement d'événement. Dans le mode par défaut, les images affichées dans la fenêtre principale 
+(option \-b) demeureront en place après la sortie du programme.
+.RE
+.br
+.B \-m 
+.RS
+Affiche une carte de la surface plutôt qu'une vue en perspective
+.RE
+.br
+.B \-M
+.RS
+Produit des réflections dans l'eau. Cette option peut provoquer des ralentissements de la machine.
+.RE
+.br
+.B \-r [20] 
+.RS
+Pour réduire la charge du serveur X, le programme produit plusieurs colonnes de pixels avant de déplacer l'image.
+Cette option configure le nombre de colonnes calculé. Une valeur négative inverse le sens de défilement de l'image.
+Une valeur nulle fait changer l'image sans aucun défilement.
+.RE
+.br
+.B \-B [80] 
+.RS
+Configure le nombre de nuance pour chaque couleur alloué par le programme.
+.RE
+.br
+.B \-n [245] 
+.RS
+Configure le nombre de couleur maximun utilisé. C'est une autre façon 
+d'indiquer le nombre de nuance pour chaque couleur.
+.RE
+.br
+.B \-Z [10] 
+.RS
+Configure le nombre de seconde que le programme attend avant de faire défiler l'image.
+.RE
+.br
+.B \-I [40.0] 
+.RS
+Configure l'angle vertical d'illumination.
+.RE
+.br
+.B \-A [0.0] 
+.RS
+Configure l'angle horizontal d'illumination.
+.RE
+.br
+.B \-S [0.6] 
+.RS
+Configure la déformation verticale de la surface.
+.RE
+.br
+.B \-T [0.5] 
+.RS
+Configure le décalage vertical de la surface.
+.RE
+.br
+.B \-W [0.5] 
+.RS
+Configure la hauteur occupée par l'eau.
+.RE
+.br
+.B \-F [1] 
+.RS
+Réduit la variation de la taille du premier plan pour assurer une bonne vue de la
+surface. Cette option positionne le nombre d'itérations pour lesquelles la taille 
+du premier plan est contrainte à une valeur constante.
+.RE
+.br
+.B \-G [-1.0] 
+.RS
+Altitude moyenne pour pour le premier plan 
+.RE
+.br
+.B \-C [0.3] 
+.RS
+Configure le paramètre de contour. La couleur de base d'un point dépend de son altitude 
+et de la pente de la surface. Ce paramètre controle l'importance relative de ces facteurs.
+.RE
+.br
+.B \-a [2.5] 
+.RS
+Configure l'altitude du point de vue.
+.RE
+.br
+.B \-p [4.0] 
+.RS
+Configure la distance du point de vue par rapport à la surface. 
+.RE
+.br
+.B \-c [1.0] 
+.RS
+Configure le paramètre de contraste. Les valeurs trop éloignées de 1,0 peuvent donner des résultats étranges.
+.RE
+.br
+.B \-e [0.3] 
+.RS
+Configure le niveau de lumière ambiant. Cette valeur configure la manière dont brille les zones d'ombres
+par rapport aux zones entièrement éclairées.
+.RE
+.br
+.B \-v [0.6] 
+.RS
+Configure le niveau de lumière verticale. Le programme implémente aussi une source secondaire
+de lumière éclairant directement au\-dessus de la surface. Cette option configure comment doit
+briller cette source par rapport à la source de lumière principale.
+.RE
+.br
+.B \-f [0.65] 
+.RS
+Configure la dimension fractal de la surface. Doit être compris dans l'interval 0.5\-1.0.
+.RE
+.br
+.B \-R [0] 
+.RS
+Configure la graine (seed) pour le générateur de nombre aléatoire. Une valeur de 0 force la graine à être
+configurée depuis l'horloge système.
+.RE
+.br
+.B \-l [10] 
+.RS
+Configure la largeur de la surface. Augmenter de un cette valeur, double la largeur de la surface.
+.RE
+.br
+.B \-t [2] 
+.RS
+Configure le nombre d'itérations non\-fractal. Augmenter de un cette valeur, double le nombre moyen 
+de montagnes affiché dans la largeur de la surface.
+.RE
+.br
+.B \-x
+.RS
+Utilise la fonction "cross updates" (voir l'option \-H)
+.RE
+.br
+.B \-s [1]
+.RS
+Controle les pas de régénération utilisés pour réduire le plissement. Il y a  
+trois pas de régénération possible controlés par les 3 bits de cette option 
+(voir l'option \-H)
+.RE
+.br
+.B \-X [0.0]
+.RS
+Paramètre de pas de régénération (voir l'option \-H)
+.RE
+.br
+.B \-Y [0.0]
+.RS
+Paramètre de pas de régénération (voir l'option \-H)
+.RE
+.br
+.B \-H
+.RS
+Affiche une courte description de l'algorithme expliquant les options
+\-x \-s \-X et \-Y.
+.RE
+
+.PP
+
+.SH AUTEUR
+Auteur: S.Booth@ed.ac.uk
+.br
+Contributeur:  Mark Thomas (http://www.mindspring.com/~mt31415/)
+
+
