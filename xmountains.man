@@ -68,7 +68,7 @@ Display a map of the surface rather than a perspective view.
 .br
 .B \-M
 .RS
-Produce reflections in the water. This may be a little slower.
+Disable reflections in the water.
 .RE
 .br
 .B \-r [20] 
