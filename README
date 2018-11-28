@@ -13,7 +13,7 @@ been correctly installed a Makefile appropriate to your system can be
 generated from this using the command "xmkmf". Once this has been done
 the program is compiled with the command "make".
 
-./xmountains: version 2.2
+./xmountains: version 2.9
 usage: ./xmountains -[bqgdPEmMrBZIASFTCapcevfRltxsXYH]
  -b       [false] use root window 
  -q       [false] reset root window on exit
@@ -22,7 +22,7 @@ usage: ./xmountains -[bqgdPEmMrBZIASFTCapcevfRltxsXYH]
  -P filename   write PID to file
  -E       [false] toggle explicit expose events 
  -m       [false] print map 
- -M       [false] implement reflections 
+ -M       [false] disable reflections 
  -r int   [20] # columns before scrolling 
  -B int   [80] # shades in a colour band
  -n int   [245] # number of colours
