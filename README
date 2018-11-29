@@ -1,51 +1,52 @@
-Xmountains is a X11 based fractal landscape generator. It generates
-random fractal surfaces and displays them in a window. While the
-program is running the fractal is continuously extended on the right
-and the image is scrolled from right to left to expose the newly
-generated area.
+Xmountains is a X11 based fractal landscape generator. It generates random
+fractal surfaces and displays them in a window. While the program is running
+the fractal is continuously extended on the right and the image is scrolled
+from right to left to expose the newly generated area.
 
 This is a very old piece of code but the algorithms
 https://spbooth.github.io/xmountains/about_xmountains.html
 are still quite interesting
 
-This distribution contains an Imakefile. If your X-window software has
-been correctly installed a Makefile appropriate to your system can be
-generated from this using the command "xmkmf". Once this has been done
-the program is compiled with the command "make".
+This distribution contains an Imakefile. If your X-window software has been
+correctly installed a Makefile appropriate to your system can be generated
+from this using the command "xmkmf". Once this has been done the program is
+compiled with the command "make".
+
+== Commandline options ==
 
 ./xmountains: version 2.9
 usage: ./xmountains -[bqgdPEmMrBZIASFTCapcevfRltxsXYH]
- -b       [false] use root window 
+ -b       [false] use root window
  -q       [false] reset root window on exit
  -g string     window geometry
  -d string     display
  -P filename   write PID to file
- -E       [false] toggle explicit expose events 
- -m       [false] print map 
- -M       [false] disable reflections 
- -r int   [20] # columns before scrolling 
+ -E       [false] toggle explicit expose events
+ -m       [false] print map
+ -M       [false] disable reflections
+ -r int   [20] # columns before scrolling
  -B int   [80] # shades in a colour band
  -n int   [245] # number of colours
  -Z int   [10] time to sleep before scrolling
- -I float [40.000000] vertical angle of light 
- -A float [0.000000] horizontal angle of light 
- -S float [0.600000] vertical stretch 
- -T float [0.500000] vertical shift 
- -W float [0.000000] sealevel 
- -F int   [1] reduce variation in the foreground 
- -G float [-1.000000] average foreground height 
- -C float [0.300000] contour parameter 
- -a float [2.500000] altitude of viewpoint 
- -p float [4.000000] distance of viewpoint 
+ -I float [40.000000] vertical angle of light
+ -A float [0.000000] horizontal angle of light
+ -S float [0.600000] vertical stretch
+ -T float [0.500000] vertical shift
+ -W float [0.000000] sealevel
+ -F int   [1] reduce variation in the foreground
+ -G float [-1.000000] average foreground height
+ -C float [0.300000] contour parameter
+ -a float [2.500000] altitude of viewpoint
+ -p float [4.000000] distance of viewpoint
  -c float [1.000000] contrast
  -e float [0.300000] ambient light level
  -v float [0.600000] vertical light level
 Fractal options:
- -f float [0.650000] fractal dimension 
- -R int   [0] rng seed, read clock if 0 
- -l int   [10] # levels of recursion 
- -t int   [2] # non fractal iterations 
- -x       [true] cross update 
+ -f float [0.650000] fractal dimension
+ -R int   [0] rng seed, read clock if 0
+ -l int   [10] # levels of recursion
+ -t int   [2] # non fractal iterations
+ -x       [true] cross update
  -s       [1] smoothing (0-7)
  -X float [0.000000] fraction of old value for rg2 & rg3
  -Y float [0.000000] fraction of old value for rg1
@@ -54,67 +55,27 @@ Fractal options:
 This program works best on a colour display. It will work on monochrome
 displays but the default parameter values are not optimal for this.
 
-
 The program breaks down into three sections
-1) Fractal generation (calcalt.c random.c crinkle.h) This code should be
-   fairly solid, It also contains some algorithmic tricks I had to
-   invent (though it is not inconceivable that somebody else has also
-   thought of them)
-2) Image rendering & main program (artist.c global.c scroll.c global.h
-   paint.h) This code is a bit more sloppy but seems to work OK.
-3) The X interface (X_graphics.c) The X interface was retro-fitted to an
-   earlier version of the program that was designed to use memory mapped
-   video hardware. As a result this code is a little crude. A more 
-   experienced X hacker could do better but ...
+1) Fractal generation (calcalt.c random.c crinkle.h) This code should be fairly
+   solid, It also contains some algorithmic tricks I had to invent (though it
+   is not inconceivable that somebody else has also thought of them)
+2) Image rendering & main program (artist.c global.c scroll.c global.h paint.h)
+   This code is a bit more sloppy but seems to work OK.
+3) The X interface (X_graphics.c) The X interface was retro-fitted to an earlier
+   version of the program that was designed to use memory mapped video hardware.
+   As a result this code is a little crude. A more experienced X hacker could
+   do better but ...
 
-PROBLEMS
- All parameters are set on the command line.
- The choice of colours looks strange on some hardware.
- The program will not work with Xscreensaver or virtual window 
-managers. This can be fixed by including vroot.h in X_graphics.c (define
-VROOT to cpp to do this) but I was a little wary of putting this in by default.
+== PROBLEMS ==
+* All parameters are set on the command line.
+* The choice of colours looks strange on some hardware.
+* The program will not work with Xscreensaver or virtual window managers. This
+  can be fixed by including vroot.h in X_graphics.c (define VROOT to cpp to do
+  this) but I was a little wary of putting this in by default.
 
-CHANGES from V2.1
-Added a -n flag to set the number of colours. This changes the same
-parameter as -B but you request total number of colours.
-
-CHANGES from V1.4 
-The fractal generation code has been reworked. There algorithm has been
-extended significantly and should be able to generate much better
-looking surfaces. There may be a performance hit for some options though.
-
-CHANGES from V1.3
-1) There is now a flag to control the horizontal light angle.
-2) negative values of the scroll parameter make the image scroll in the
-   opposite direction.
-3) water reflections have been implemented.
-
-CHANGES from V1.2
-1) program now sleeps after a scroll rather than once per column.
-2) added a -B flag to control the number of colours needed.
-3) added a -q flag that clears the root window when the program exits.
-4) fixed memory leak when in `map' mode.
-
-CHANGES from V1.1
-Several changes including:
-1) There is now a secondary (vertical) light source to add some detail to 
-the shadows. 
-2) There is a -Z flag to reduce the CPU load, once the initial screen has
-been generated the program will call sleep once for each column of
-pixels. 
-3) Xmountains creates a pixmap containing the current state of the image.
-This is now installed as the background pixmap of the window. This means
-that root-window images will remain in place if the program is stopped.
-The -E flag disables this feature and explicitly traps expose events
-instead. There may be some delay in repainting the window if both the -E
-and -Z flags are used at the same time.
-
-If you have any comments/fixes etc for this program 
-Email me at
- S.Booth@epcc.ed.ac.uk 
+== Contact ==
+If you have any comments/fixes etc for this program,
+Email me at: S.Booth@epcc.ed.ac.uk or send pull request.
 
 Copyright 1994 Stephen Booth, see copyright.h
-
-
-
 
