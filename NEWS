@@ -1,0 +1,34 @@
+CHANGES from V2.1
+Added a -n flag to set the number of colours. This changes the same
+parameter as -B but you request total number of colours.
+
+CHANGES from V1.4
+The fractal generation code has been reworked. There algorithm has been
+extended significantly and should be able to generate much better
+looking surfaces. There may be a performance hit for some options though.
+
+CHANGES from V1.3
+1) There is now a flag to control the horizontal light angle.
+2) negative values of the scroll parameter make the image scroll in the
+   opposite direction.
+3) water reflections have been implemented.
+
+CHANGES from V1.2
+1) program now sleeps after a scroll rather than once per column.
+2) added a -B flag to control the number of colours needed.
+3) added a -q flag that clears the root window when the program exits.
+4) fixed memory leak when in `map' mode.
+
+CHANGES from V1.1
+Several changes including:
+1) There is now a secondary (vertical) light source to add some detail to 
+the shadows.
+2) There is a -Z flag to reduce the CPU load, once the initial screen has
+been generated the program will call sleep once for each column of
+pixels.
+3) Xmountains creates a pixmap containing the current state of the image.
+This is now installed as the background pixmap of the window. This means
+that root-window images will remain in place if the program is stopped.
+The -E flag disables this feature and explicitly traps expose events
+instead. There may be some delay in repainting the window if both the -E
+and -Z flags are used at the same time.
