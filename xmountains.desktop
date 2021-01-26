@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name=Xmountains
+Comment=Fractal landscape generator for X
+Exec=xmountains
+TryExec=xmountains
+Terminal=false
+Type=Application
+Icon=
+Categories=Game;Art
+Keywords=game;art;toy
+
+[Desktop Action View]
+Exec=xmountains
