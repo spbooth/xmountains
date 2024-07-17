@@ -26,10 +26,7 @@ int optind=1;
 char *optarg;
 int opterr=1;
 
-int my_getopt (argc, argv, pat)
-int argc;
-char **argv;
-char *pat;
+int my_getopt (int argc, char **argv, char *pat)
 {
   char *flag;
   
@@ -107,11 +104,7 @@ int mapwid;
    "-window-id 0xXXXX" option.  (Maybe this can be done with
    getopt, but I can't be bothered to figure it out.)
  */
-static unsigned long
-window_id_kludge (argcP, argv)
-int *argcP;
-char **argv;
-
+static unsigned long window_id_kludge (int *argcP, char **argv)
 {
   unsigned long id = 0;
   int i;
@@ -143,9 +136,10 @@ void print_algorithm();
 void seed_uni(int ijkl);
 void plot_column(Graph *g);
 
-main (argc,argv)
-int argc;
-char **argv;
+/* Note, Robbie Hatley, 2024-07-16: When installing xmountains as an AUR package,
+   "main" no-longer compiles without being declared "int", presumably due to
+   recent changes in gcc. */
+int main (int argc, char **argv)
 {
   int i;
   int e_events=FALSE;
