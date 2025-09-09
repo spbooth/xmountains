@@ -95,7 +95,7 @@ void scroll_screen ();
 void zap_events();
 #endif
 
-void finish_prog();
+void finish_prog(int err);
 
 int s_height=768, s_width=1024;
 int mapwid;
@@ -156,6 +156,8 @@ int main (int argc, char **argv)
   char *mesg[2];
   Gun *clut[3];
   FILE *pidfile;
+  struct sigaction sa;
+
   swosh = 0;          /* default is ! -w */
 
   init_parameters();
@@ -430,26 +432,11 @@ int main (int argc, char **argv)
   seed_uni(seed);
 
   init_artist_variables();
-  if( SIG_ERR == signal(SIGINT, finish_prog ))
-  {
-    perror(argv[0]);
-    exit(1);
-  }
-  if( SIG_ERR == signal(SIGTERM, finish_prog ))
-  {
-    perror(argv[0]);
-    exit(1);
-  }
-  if( SIG_ERR == signal(SIGHUP, finish_prog ))
-  {
-    perror(argv[0]);
-    exit(1);
-  }
-  if( SIG_ERR == signal(SIGQUIT, finish_prog ))
-  {
-    perror(argv[0]);
-    exit(1);
-  }
+  sa.sa_handler = &finish_prog;
+  sigaction(SIGINT, &sa, NULL );
+  sigaction(SIGTERM, &sa, NULL );
+  sigaction(SIGHUP, &sa, NULL );
+  sigaction(SIGQUIT, &sa, NULL );
 
 
   /* This is a stand in for the event loop in a Widget set implementation 
@@ -483,7 +470,7 @@ int main (int argc, char **argv)
     
 extern int quit_xmount;
 
-void finish_prog()
+void finish_prog(int err)
 {
   /* The next time zap_events is called the program will quit */
   quit_xmount=TRUE;
