@@ -56,11 +56,7 @@ float uni()
 	return ((float) luni);
 }
 
-void rstart(i,j,k,l)
-int i;
-int j;
-int k;
-int l;
+void rstart(int i,int j,int k,int l)
 {
 	int ii, jj, m;
 	float s, t;
@@ -99,8 +95,7 @@ int l;
  *
  */
 
-void seed_uni(ijkl)
-int ijkl;
+void seed_uni(int ijkl)
 {
 	int i, j, k, l, ij, kl;
 
