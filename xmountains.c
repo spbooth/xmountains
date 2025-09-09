@@ -97,7 +97,6 @@ void zap_events();
 
 void finish_prog(int err);
 
-int s_height=768, s_width=1024;
 int mapwid;
 
 /* Go through argv and find and extract any "-window-id NNNN" or
@@ -167,7 +166,7 @@ int main (int argc, char **argv)
 
   mesg[0]="false";
   mesg[1]="true";
-  while((c = my_getopt(argc,argv,"whbxmqMEHl:r:f:t:I:A:S:T:W:C:a:p:B:n:R:g:d:c:e:v:Z:s:X:Y:P:F:G:"))!= -1)
+  while((c = my_getopt(argc,argv,"whbxmqMEHl:r:f:t:I:A:S:T:W:C:a:p:B:n:R:g:d:c:e:v:Z:s:X:Y:P:F:G:K:L:"))!= -1)
   {
     switch(c){
        case 'w':
@@ -356,6 +355,19 @@ int main (int argc, char **argv)
       case 'd':
          display = optarg;
          break;
+      case 'K':
+	 g.graph_width = atoi( optarg );
+	 if( g.graph_width < 10 )
+	 {
+	   g.graph_width=1024;
+	 }
+	 break;
+      case 'L':
+	 g.graph_height = atoi( optarg );
+         if( g.graph_height < 10 ){
+	   g.graph_height = 768;
+	 }
+	 break;
       case 'H':
          print_algorithm();
          errflg++;
@@ -406,6 +418,8 @@ int main (int argc, char **argv)
     fprintf(stderr," -X float [%f] fraction of old value for rg2 & rg3\n",fold_param.mix);
     fprintf(stderr," -Y float [%f] fraction of old value for rg1\n",fold_param.midmix);
     fprintf(stderr," -window-id 0xNNNNN  draw on existing external window.\n");
+    fprintf(stderr," -K int [%d] width of window\n",g.graph_width);
+    fprintf(stderr," -L int [%d] height of window\n",g.graph_height);
     fprintf(stderr," -H            print short description of algorithm.\n");
     exit(1);
   }
