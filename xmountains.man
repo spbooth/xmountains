@@ -208,6 +208,22 @@ regeneration step parameter (see under \-H)
 regeneration step parameter (see under \-H)
 .RE
 .br
+.B \-window-id 0xNNNNN
+.RS
+draw on existing external window.
+.RE
+.br
+.B \-K [1024]
+.RS
+initial width of window
+.RE
+.br
+.B \-L [768]
+.RS
+initial height of window
+.RE
+
+.br
 .B \-H
 .RS
 Print a short description of the algorithm explaining the \-x \-s \-X
@@ -217,7 +233,7 @@ and \-Y parameters.
 .PP
 
 .SH IDENTIFICATION
-Author: S.Booth@ed.ac.uk
+Author: S.Booth@epcc.ed.ac.uk
 
 
 
