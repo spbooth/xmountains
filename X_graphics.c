@@ -47,7 +47,7 @@ Atom wm_delete_window;
   Pixmap bg_pix;
   Colormap map, defaultmap;
   XColor *table=NULL;
-void zap_events();
+  
 void finish_graphics();
   
 Graph g={
