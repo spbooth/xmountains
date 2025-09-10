@@ -78,22 +78,12 @@ int my_getopt (int argc, char **argv, char *pat)
 }
 /* }}} */
 
-double atof();
-#ifdef ANSI
 void init_graphics (int, Window, int,int, Graph *, Gun *, Gun *, Gun *);
 void clear_col( int );
 void finish_graphics();
 void plot_pixel (int, int, unsigned char);
 void scroll_screen ( int );
 void zap_events();
-#else
-void init_graphics ();
-void clear_col();
-void finish_graphics();
-void plot_pixel ();
-void scroll_screen ();
-void zap_events();
-#endif
 
 void finish_prog(int err);
 

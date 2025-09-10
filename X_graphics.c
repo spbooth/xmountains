@@ -80,8 +80,7 @@ TRUE,
 void finish_artist();
 
 /*{{{void zap_events(int snooze)*/
-void zap_events(snooze)
-int snooze;
+void zap_events(int snooze)
 {
   XEvent event;
   XExposeEvent *expose = (XExposeEvent *)&event;
@@ -193,8 +192,7 @@ void finish_graphics()
 /*}}}*/
 
 /*{{{void blank_region(lx,ly,ux,uy)*/
-void blank_region(lx,ly,ux,uy)
-int lx,ly,ux,uy;
+void blank_region(int lx,int ly,int ux,int uy)
 {
   if( depth < 4 )
   {
@@ -213,25 +211,14 @@ int lx,ly,ux,uy;
 /*}}}*/
 
 /*{{{void blank_col( pos )*/
-void blank_col( pos )
-int pos;
+void blank_col(int  pos )
 {
   blank_region(pos,0,pos,graph_height);
 }
 /*}}}*/
 
 /*{{{void init_graphics( ... )*/
-void init_graphics( want_use_root, use_window, use_background, want_clear,gptr,red,green,blue )
-
-int want_use_root;    /* display on the root window */
-Window use_window;    /* display on external window */
-int  use_background;  /* install the pixmap as the background-pixmap */
-int want_clear;
-Graph *gptr;
-
-Gun *red;
-Gun *green;
-Gun *blue;
+void init_graphics(int  want_use_root,Window  use_window,int  use_background,int  want_clear,Graph *gptr,Gun *red,Gun *green,Gun *blue )
 {
 /*{{{defs*/
   Visual *vis;
@@ -435,8 +422,7 @@ Gun *blue;
 /*}}}*/
 
 /*{{{void scroll_screen( int dist )*/
-void scroll_screen( dist )
-int dist;
+void scroll_screen(int dist )
 {
   int reverse=FALSE;
 
@@ -497,10 +483,7 @@ int dist;
 /*}}}*/
 
 /*{{{void plot_pixel( int x, int y, Gun value )*/
-void plot_pixel( x, y, value )
-int x;
-int y;
-Gun value;
+void plot_pixel(int x,int  y,Gun value )
 {
   int do_draw, draw_x, draw_y1, draw_y2;
   unsigned long draw_colour;
@@ -554,11 +537,7 @@ Gun value;
 /*}}}*/
 
 /*{{{void flush_region(int x, int y, int w, int h)*/
-void flush_region( x, y, w, h)
-int x;
-int y;
-int w;
-int h;
+void flush_region(int x,int  y,int  w,int  h)
 {
   /* flush outstanding plots */
   plot_pixel(-1,0,0);

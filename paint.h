@@ -59,7 +59,7 @@ typedef struct graph{
 
 #define PI 3.14159265
 
-#ifdef ANSI
+
 void set_clut(int, Gun *, Gun *, Gun *);
 Height *extract(Strip *s);
 void init_artist_variables();
@@ -68,16 +68,7 @@ Col *makemap(Height *a, Height *b, Height *shadow);
 Col *camera(Height *a, Height *b, Height *shadow);
 Col *mirror(Height *a, Height *b, Height *shadow);
 int project( int x , Height y );
-#else
-void set_clut();
-Height *extract();
-void init_artist_variables();
-Col get_col();
-Col *makemap();
-Col *camera();
-Col *mirror();
-int project();
-#endif
+
 
 
 #endif

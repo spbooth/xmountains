@@ -55,11 +55,7 @@ float uni();
 /*
  * setup the colour lookup table
  */
-void set_clut (max_col,red,green,blue)
-int max_col;
-Gun *red;
-Gun *green;
-Gun *blue;
+void set_clut (int max_col,Gun *red,Gun *green,Gun *blue)
 {
   int band,shade;
   float top, bot;
@@ -183,8 +179,7 @@ Gun *blue;
  * extract the table of heights from the Strip struct
  * and discard the rest of the struct.
  */
-Height *extract (s)
-Strip *s;
+Height *extract (Strip *s)
 {
   int i;
   
@@ -277,11 +272,7 @@ void init_artist_variables()
 /*
  * calculate the colour of a point.
  */
-Col get_col (p,p_minus_x,p_minus_y,shadow)
-Height p;
-Height p_minus_x;
-Height p_minus_y;
-Height shadow;
+Col get_col (Height p,Height p_minus_x,Height p_minus_y,Height shadow)
 {
   Height delta_x, delta_y;
   Height delta_x_sqr, delta_y_sqr;
@@ -397,10 +388,7 @@ Height shadow;
 }
 /* }}} */
 /* {{{   Col *makemap(Height *a, Height *b, Height *shadow) */
-Col *makemap (a,b,shadow)
-Height *a;
-Height *b;
-Height *shadow;
+Col *makemap (Height *a,Height *b,Height *shadow)
 {
 Col *res;
 int i;
@@ -422,10 +410,7 @@ int i;
   
 /* }}} */
 /* {{{   Col *camera(Height *a, Height *b, Height *shadow) */
-Col *camera(a,b,shadow)
-Height *a;
-Height *b;
-Height *shadow;
+Col *camera(Height *a,Height *b,Height *shadow)
 {
   int i, coord, last;
   Col *res, col;
@@ -477,10 +462,7 @@ Height *shadow;
 }
 /* }}} */
 /* {{{   Col *mirror(Height *a, Height *b, Height *shadow)*/
-Col *mirror(a,b,shadow)
-Height *a;
-Height *b;
-Height *shadow;
+Col *mirror(Height *a,Height *b,Height *shadow)
 {
   Col *res, *map;
   Col last_col;
@@ -603,9 +585,7 @@ Height *shadow;
 /*
  *  project a point onto the screen position
  */
-int project (x,y)
-int x;
-Height y;
+int project (int x,Height y)
 {
   int pos;
 #ifndef SLOPPY
@@ -688,9 +668,7 @@ void init_parameters()
 /* }}} */
 /* {{{   Col *next_col(int paint, int reflec) */
 
-Col *next_col (paint, reflec)
-int paint;
-int reflec;
+Col *next_col (int paint, int reflec)
 {
   Col *res;
   int i,offset=0;
@@ -826,8 +804,7 @@ void plot_pixel(int x, int y, Gun value);
 
 /* }}} */
 /* {{{  void plot_column(g)*/
-void plot_column(g)
-Graph *g;
+void plot_column(Graph *g)
 {
   Col *l;
   int j;
