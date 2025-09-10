@@ -9,6 +9,9 @@
 #include "paint.h"
 #include "patchlevel.h"
 #include "copyright.h"
+#include<X11/Xlib.h>
+#include<X11/Xutil.h>
+#include<X11/Xatom.h>
 
 #define VERSION 2
 #define SIDE 1.0
