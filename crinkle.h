@@ -61,7 +61,6 @@ typedef struct strip{
 
 /* }}} */
 /* {{{   prototypes */
-#ifdef ANSI
 Strip *make_strip (Fold *);
 void free_strip (Strip *);
 Strip *double_strip (Strip *);
@@ -78,24 +77,5 @@ void t_update(Fold *, float, float, Strip *, Strip *, Strip *);
 void v_update(Fold *, float, float, Strip *, Strip *, Strip *);
 void vside_update(Fold *, float, float, Strip *);
 void hside_update(Fold *, float, float, Strip *, Strip *, Strip *);
-#else
-Strip *make_strip ();
-void free_strip ();
-Strip *double_strip ();
-Strip *set_strip ();
-Strip *random_strip ();
-Strip *next_strip ();
-void reset_fold();
-Fold *make_fold ();
-void free_fold ();
-Length gaussian ();
-void x_update();
-void p_update();
-void t_update();
-void v_update();
-void vside_update();
-void hside_update();
-
-#endif
 /* }}} */
 #endif
