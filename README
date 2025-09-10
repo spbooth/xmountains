@@ -50,6 +50,9 @@ Fractal options:
  -s       [1] smoothing (0-7)
  -X float [0.000000] fraction of old value for rg2 & rg3
  -Y float [0.000000] fraction of old value for rg1
+ -window-id 0xNNNNN  draw on existing external window.
+ -K int [1024] width of window
+ -L int [768] height of window
  -H            print short description of algorithm.
 
 This program works best on a colour display. It will work on monochrome
