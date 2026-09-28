@@ -79,8 +79,8 @@ TRUE,
 
 void finish_artist();
 
-/*{{{void zap_events(int snooze)*/
-void zap_events(int snooze)
+/*{{{void zap_events()*/
+void zap_events()
 {
   XEvent event;
   XExposeEvent *expose = (XExposeEvent *)&event;

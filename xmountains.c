@@ -82,7 +82,7 @@ int my_getopt (int argc, char **argv, char *pat)
 /* }}} */
 
 void init_graphics (int, Window, int,int, Graph *, Gun *, Gun *, Gun *);
-void clear_col( int );
+void blank_col( int );
 void finish_graphics();
 void plot_pixel (int, int, unsigned char);
 void scroll_screen ( int );
