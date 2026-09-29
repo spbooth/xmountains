@@ -55,7 +55,7 @@ Atom wm_delete_window;
   
 void finish_graphics();
   
-
+extern Graph g;
 
 void finish_artist();
 
