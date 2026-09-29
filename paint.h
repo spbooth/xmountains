@@ -5,8 +5,21 @@
 #include "crinkle.h"
 
 /* colour code definitions */
+/* colours are stored as integer codes which index into RGB values stored a Guns
+ * The total number of colours used is determined by BAND_SIZE with the default
+ * value resulting in less than 255 colours. This is not an issue for most modern
+ * hardware but there is little visual difference increasing BAND_SIZE above 80
+ * COL_RANGE defines the depth of the color values defaulting to the 16-bit colour
+ * used by X11. It make make sense to change this for a different graphical back-end  
+ */
 typedef int Col;
+#ifdef COLOR_32_BIT
+typedef unsigned long Gun;
+#define COL_RANGE 4294967295UL
+#else
 typedef unsigned short Gun;
+#define COL_RANGE   65535
+#endif
 
 typedef struct graph{
   int graph_height;     /* height of display */
@@ -55,7 +68,7 @@ typedef struct graph{
 #define N_BANDS     3
 #define DEF_COL     (BAND_BASE + (N_BANDS * BAND_SIZE))
 #define MIN_COL     (BAND_BASE + (N_BANDS * 2))
-#define COL_RANGE   65535
+
 
 #define PI 3.14159265
 

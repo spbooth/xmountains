@@ -2,16 +2,15 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#ifndef NO_SIGNAL
 #include <signal.h>
+#endif
 #include <sys/types.h>
 #include <unistd.h>
 #include "crinkle.h"
 #include "paint.h"
 #include "patchlevel.h"
 #include "copyright.h"
-#include<X11/Xlib.h>
-#include<X11/Xutil.h>
-#include<X11/Xatom.h>
 
 #define VERSION 2
 #define SIDE 1.0
@@ -81,7 +80,7 @@ int my_getopt (int argc, char **argv, char *pat)
 }
 /* }}} */
 
-void init_graphics (int, Window, int,int, Graph *, Gun *, Gun *, Gun *);
+void init_graphics (int, unsigned long, int,int, Graph *, Gun *, Gun *, Gun *);
 void blank_col( int );
 void finish_graphics();
 void plot_pixel (int, int, unsigned char);
@@ -439,12 +438,13 @@ int main (int argc, char **argv)
   seed_uni(seed);
 
   init_artist_variables();
+#ifndef NO_SIGNAL
   sa.sa_handler = &finish_prog;
   sigaction(SIGINT, &sa, NULL );
   sigaction(SIGTERM, &sa, NULL );
   sigaction(SIGHUP, &sa, NULL );
   sigaction(SIGQUIT, &sa, NULL );
-
+#endif
 
   /* This is a stand in for the event loop in a Widget set implementation 
    * where we would call plot_column at regular intervals using

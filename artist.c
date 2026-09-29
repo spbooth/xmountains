@@ -18,7 +18,32 @@ char artist_Id[] = "$Id: artist.c,v 1.41 2009/08/28 09:09:17 spb Exp $";
 int base=0;      /* parity flag for mirror routine */
 
 extern Parm fold_param;
-extern Graph g;
+Graph g={
+1024,
+768,
+0,
+0,
+0.3,
+1.0,
+0.3,
+0.6,
+2.5,
+4.0,
+(40.0 * PI)/180.0,
+0.0,
+0.5,
+0.0,
+0.6,
+DEF_COL,
+60,
+10,
+2,
+FALSE,
+TRUE,
+20,
+0,
+0
+};
 
 extern int swosh;
 

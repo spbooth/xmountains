@@ -1,3 +1,8 @@
+/**  This is an implementation of the graphics functions in X11.
+* 
+* It should be possible to substitute a different graphics back-end preserving the 
+* interface.
+*/
 #include <stdio.h>
 #include <string.h>
 #include<X11/Xlib.h>
@@ -50,32 +55,7 @@ Atom wm_delete_window;
   
 void finish_graphics();
   
-Graph g={
-1024,
-768,
-0,
-0,
-0.3,
-1.0,
-0.3,
-0.6,
-2.5,
-4.0,
-(40.0 * PI)/180.0,
-0.0,
-0.5,
-0.0,
-0.6,
-DEF_COL,
-60,
-10,
-2,
-FALSE,
-TRUE,
-20,
-0,
-0
-};
+
 
 void finish_artist();
 
@@ -218,12 +198,12 @@ void blank_col(int  pos )
 /*}}}*/
 
 /*{{{void init_graphics( ... )*/
-void init_graphics(int  want_use_root,Window  use_window,int  use_background,int  want_clear,Graph *gptr,Gun *red,Gun *green,Gun *blue )
+void init_graphics(int  want_use_root,unsigned long  window_id,int  use_background,int  want_clear,Graph *gptr,Gun *red,Gun *green,Gun *blue )
 {
 /*{{{defs*/
   Visual *vis;
 
-  
+  Window use_window = (Window) window_id;
   int x=0;
   int y=0;
   int gbits=0;
