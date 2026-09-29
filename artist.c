@@ -85,7 +85,6 @@ void set_clut (int max_col,Gun *red,Gun *green,Gun *blue)
   int band,shade;
   float top, bot;
   float intensity;
-  int tmp;
 /*
 *  float rb[N_BANDS] = { 0.167,0.200,0.333,0.450,0.600,1.000 };
 *  float gb[N_BANDS] = { 0.667,0.667,0.500,0.500,0.600,1.000 };
@@ -102,29 +101,29 @@ void set_clut (int max_col,Gun *red,Gun *green,Gun *blue)
   bb[0] = 0.333; bb[1] = 0.000; bb[2] = 1.000;
 
   /* {{{   black */
-  red[BLACK]       = 0;
-  green[BLACK]     = 0;
-  blue[BLACK]      = 0;
+  red[BLACK]       = 0.0;
+  green[BLACK]     = 0.0;
+  blue[BLACK]      = 0.0;
   /* }}} */
   /* {{{   white */
-  red[WHITE]       = COL_RANGE;
-  green[WHITE]     = COL_RANGE;
-  blue[WHITE]      = COL_RANGE;
+  red[WHITE]       = 1.0;
+  green[WHITE]     = 1.0;
+  blue[WHITE]      = 1.0;
   /* }}} */
   /* {{{   sky*/
-  red[SKY]         = 0.404*COL_RANGE;
-  green[SKY]       = 0.588*COL_RANGE;
-  blue[SKY]        = COL_RANGE;
+  red[SKY]         = 0.404;
+  green[SKY]       = 0.588;
+  blue[SKY]        = 1.0;
   /* }}} */
   /* {{{   sea (lit) */
-  red[SEA_LIT]     = 0;
-  green[SEA_LIT]   = 0.500*COL_RANGE;
-  blue[SEA_LIT]    = 0.700*COL_RANGE;
+  red[SEA_LIT]     = 0.0;
+  green[SEA_LIT]   = 0.500;
+  blue[SEA_LIT]    = 0.700;
   /* }}} */
   /* {{{   sea (unlit)*/
-  red[SEA_UNLIT]   = 0;
-  green[SEA_UNLIT] = ((g.ambient+(g.vfract/(1.0+g.vfract)))*0.500)*COL_RANGE;
-  blue[SEA_UNLIT]  = ((g.ambient+(g.vfract/(1.0+g.vfract)))*0.700)*COL_RANGE;
+  red[SEA_UNLIT]   = 0.0;
+  green[SEA_UNLIT] = ((g.ambient+(g.vfract/(1.0+g.vfract)))*0.500);
+  blue[SEA_UNLIT]  = ((g.ambient+(g.vfract/(1.0+g.vfract)))*0.700);
   /* }}} */
 
   if( MIN_COL > max_col )
@@ -151,49 +150,47 @@ void set_clut (int max_col,Gun *red,Gun *green,Gun *blue)
       top = rb[band];
       bot = g.ambient * top;
       intensity = bot + ((shade * (top - bot))/(g.band_size-1));
-      tmp = COL_RANGE * intensity;
-      if (tmp < 0)
+      if (intensity < 0.0)
       {
-        fprintf(stderr,"set_clut: internal error: invalid code %d\n",tmp);
+        fprintf(stderr,"set_clut: internal error: invalid intensity %f\n",intensity);
         exit(2);
       }
-      if( tmp > COL_RANGE )
+      if( intensity > 1.0 )
       {
-        tmp = COL_RANGE;
+        intensity = 1.0;
       }
-      red[BAND_BASE + (band*g.band_size) + shade] = tmp;
+      red[BAND_BASE + (band*g.band_size) + shade] = intensity;
       /* }}} */
       /* {{{   set green */
       top = gb[band];
       bot = g.ambient * top;
       intensity = bot + ((shade * (top - bot))/(g.band_size-1));
-      tmp = COL_RANGE * intensity;
-      if (tmp < 0)
+      if (intensity < 0.0)
       {
-        fprintf(stderr,"set_clut: internal error: invalid code %d\n",tmp);
+        fprintf(stderr,"set_clut: internal error: invalid intensity %f\n",intensity);
         exit(2);
       }
-      if( tmp > COL_RANGE )
+      if( intensity > 1.0 )
       {
-        tmp = COL_RANGE;
+        intensity = 1.0;
       }
-      green[BAND_BASE + (band*g.band_size) + shade] = tmp;
+      green[BAND_BASE + (band*g.band_size) + shade] = intensity;
       /* }}} */
       /* {{{   set blue */
       top = bb[band];
       bot = g.ambient * top;
       intensity = bot + ((shade * (top - bot))/(g.band_size-1));
-      tmp = COL_RANGE * intensity;
-      if (tmp < 0)
+ 
+      if (intensity < 0.0)
       {
-        fprintf(stderr,"set_clut: internal error: invalid code %d\n",tmp);
+        fprintf(stderr,"set_clut: internal error: invalid intensity %f\n",intensity);
         exit(2);
       }
-      if( tmp > COL_RANGE )
+      if( intensity > 1.0 )
       {
-        tmp = COL_RANGE;
+        intensity = 1.0;
       }
-      blue[BAND_BASE + (band*g.band_size) + shade] = tmp;
+      blue[BAND_BASE + (band*g.band_size) + shade] = intensity;
       /* }}} */
     }
   }
@@ -818,14 +815,13 @@ Col *next_col (int paint, int reflec)
   }
 
   /* }}} */
-  
   return(res);
 }
 
 void blank_region(int lx, int ly, int ux, int uy);
 void flush_region(int x, int y, int w, int h);
 void scroll_screen(int dist);
-void plot_pixel(int x, int y, Gun value);
+void plot_pixel(int x, int y, Col value);
 
 /* }}} */
 /* {{{  void plot_column(g)*/

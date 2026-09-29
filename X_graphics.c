@@ -26,6 +26,7 @@ Atom wm_delete_window;
 #define FALSE 0
 #endif
 
+#define COL_RANGE   65535
   int quit_xmount=FALSE;
   Display *dpy;
   int screen;
@@ -196,6 +197,17 @@ void blank_col(int  pos )
   blank_region(pos,0,pos,graph_height);
 }
 /*}}}*/
+unsigned short convertGun(float intensity){
+   int value;
+   value = intensity * COL_RANGE;
+   if( value < 0 ){
+	   value = 0;
+   }
+   if( value > COL_RANGE ){
+	   value = COL_RANGE;
+   }
+   return (unsigned short) value;
+}
 
 /*{{{void init_graphics( ... )*/
 void init_graphics(int  want_use_root,unsigned long  window_id,int  use_background,int  want_clear,Graph *gptr,Gun *red,Gun *green,Gun *blue )
@@ -257,9 +269,10 @@ void init_graphics(int  want_use_root,unsigned long  window_id,int  use_backgrou
   }
   for(i = 0; i < gptr->n_col; i++)
   {
-    table[i].red   = red[i];
-    table[i].green = green[i];
-    table[i].blue  = blue[i];
+    table[i].red   = convertGun(red[i]);
+    table[i].green = convertGun(green[i]);
+    table[i].blue  = convertGun(blue[i]);
+    table[i].flags = DoRed | DoGreen | DoBlue;
     while( ! XAllocColor(dpy,map,table+i) )
     {
       if( newmap ){
@@ -462,7 +475,7 @@ void scroll_screen(int dist )
 }
 /*}}}*/
 
-/*{{{void plot_pixel( int x, int y, Gun value )*/
+/*{{{void plot_pixel( int x, int y, Col value )*/
 void plot_pixel(int x,int  y,Col value )
 {
   int do_draw, draw_x, draw_y1, draw_y2;
