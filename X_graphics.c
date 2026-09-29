@@ -463,7 +463,7 @@ void scroll_screen(int dist )
 /*}}}*/
 
 /*{{{void plot_pixel( int x, int y, Gun value )*/
-void plot_pixel(int x,int  y,Gun value )
+void plot_pixel(int x,int  y,Col value )
 {
   int do_draw, draw_x, draw_y1, draw_y2;
   unsigned long draw_colour;

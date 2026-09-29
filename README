@@ -62,7 +62,7 @@ The program breaks down into three sections
 1) Fractal generation (calcalt.c random.c crinkle.h) This code should be fairly
    solid, It also contains some algorithmic tricks I had to invent (though it
    is not inconceivable that somebody else has also thought of them)
-2) Image rendering & main program (artist.c global.c scroll.c global.h paint.h)
+2) Image rendering & main program (artist.c paint.h)
    This code is a bit more sloppy but seems to work OK.
 3) The X interface (X_graphics.c) The X interface was retro-fitted to an earlier
    version of the program that was designed to use memory mapped video hardware.
@@ -70,11 +70,11 @@ The program breaks down into three sections
    do better but ...
 
 == PROBLEMS ==
-* All parameters are set on the command line.
+* All parameters are set on the command line. It should be possible to vary 
+  some of the parameters dynamically while the program is running. The javascript port 
+  of this code allows this. However this code currently does not support this
 * The choice of colours looks strange on some hardware.
-* The program will not work with Xscreensaver or virtual window managers. This
-  can be fixed by including vroot.h in X_graphics.c (define VROOT to cpp to do
-  this) but I was a little wary of putting this in by default.
+
 
 == Contact ==
 If you have any comments/fixes etc for this program,
