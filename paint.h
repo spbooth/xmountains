@@ -50,6 +50,7 @@ typedef struct graph{
   int repeat;
   int pos;
   int scroll;
+  int pause;
 }Graph;
 
 #define BLACK       0
@@ -77,7 +78,11 @@ Col *makemap(Height *a, Height *b, Height *shadow);
 Col *camera(Height *a, Height *b, Height *shadow);
 Col *mirror(Height *a, Height *b, Height *shadow);
 int project( int x , Height y );
-
-
+/* This is the external entry point. 
+ * called from the animation loop to generate a new "frame"
+ * the application updates one column at a time.
+ * this may also
+*/
+void plot_column(Graph *g);
 
 #endif

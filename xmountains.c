@@ -2,15 +2,16 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#ifndef NO_SIGNAL
-#include <signal.h>
-#endif
+
 #include <sys/types.h>
 #include <unistd.h>
 #include "crinkle.h"
 #include "paint.h"
+#include "graphics.h"
+#include "random.h"
 #include "patchlevel.h"
 #include "copyright.h"
+
 
 #define VERSION 2
 #define SIDE 1.0
@@ -80,14 +81,7 @@ int my_getopt (int argc, char **argv, char *pat)
 }
 /* }}} */
 
-void init_graphics (int, unsigned long, int,int, Graph *, Gun *, Gun *, Gun *);
-void blank_col( int );
-void finish_graphics();
-void plot_pixel (int, int, Col);
-void scroll_screen ( int );
-void zap_events();
 
-void finish_prog(int err);
 
 int mapwid;
 
@@ -122,10 +116,8 @@ static unsigned long window_id_kludge (int *argcP, char **argv)
 }
 
 
-void init_parameters();
 void print_algorithm();
-void seed_uni(int ijkl);
-void plot_column(Graph *g);
+
 
 /* Note, Robbie Hatley, 2024-07-16: When installing xmountains as an AUR package,
    "main" no-longer compiles without being declared "int", presumably due to
@@ -137,6 +129,7 @@ int main (int argc, char **argv)
   int request_clear=FALSE;
   int smooth=1;
   int snooze=10;
+  int column_millis=10;
   int root= 0;
   unsigned long window_id = 0;
   int seed=0;
@@ -147,7 +140,7 @@ int main (int argc, char **argv)
   char *mesg[2];
   Gun *clut[3];
   FILE *pidfile;
-  struct sigaction sa;
+
 
   swosh = 0;          /* default is ! -w */
 
@@ -158,7 +151,7 @@ int main (int argc, char **argv)
 
   mesg[0]="false";
   mesg[1]="true";
-  while((c = my_getopt(argc,argv,"whbxmqMEHl:r:f:t:I:A:S:T:W:C:a:p:B:n:R:g:d:c:e:v:Z:s:X:Y:P:F:G:K:L:"))!= -1)
+  while((c = my_getopt(argc,argv,"whbxmqMEHl:r:f:t:I:A:S:T:W:C:a:p:B:n:R:g:d:c:e:v:Z:z:s:X:Y:P:F:G:K:L:"))!= -1)
   {
     switch(c){
        case 'w':
@@ -246,6 +239,13 @@ int main (int argc, char **argv)
            snooze = 0;
          }
          break;
+      case 'z':                     /* millisends pause between columns */
+          column_millis = atoi( optarg );
+          if( column_millis < 0 || column_millis > 999)
+          {
+        	  column_millis = 0;
+          }
+          break;
       case 'P':
          pidfile = fopen(optarg,"w");
          if( pidfile )
@@ -387,6 +387,7 @@ int main (int argc, char **argv)
     fprintf(stderr," -B int   [%d] # shades in a colour band\n",g.band_size);
     fprintf(stderr," -n int   [%d] # number of colours\n",g.n_col);
     fprintf(stderr," -Z int   [%d] time to sleep before scrolling\n",snooze);
+    fprintf(stderr," -z int   [%d] milliseconds to sleep after each column\n",column_millis);
     fprintf(stderr," -I float [%f] vertical angle of light \n",(g.phi*180.0)/PI);
     fprintf(stderr," -A float [%f] horizontal angle of light \n",(g.alpha*180.0)/PI);
     fprintf(stderr," -S float [%f] vertical stretch \n",g.stretch);
@@ -427,59 +428,26 @@ int main (int argc, char **argv)
     }
   }
   set_clut(g.n_col,clut[0], clut[1], clut[2]);
- init_graphics(root,window_id, !e_events, request_clear, &g, clut[0], clut[1], clut[2]);
+  init_graphics(root,window_id, !e_events, request_clear, &g, clut[0], clut[1], clut[2]);
 
   for(i=0;i<3;i++)
   {
     free(clut[i]);
   }
 
-    
-  seed_uni(seed);
-
-  init_artist_variables();
-#ifndef NO_SIGNAL
-  sa.sa_handler = &finish_prog;
-  sigaction(SIGINT, &sa, NULL );
-  sigaction(SIGTERM, &sa, NULL );
-  sigaction(SIGHUP, &sa, NULL );
-  sigaction(SIGQUIT, &sa, NULL );
-#endif
-
-  /* This is a stand in for the event loop in a Widget set implementation 
-   * where we would call plot_column at regular intervals using
-   * XTtimeout. However xmountains is an Xlib program
-   * so I do the following.
-   */
-  while( TRUE )
-  {
-    plot_column(&g);
-    zap_events();
-#ifndef NO_SLEEP
-    if( g.scroll ){
-    /* sleep if we are due a scroll next time */
-    /* sleeping is very bad because it will prevent
-     * events being processed but I suppose it is better
-     * than being a CPU hog, as a compremise always check for
-     * events at least once a second, looping for longer sleep times.
-     * process the events before a sleep to make sure the screen is up to date.
-     * the events must always be processed at least once.
-     */
-      for(i=0;i<snooze;i++){
-	sleep(1);
-	zap_events();
-      }
-    }
-#endif
+  if( seed == 0){
+	  seed = get_clock();
+	  if( seed >= MAX_SEED){
+		  seed = seed % MAX_SEED;
+	  }
   }
+  seed_uni(seed);
+  init_artist_variables();
+
+  animate(plot_column,&g,snooze,column_millis);
 }
 
     
-extern int quit_xmount;
 
-void finish_prog(int err)
-{
-  /* The next time zap_events is called the program will quit */
-  quit_xmount=TRUE;
-}
+
 

@@ -20,6 +20,7 @@
 #include <stdlib.h>
 #include <math.h>
 #include "crinkle.h"
+#include "random.h"
 
 char calcalt_Id[] = "$Id: calcalt.c,v 2.18 2009/08/28 09:09:17 spb Exp $";
 

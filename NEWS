@@ -1,3 +1,8 @@
+CHANGES from V2.17
+Added a -z flag to control a short sleep between columns. Modern hardware is too fast
+to just plot columns at full speed. 
+Refactored the seperation between the fractal and graphical parts of the code to make it easier
+to add alternative graphics back-end
 CHANGES from V2.1
 Added a -n flag to set the number of colours. This changes the same
 parameter as -B but you request total number of colours.

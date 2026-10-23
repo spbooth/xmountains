@@ -5,14 +5,27 @@
 */
 #include <stdio.h>
 #include <string.h>
+#include <unistd.h>
 #include<X11/Xlib.h>
 #include<X11/Xutil.h>
 #include<X11/Xatom.h>
+/* need types and time */
+#include <X11/Xos.h>
+#include <time.h>
 # define VROOT /* always do this */
 #ifdef VROOT
 #include"vroot.h"
 #endif
+#ifndef NO_SIGNAL
+#include <signal.h>
+#endif
 #include "paint.h"
+#include "graphics.h"
+// internal routine prototypes
+void zap_events();
+void finish_graphics();
+void finish_prog(int err);
+
 char X_graphics_Id[]="$Id: X_graphics.c,v 1.26 2009/08/28 09:09:17 spb Exp $";
 
 char *display=NULL;       /* name of display to open, NULL for default */
@@ -20,6 +33,7 @@ char *geom=NULL;          /* geometry of window, NULL for default */
 
 Atom wm_protocols;
 Atom wm_delete_window;
+struct sigaction sa;
 
 #ifndef FALSE
 #define TRUE 1
@@ -59,6 +73,12 @@ void finish_graphics();
 extern Graph g;
 
 void finish_artist();
+
+void finish_prog(int err)
+{
+  /* The next time zap_events is called the program will quit */
+  quit_xmount=TRUE;
+}
 
 /*{{{void zap_events()*/
 void zap_events()
@@ -234,6 +254,17 @@ void init_graphics(int  want_use_root,unsigned long  window_id,int  use_backgrou
 
 /*}}}*/
 
+#ifndef NO_SIGNAL
+// treat signal handling as part of the graphics interface
+// we are catching signals to clean up. Also this is OS dependent
+// so we are likely to use a different mechanism with other graphical back-ends
+  sa.sa_handler = &finish_prog;
+  sigaction(SIGINT, &sa, NULL );
+  sigaction(SIGTERM, &sa, NULL );
+  sigaction(SIGHUP, &sa, NULL );
+  sigaction(SIGQUIT, &sa, NULL );
+#endif
+
   if (use_window) use_root = 0;
 
   do_clear = want_clear;
@@ -407,7 +438,7 @@ void init_graphics(int  want_use_root,unsigned long  window_id,int  use_backgrou
     XMapWindow(dpy, win );
   }
   XClearWindow(dpy,win);
-  zap_events(0);
+  zap_events();
   
   gptr->graph_width = graph_width;
   gptr->graph_height = graph_height;
@@ -540,4 +571,58 @@ void flush_region(int x,int  y,int  w,int  h)
   }
 }
 /*}}}*/
+void animate(void next_frame(Graph *g),Graph *g,int snooze,int millis){
+	struct timespec tt;
+	struct timespec tt_snooze;
+	int i;
 
+	// column pause rate
+	 tt.tv_sec=0;
+	 tt.tv_nsec=1000000*millis;
+	 // keep our original second resolution for the long pause
+	 // we could process events faster by waiting a shorter time and
+	 // multiplying snooze by the corresponding factor here.
+	 tt_snooze.tv_sec=1;
+	 tt_snooze.tv_nsec=0;
+	 /* This is a stand in for the event loop in a Widget set implementation
+	  * or some other graphical back-end.
+	  *
+	  *
+	   * where we would call plot_column at regular intervals using
+	   * XTtimeout or equivalent with a longer (snooze seconds) pause when g->pause it true
+	   *
+	   * However xmountains is an Xlib program
+	   * so I call next_frame in a loop (processing events after each call) and implement
+	   * the longer pause using nanosleep (called in a loop so events are handled once a second.
+	   *
+	   */
+	  while( TRUE )
+	  {
+	    next_frame(g);
+	    zap_events();
+#ifndef NO_SLEEP
+	    if( g->pause ){
+	    /* sleep if we are due a pause next time */
+	    /* sleeping the full time is very bad because it will prevent
+	     * events being processed but I suppose it is better
+	     * than being a CPU hog, as a compremise always check for
+	     * events at least once a second, looping for longer sleep times.
+	     * process the events before a sleep to make sure the screen is up to date.
+	     * the events must always be processed at least once.
+	     */
+	      for(i=0;i<snooze;i++){
+	    	nanosleep(&tt_snooze,NULL);
+		    zap_events();
+	      }
+	    }else{
+	    	if( millis > 0 ){
+	    		nanosleep(&tt,NULL);
+	    	}
+	    }
+#endif
+	  }
+}
+
+int get_clock(){
+	return time((time_t *) 0);
+}

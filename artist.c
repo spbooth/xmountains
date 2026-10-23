@@ -42,6 +42,7 @@ FALSE,
 TRUE,
 20,
 0,
+0,
 0
 };
 
@@ -672,6 +673,7 @@ void init_parameters()
   g.repeat=20;
   g.pos=0;
   g.scroll=0;
+  g.pause=FALSE;
 
   fold_param.mean=0;
   fold_param.rg1=FALSE;
@@ -879,12 +881,14 @@ void plot_column(Graph *g)
   free(l);
   flush_region(g->pos,0,1,g->graph_height);
   g->scroll = 0;
+  g->pause = FALSE;
   /* now update pos ready for next time */
   if( g->repeat >=0 ){
     g->pos++;
     if(g->pos >= g->pixmap_width)
     {
       g->pos -=  g->repeat;
+      g->pause = TRUE;
       if( g->pos < 0 || g->pos > g->pixmap_width-1 )
       {
         g->pos=0; 
@@ -896,6 +900,7 @@ void plot_column(Graph *g)
     g->pos--;
     if( g->pos < 0 ){
       g->pos -=   g->repeat;
+      g->pause = TRUE;
       if( g->pos < 0 || g->pos > (g->pixmap_width-1) ){
 	g->pos=g->pixmap_width-1;
       }else{

@@ -94,6 +94,11 @@ setting the number of shades of each colour.
 Set the number of seconds that the program sleeps after scrolling the screen.
 .RE
 .br
+.B \-z [10] 
+.RS
+Set the number of milliseconds that the program sleeps after drawing a column.
+.RE
+.br
 .B \-I [40.0] 
 .RS
 Set the vertical angle of illumination.

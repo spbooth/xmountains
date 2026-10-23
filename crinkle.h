@@ -70,12 +70,12 @@ Strip *next_strip (Fold *);
 void reset_fold(Fold *f);
 Fold *make_fold (Fold *,Parm *,int, int, Length);
 void free_fold (Fold *);
-Length gaussian ();
 void x_update(Fold *, float, float, Strip *, Strip *, Strip *);
 void p_update(Fold *, float, float, Strip *, Strip *, Strip *);
 void t_update(Fold *, float, float, Strip *, Strip *, Strip *);
 void v_update(Fold *, float, float, Strip *, Strip *, Strip *);
 void vside_update(Fold *, float, float, Strip *);
 void hside_update(Fold *, float, float, Strip *, Strip *, Strip *);
+void init_parameters();
 /* }}} */
 #endif

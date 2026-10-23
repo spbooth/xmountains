@@ -17,16 +17,6 @@ char uni_id[] = "$Id: random.c,v 1.7 2009/08/28 09:09:17 spb Exp $" ;
 
 #define PARANOID
 
-#ifdef _WIN32
-/* special handling for time on win32*/
-#include <time.h>
-#else
-/* need types and time */
-#include <X11/Xos.h> 
-#endif
-/* #include <sys/types.h>
- * #include <sys/time.h>
- */
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -105,11 +95,6 @@ void seed_uni(int ijkl)
 {
 	int i, j, k, l, ij, kl;
 
-	if( ijkl == 0 )
-	{
-	  ijkl = time((time_t *) 0);
-	  ijkl %= 900000000;
-	}
 	/* check ijkl is within range */
 	if( (ijkl < 0) || (ijkl > 900000000) )
 		{
