@@ -10,11 +10,21 @@
  * value resulting in less than 255 colours.
  * This is not an issue for most modern
  * hardware but there is little visual difference increasing BAND_SIZE above 80
+ * Note that command line parameters can result in a higher than default band_size
+ * as well as lower.
+ *
+ * If we define COL_8_BIT then an 8-bit type is used for Col and we are restricted
+ * to less than 255 colours. Only really worth doing if the graphics back-end can
+ * make use of this
  * 
  * The Gun type is a float holding intensity values between 0.0 and 1.0 .
  * This decouples from the colour depth of the graphics engine 
  */
+#ifdef COL_8_BIT
+typedef unsigned char Col;
+#else
 typedef int Col;
+#endif
 typedef float Gun;
 
 typedef struct graph{

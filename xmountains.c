@@ -222,6 +222,11 @@ int main (int argc, char **argv)
          break;
       case 'n':                     /* set max number of colours */
          g.n_col = atoi( optarg );
+#ifdef COL_8_BIT
+         if( g.n_col > 255){
+        	 g.n_col = 255;
+         }
+#endif
          if( g.n_col < MIN_COL )
          {
            g.n_col = MIN_COL;

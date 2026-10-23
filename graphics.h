@@ -17,6 +17,10 @@ void plot_pixel (int, int, Col);
 void scroll_screen ( int );
 // run the animation loop
 void animate(void next_frame(Graph *g),Graph *g,int snooze,int millis);
+// record a region has changed (damaged)
+void flush_region(int x,int  y,int  w,int  h);
+
+
 // get an integer from the clock. Not graphics related but often OS related
 int get_clock();
 

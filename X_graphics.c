@@ -192,8 +192,8 @@ void finish_graphics()
 }
 /*}}}*/
 
-/*{{{void blank_region(lx,ly,ux,uy)*/
-void blank_region(int lx,int ly,int ux,int uy)
+/*{{{void blank_region(lx,ly,dx,dy)*/
+void blank_region(int lx,int ly,int dx,int dy)
 {
   if( depth < 4 )
   {
@@ -202,11 +202,11 @@ void blank_region(int lx,int ly,int ux,int uy)
      */
     XSetForeground(dpy,gc,WhitePixel(dpy,screen));
     XSetFillStyle(dpy,gc,FillOpaqueStippled);
-    XFillRectangle(dpy,pix,gc,lx,ly,ux,uy);
+    XFillRectangle(dpy,pix,gc,lx,ly,dx,dy);
     XSetFillStyle(dpy,gc,FillSolid);
   }else{
     XSetForeground(dpy,gc,table[SKY].pixel);
-    XFillRectangle(dpy,pix,gc,lx,ly,ux,uy);
+    XFillRectangle(dpy,pix,gc,lx,ly,dx,dy);
   }
 }
 /*}}}*/

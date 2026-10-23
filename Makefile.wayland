@@ -1,0 +1,73 @@
+#
+# Makefile for building xmountains against the Wayland graphics
+# back end (Y_graphics.c) instead of the X11 back end (X_graphics.c).
+#
+# Requirements:
+#   build-essential pkg-config libwayland-dev wayland-protocols
+# e.g. on Debian/Ubuntu:
+#   apt install build-essential pkg-config libwayland-dev wayland-protocols
+#
+# Usage:
+#   make -f Makefile.wayland
+#
+
+CC ?= cc
+CFLAGS ?=  -g
+
+PKG_CONFIG ?= pkg-config
+
+WAYLAND_CFLAGS := $(shell $(PKG_CONFIG) --cflags wayland-client 2>/dev/null)
+WAYLAND_LIBS := $(shell $(PKG_CONFIG) --libs wayland-client 2>/dev/null)
+ifeq ($(WAYLAND_LIBS),)
+WAYLAND_CFLAGS =
+WAYLAND_LIBS = -lwayland-client
+endif
+
+# xdg-shell protocol xml, new and legacy locations
+XDG_SHELL_XMLS := $(wildcard /usr/share/wayland-protocols/stable/xdg-shell/xdg-shell.xml)
+XDG_SHELL_XMLS += $(wildcard /usr/share/wayland-protocols/unstable/xdg-shell/xdg-shell.xml)
+XDG_SHELL_XML := $(firstword $(XDG_SHELL_XMLS))
+ifeq ($(XDG_SHELL_XML),)
+$(error xdg-shell.xml not found, install the wayland-protocols package)
+endif
+
+            SRCS = calcalt.c random.c  artist.c xmountains.c Y_graphics.c print_alg.c xdg-shell-protocol.c
+            OBJS = calcalt.o random.o  artist.o xmountains.o Y_graphics.o print_alg.o xdg-shell-protocol.o
+            HDRS = crinkle.h paint.h patchlevel.h copyright.h graphics.h random.h
+
+ymountains: $(OBJS)
+	$(CC) $(CFLAGS) $(WAYLAND_CFLAGS) -o ymountains $(OBJS) $(WAYLAND_LIBS) -lm
+
+example: $(OBJS)
+	$(CC) $(CFLAGS) $(WAYLAND_CFLAGS) -o example example.c xdg-shell-protocol.o $(WAYLAND_LIBS) -lm
+
+%.o: %.c
+	$(CC) $(CFLAGS) $(WAYLAND_CFLAGS) -c $< -o $@
+
+# xdg-shell protocol bindings, generated with wayland-scanner
+# recent scanners call the code generator "private-code",
+# older ones call it "client-protocol"
+ifeq ($(shell wayland-scanner private-code $(XDG_SHELL_XML) /dev/null >/dev/null 2>&1; echo $$?),0)
+SCAN_CODE_MODE = private-code
+else
+SCAN_CODE_MODE = client-protocol
+endif
+
+xdg-shell-client-protocol.h: $(XDG_SHELL_XML)
+	wayland-scanner client-header $< $@
+
+xdg-shell-protocol.c: $(XDG_SHELL_XML)
+	wayland-scanner $(SCAN_CODE_MODE) $< $@
+
+Y_graphics.o: Y_graphics.c xdg-shell-client-protocol.h paint.h crinkle.h
+xdg-shell-protocol.o: xdg-shell-protocol.c
+xmountains.o: xmountains.c paint.h patchlevel.h copyright.h crinkle.h
+artist.o: artist.c paint.h crinkle.h
+calcalt.o: calcalt.c crinkle.h
+random.o: random.c
+print_alg.o: print_alg.c paint.h
+
+clean:
+	rm -f $(OBJS) ymountains xdg-shell-client-protocol.h xdg-shell-protocol.c
+
+.PHONY: clean
