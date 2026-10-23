@@ -615,7 +615,8 @@ void animate(void next_frame(Graph *g),Graph *g,int snooze,int millis){
 		    zap_events();
 	      }
 	    }else{
-	    	if( millis > 0 ){
+	    	if( millis > 0 && ! swosh){
+	    		// don't sleep on swosh as there is no intermediate images
 	    		nanosleep(&tt,NULL);
 	    	}
 	    }
