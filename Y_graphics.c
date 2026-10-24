@@ -12,10 +12,8 @@
 #include <sys/mman.h>
 #include <wayland-client.h>
 #include "xdg-shell-client-protocol.h"
+#include <linux/input-event-codes.h>
 #include <time.h>
-#ifndef NO_SIGNAL
-#include <signal.h>
-#endif
 #include "paint.h"
 #include "graphics.h"
 
@@ -114,6 +112,7 @@ struct client_state {
     struct xdg_toplevel *xdg_toplevel;
     struct wl_seat *wl_seat;
     struct wl_keyboard *wl_keyboard;
+    struct wl_pointer *wl_pointer;
     uint32_t last_frame;
     int snooze;
     int millis;
@@ -157,10 +156,7 @@ draw_frame(struct client_state *state)
     wl_shm_pool_destroy(pool);
     close(fd);
 
-    if( state->next_column ){
-    	// plot a column
-    	state->next_column(state->g);
-    }
+
     int offset = 0;
     if( swosh && state->g->repeat < 0){
     	offset = -state->g->repeat;
@@ -192,6 +188,33 @@ xdg_surface_configure(void *data,
     wl_surface_commit(state->wl_surface);
 }
 
+static void
+xdg_toplevel_configure(void *data,
+		struct xdg_toplevel *xdg_toplevel, int32_t width, int32_t height,
+		struct wl_array *states)
+{
+	struct client_state *state = data;
+	if (width == 0 || height == 0) {
+		/* Compositor is deferring to us */
+		return;
+	}
+	printf("configure %d %d\n",width,height);
+//	state->width = width;
+//	state->height = height;
+}
+
+static void
+xdg_toplevel_close(void *data, struct xdg_toplevel *toplevel)
+{
+	struct client_state *state = data;
+	state->quit = true;
+}
+
+static const struct xdg_toplevel_listener xdg_toplevel_listener = {
+	.configure = xdg_toplevel_configure,
+	.close = xdg_toplevel_close,
+};
+
 static const struct xdg_surface_listener xdg_surface_listener = {
     .configure = xdg_surface_configure,
 };
@@ -209,6 +232,10 @@ static const struct xdg_wm_base_listener xdg_wm_base_listener = {
 static void
 finish_graphics(struct client_state *state)
 {
+    if (state->wl_pointer) {
+        wl_pointer_destroy(state->wl_pointer);
+        state->wl_pointer = NULL;
+    }
     if (state->wl_keyboard) {
         wl_keyboard_destroy(state->wl_keyboard);
         state->wl_keyboard = NULL;
@@ -298,6 +325,103 @@ static const struct wl_keyboard_listener wl_keyboard_listener = {
 };
 
 static void
+wl_pointer_enter(void *data, struct wl_pointer *wl_pointer,
+        uint32_t serial, struct wl_surface *surface,
+        wl_fixed_t surface_x, wl_fixed_t surface_y)
+{
+}
+
+static void
+wl_pointer_leave(void *data, struct wl_pointer *wl_pointer,
+        uint32_t serial, struct wl_surface *surface)
+{
+}
+
+static void
+wl_pointer_motion(void *data, struct wl_pointer *wl_pointer,
+        uint32_t time, wl_fixed_t surface_x, wl_fixed_t surface_y)
+{
+}
+
+static void
+wl_pointer_button(void *data, struct wl_pointer *wl_pointer,
+        uint32_t serial, uint32_t time, uint32_t button, uint32_t button_state)
+{
+    struct client_state *state = data;
+    if (state->quit)
+        return;
+    if (button_state != WL_POINTER_BUTTON_STATE_PRESSED)
+        return;
+    if (button == BTN_LEFT) {
+        /* begin an interactive move of the window; the compositor
+         * takes over the pointer and drags the window, so we see
+         * neither the motion nor the release events
+         */
+        xdg_toplevel_move(state->xdg_toplevel, state->wl_seat, serial);
+    } else if (button == BTN_RIGHT) {
+        /* only set the flag here; the event loop in animate() checks
+         * the flag and shuts down once it is set
+         */
+        state->quit = TRUE;
+    }
+}
+
+static void
+wl_pointer_axis(void *data, struct wl_pointer *wl_pointer,
+        uint32_t time, uint32_t axis, wl_fixed_t value)
+{
+}
+
+static void
+wl_pointer_frame(void *data, struct wl_pointer *wl_pointer)
+{
+}
+
+static void
+wl_pointer_axis_source(void *data, struct wl_pointer *wl_pointer,
+        uint32_t axis_source)
+{
+}
+
+static void
+wl_pointer_axis_stop(void *data, struct wl_pointer *wl_pointer,
+        uint32_t time, uint32_t axis)
+{
+}
+
+static void
+wl_pointer_axis_discrete(void *data, struct wl_pointer *wl_pointer,
+        uint32_t axis, int32_t discrete)
+{
+}
+
+static void
+wl_pointer_axis_value120(void *data, struct wl_pointer *wl_pointer,
+        uint32_t axis, int32_t value120)
+{
+}
+
+static void
+wl_pointer_axis_relative_direction(void *data, struct wl_pointer *wl_pointer,
+        uint32_t axis, uint32_t direction)
+{
+}
+
+static const struct wl_pointer_listener wl_pointer_listener = {
+    .enter = wl_pointer_enter,
+    .leave = wl_pointer_leave,
+    .motion = wl_pointer_motion,
+    .button = wl_pointer_button,
+    .axis = wl_pointer_axis,
+    .frame = wl_pointer_frame,
+    .axis_source = wl_pointer_axis_source,
+    .axis_stop = wl_pointer_axis_stop,
+    .axis_discrete = wl_pointer_axis_discrete,
+    .axis_value120 = wl_pointer_axis_value120,
+    .axis_relative_direction = wl_pointer_axis_relative_direction,
+};
+
+static void
 wl_seat_capabilities(void *data, struct wl_seat *wl_seat,
         uint32_t capabilities)
 {
@@ -311,6 +435,16 @@ wl_seat_capabilities(void *data, struct wl_seat *wl_seat,
     } else if (state->wl_keyboard) {
         wl_keyboard_destroy(state->wl_keyboard);
         state->wl_keyboard = NULL;
+    }
+    if (capabilities & WL_SEAT_CAPABILITY_POINTER) {
+        if (!state->wl_pointer) {
+            state->wl_pointer = wl_seat_get_pointer(wl_seat);
+            wl_pointer_add_listener(state->wl_pointer,
+                    &wl_pointer_listener, state);
+        }
+    } else if (state->wl_pointer) {
+        wl_pointer_destroy(state->wl_pointer);
+        state->wl_pointer = NULL;
     }
 }
 
@@ -326,7 +460,6 @@ wl_surface_frame_done(void *data, struct wl_callback *cb, uint32_t time)
 	wl_callback_destroy(cb);
 
 
-	/* Request another frame */
 	struct client_state *state = data;
 	if(state->quit){
 		// we are stopping no more frame requests
@@ -335,6 +468,7 @@ wl_surface_frame_done(void *data, struct wl_callback *cb, uint32_t time)
 
 	cb = wl_surface_frame(state->wl_surface);
 	wl_callback_add_listener(cb, &wl_surface_frame_listener, state);
+
 
 	int do_update=TRUE;
 	if( state->last_frame != 0){
@@ -350,6 +484,12 @@ wl_surface_frame_done(void *data, struct wl_callback *cb, uint32_t time)
 
 	/* Submit a frame for this event */
 	if( do_update){
+		if( state->next_column ){
+			// plot a column
+			// we could do multiple columns here to allow update frequencies faster than the frame rate.
+			// however there is a limited time before next frame is needed so
+			state->next_column(state->g);
+		}
 		struct wl_buffer *buffer = draw_frame(state);
 		wl_surface_attach(state->wl_surface, buffer, 0, 0);
 		//wl_surface_damage_buffer(state->wl_surface, 0, 0, INT32_MAX, INT32_MAX);
@@ -357,7 +497,9 @@ wl_surface_frame_done(void *data, struct wl_callback *cb, uint32_t time)
 
 		state->last_frame = time;
 	}
+
 	wl_surface_commit(state->wl_surface);
+
 }
 
 
@@ -533,6 +675,8 @@ void init_graphics(int  want_use_root,unsigned long  window_id,int  use_backgrou
   state.xdg_toplevel = xdg_surface_get_toplevel(state.xdg_surface);
   xdg_toplevel_set_title(state.xdg_toplevel, "Ymountains");
   xdg_toplevel_set_app_id(state.xdg_toplevel, "ymountains");
+  xdg_toplevel_add_listener(state.xdg_toplevel,
+			&xdg_toplevel_listener, &state);
   wl_surface_commit(state.wl_surface);
 
 
