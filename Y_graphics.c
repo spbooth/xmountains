@@ -112,9 +112,12 @@ struct client_state {
     struct wl_surface *wl_surface;
     struct xdg_surface *xdg_surface;
     struct xdg_toplevel *xdg_toplevel;
+    struct wl_seat *wl_seat;
+    struct wl_keyboard *wl_keyboard;
     uint32_t last_frame;
     int snooze;
     int millis;
+    int quit;
 };
 
 static void
@@ -158,10 +161,14 @@ draw_frame(struct client_state *state)
     	// plot a column
     	state->next_column(state->g);
     }
+    int offset = 0;
+    if( swosh && state->g->repeat < 0){
+    	offset = -state->g->repeat;
+    }
     for (int y = 0; y < height; ++y) {
         for (int x = 0; x < width; ++x) {
             if( x < state->g->pixmap_width && y < state->g->graph_height){
-            	data[y * width + x] = pix[y * state->g->pixmap_width +x ];
+            	data[y * width + x] = pix[y * state->g->pixmap_width +x + offset ];
             }else{
             	data[y * width + x] = table[BLACK];
             }
@@ -199,6 +206,118 @@ static const struct xdg_wm_base_listener xdg_wm_base_listener = {
     .ping = xdg_wm_base_ping,
 };
 
+static void
+finish_graphics(struct client_state *state)
+{
+    if (state->wl_keyboard) {
+        wl_keyboard_destroy(state->wl_keyboard);
+        state->wl_keyboard = NULL;
+    }
+    if (state->wl_seat) {
+        wl_seat_destroy(state->wl_seat);
+        state->wl_seat = NULL;
+    }
+    if (state->xdg_toplevel) {
+        xdg_toplevel_destroy(state->xdg_toplevel);
+        state->xdg_toplevel = NULL;
+    }
+    if (state->xdg_surface) {
+        xdg_surface_destroy(state->xdg_surface);
+        state->xdg_surface = NULL;
+    }
+    if (state->wl_surface) {
+        wl_surface_destroy(state->wl_surface);
+        state->wl_surface = NULL;
+    }
+    if (state->wl_display) {
+        wl_display_disconnect(state->wl_display);
+        state->wl_display = NULL;
+    }
+}
+
+static void
+wl_keyboard_key(void *data, struct wl_keyboard *wl_keyboard,
+        uint32_t serial, uint32_t time, uint32_t key, uint32_t key_state)
+{
+    struct client_state *state = data;
+    /* Escape, the xkb keycode is the same on all layouts.
+     * Only set the flag here; the wayland display must not be
+     * disconnected from inside an event callback, the event loop in
+     * animate() checks the flag and shuts down once it is set.
+     */
+    /** The scancode values used by wayland are evdev scancodes
+     * which differ from xkb by 8 to ESC is scancode 1
+     *
+     */
+    if (key_state == WL_KEYBOARD_KEY_STATE_RELEASED && key == 1)
+        state->quit = TRUE;
+}
+
+/* We do not interpret the keymap, so just drop the file descriptor */
+static void
+wl_keyboard_keymap(void *data, struct wl_keyboard *wl_keyboard,
+        uint32_t format, int32_t fd, uint32_t size)
+{
+    close(fd);
+}
+
+static void
+wl_keyboard_enter(void *data, struct wl_keyboard *wl_keyboard,
+        uint32_t serial, struct wl_surface *surface,
+        struct wl_array *keysyms)
+{
+}
+
+static void
+wl_keyboard_leave(void *data, struct wl_keyboard *wl_keyboard,
+        uint32_t serial, struct wl_surface *surface)
+{
+}
+
+static void
+wl_keyboard_modifiers(void *data, struct wl_keyboard *wl_keyboard,
+        uint32_t serial, uint32_t mods_depressed,
+        uint32_t mods_latched, uint32_t mods_locked,
+        uint32_t group)
+{
+}
+
+static void
+wl_keyboard_repeat_info(void *data, struct wl_keyboard *wl_keyboard,
+        int32_t rate, int32_t delay)
+{
+}
+
+static const struct wl_keyboard_listener wl_keyboard_listener = {
+    .keymap = wl_keyboard_keymap,
+    .enter = wl_keyboard_enter,
+    .leave = wl_keyboard_leave,
+    .key = wl_keyboard_key,
+    .modifiers = wl_keyboard_modifiers,
+    .repeat_info = wl_keyboard_repeat_info,
+};
+
+static void
+wl_seat_capabilities(void *data, struct wl_seat *wl_seat,
+        uint32_t capabilities)
+{
+    struct client_state *state = data;
+    if (capabilities & WL_SEAT_CAPABILITY_KEYBOARD) {
+        if (!state->wl_keyboard) {
+            state->wl_keyboard = wl_seat_get_keyboard(wl_seat);
+            wl_keyboard_add_listener(state->wl_keyboard,
+                    &wl_keyboard_listener, state);
+        }
+    } else if (state->wl_keyboard) {
+        wl_keyboard_destroy(state->wl_keyboard);
+        state->wl_keyboard = NULL;
+    }
+}
+
+static const struct wl_seat_listener wl_seat_listener = {
+    .capabilities = wl_seat_capabilities,
+};
+
 static const struct wl_callback_listener wl_surface_frame_listener;
 static void
 wl_surface_frame_done(void *data, struct wl_callback *cb, uint32_t time)
@@ -206,8 +325,14 @@ wl_surface_frame_done(void *data, struct wl_callback *cb, uint32_t time)
 	/* Destroy this callback */
 	wl_callback_destroy(cb);
 
+
 	/* Request another frame */
 	struct client_state *state = data;
+	if(state->quit){
+		// we are stopping no more frame requests
+		return;
+	}
+
 	cb = wl_surface_frame(state->wl_surface);
 	wl_callback_add_listener(cb, &wl_surface_frame_listener, state);
 
@@ -256,6 +381,10 @@ registry_global(void *data, struct wl_registry *wl_registry,
                 wl_registry, name, &xdg_wm_base_interface, 1);
         xdg_wm_base_add_listener(state->xdg_wm_base,
                 &xdg_wm_base_listener, state);
+    } else if (strcmp(interface, wl_seat_interface.name) == 0) {
+        state->wl_seat = wl_registry_bind(
+                wl_registry, name, &wl_seat_interface, 1);
+        wl_seat_add_listener(state->wl_seat, &wl_seat_listener, state);
     }
 }
 
@@ -403,6 +532,7 @@ void init_graphics(int  want_use_root,unsigned long  window_id,int  use_backgrou
   xdg_surface_add_listener(state.xdg_surface, &xdg_surface_listener, &state);
   state.xdg_toplevel = xdg_surface_get_toplevel(state.xdg_surface);
   xdg_toplevel_set_title(state.xdg_toplevel, "Ymountains");
+  xdg_toplevel_set_app_id(state.xdg_toplevel, "ymountains");
   wl_surface_commit(state.wl_surface);
 
 
@@ -518,12 +648,28 @@ void animate(void next_frame(Graph *g),Graph *g,int snooze,int millis){
 	state.snooze=snooze;
 	state.millis=millis;
 
+	if( swosh ){
+		// make initial surface as quick as possible
+		// so run till pause
+		while(! g->pause){
+			next_frame(g);
+		}
+	}
+
 	struct wl_callback *cb = wl_surface_frame(state.wl_surface);
 	wl_callback_add_listener(cb, &wl_surface_frame_listener, &state);
 
-    while (wl_display_dispatch(state.wl_display)) {
-        /* This space deliberately left blank */
-    }
+	// wl_dsiplay_dispatch processes the queued events and will block
+	// if there are no events. However this includes any event that
+	// causes state.quit to be set so there should be no delay in exit
+	while (! state.quit && wl_display_dispatch(state.wl_display)) {
+		/* This space deliberately left blank */
+	}
+
+
+
+	finish_graphics(&state);
+	finish_artist();
 }
 
 int get_clock(){

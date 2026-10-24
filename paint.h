@@ -28,12 +28,14 @@ typedef int Col;
 typedef float Gun;
 
 typedef struct graph{
-  int graph_height;     /* height of display */
-  int graph_width ;     /* width of display */
+  int graph_height;     /* height of display/window */
+  int graph_width ;     /* width of display/window */
 
-  int pixmap_width;     /* width of pixmap buffer */
+  int pixmap_width;     /* width of pixmap buffer. This is the width of the area that artist is
+   	   	   	   	   	   	 * allowed/expected to draw into
+   	   	   	   	   	   	 **/
 
-  int width;            /* width of terrain strip */
+  int width;            /* width of terrain strip (forground to background */
 
   float ambient;        /* level of ambient light */
   float contrast;       /* contrast,

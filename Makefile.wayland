@@ -38,9 +38,6 @@ endif
 ymountains: $(OBJS)
 	$(CC) $(CFLAGS) $(WAYLAND_CFLAGS) -o ymountains $(OBJS) $(WAYLAND_LIBS) -lm
 
-example: $(OBJS)
-	$(CC) $(CFLAGS) $(WAYLAND_CFLAGS) -o example example.c xdg-shell-protocol.o $(WAYLAND_LIBS) -lm
-
 %.o: %.c
 	$(CC) $(CFLAGS) $(WAYLAND_CFLAGS) -c $< -o $@
 

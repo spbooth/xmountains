@@ -46,7 +46,6 @@ TRUE,
 0
 };
 
-extern int swosh;
 
 Fold *top;
 
@@ -845,7 +844,10 @@ void plot_column(Graph *g)
       flush_region(0,0,g->graph_width,g->graph_height);
     }
   }
-  if( g->scroll && !swosh ){
+  // If we are showing each column being plotted
+  // scroll before the plot so the long pause shows a complete image
+  // then we scroll as animation starts again
+  if( g->scroll ){
     scroll_screen(g->scroll);
   }
 
@@ -909,10 +911,7 @@ void plot_column(Graph *g)
     }
   }
 
-  if(g->scroll && swosh)
-  {
-    scroll_screen(g->scroll);
-  }
+
 }
 /* }}} */
 

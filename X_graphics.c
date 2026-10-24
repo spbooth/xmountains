@@ -64,7 +64,8 @@ struct sigaction sa;
   unsigned int depth=0;
   GC gc;
   Pixmap pix;
-  Pixmap bg_pix;
+  Pixmap bg_pix;  // if we have swosh and reverse we want the bakground to not start at pix origin
+                  // so we need a second pixmap to serve as the background
   Colormap map, defaultmap;
   XColor *table=NULL;
   
@@ -258,6 +259,8 @@ void init_graphics(int  want_use_root,unsigned long  window_id,int  use_backgrou
 // treat signal handling as part of the graphics interface
 // we are catching signals to clean up. Also this is OS dependent
 // so we are likely to use a different mechanism with other graphical back-ends
+// really the only reason to have a custom signal handler is to implement the
+// optional clear when using a root window. otherwise just killing the app is usually fine.
   sa.sa_handler = &finish_prog;
   sigaction(SIGINT, &sa, NULL );
   sigaction(SIGTERM, &sa, NULL );
@@ -270,6 +273,8 @@ void init_graphics(int  want_use_root,unsigned long  window_id,int  use_backgrou
   do_clear = want_clear;
   use_root = want_use_root;
   pixmap_installed = use_background;
+
+  // use the initial values from graphics parameters as the desired window size
   graph_width = gptr->graph_width;
   graph_height = gptr->graph_height;
 /*{{{open display*/
@@ -333,6 +338,7 @@ void init_graphics(int  want_use_root,unsigned long  window_id,int  use_backgrou
   }else{
     if( geom )
     {
+      // note this could override the reqeusted size
       gbits =XParseGeometry(geom,&x,&y,&graph_width,&graph_height);
       if((gbits & XValue) && (gbits & XNegative))
       {
@@ -406,6 +412,9 @@ void init_graphics(int  want_use_root,unsigned long  window_id,int  use_backgrou
 
   if(swosh)
   {
+	// If we only want to show full frames we need the pixmap area (the area artist writes into
+	// to be a little larger so the "repeat" area which is modified between full frames
+	// is off window.
     if(gptr->repeat < 0)
     {
       gptr->pixmap_width = graph_width - gptr->repeat;
@@ -415,8 +424,10 @@ void init_graphics(int  want_use_root,unsigned long  window_id,int  use_backgrou
     {
       if(gptr->repeat == 0)
       {
+    	// zero means repeat over the full frame
         gptr->repeat = graph_width;
       }
+      // so the pixmap needs to be double
       gptr->pixmap_width = graph_width + gptr->repeat;
     }
   }
@@ -431,7 +442,12 @@ void init_graphics(int  want_use_root,unsigned long  window_id,int  use_backgrou
 
   if( use_background )
   {
-    XSetWindowBackgroundPixmap(dpy,win,pix);
+	if( swosh && gptr->repeat < 0){
+		XCopyArea(dpy, pix, bg_pix, gc, -gptr->repeat, 0, graph_width, graph_height, 0, 0);
+		XSetWindowBackgroundPixmap(dpy, win, bg_pix);
+	}else{
+		XSetWindowBackgroundPixmap(dpy,win,pix);
+	}
   }
   if( ! use_root )
   {
@@ -472,7 +488,10 @@ void scroll_screen(int dist )
     /* blank new region */
     blank_region(g.pixmap_width - dist, 0, dist, graph_height);
   }
-  /* update the window to match */
+  /* update the window to match
+   * This is a more comprehensive update than flush_region and is swosh
+   * mode this will be the only flush operation used
+   */
   if( pixmap_installed )
   {
     /* this line never seems to be needed on any system I know about
@@ -576,6 +595,14 @@ void animate(void next_frame(Graph *g),Graph *g,int snooze,int millis){
 	struct timespec tt_snooze;
 	int i;
 
+
+	if( swosh ){
+		// make initial surface as quick as possible
+		// so run till pause
+		while(! g->pause){
+			next_frame(g);
+		}
+	}
 	// column pause rate
 	 tt.tv_sec=0;
 	 tt.tv_nsec=1000000*millis;
